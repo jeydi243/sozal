@@ -13,7 +13,7 @@ export default defineNuxtConfig({
     icons: ['heroicons', 'simple-icons'],
     safelistColors: ['primary', 'red', 'orange', 'green']
   },
-
+  devServer: { port: 9000 },
   colorMode: {
     disableTransition: true
   },
