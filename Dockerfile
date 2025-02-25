@@ -18,5 +18,8 @@ RUN bun install
 # Expose the port the app runs on
 EXPOSE 9000
 
+ENV NUXT_HOST=0.0.0.0
+ENV NUXT_PORT=9000
+
 # Start the application
 CMD ["bun", "run", "dev"]
