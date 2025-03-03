@@ -14,7 +14,8 @@ useHead({
   ],
   htmlAttrs: {
     lang: 'en'
-  }
+  },
+  title: 'Sozal'
 })
 
 const title = 'Nuxt UI Pro - Dashboard template'
