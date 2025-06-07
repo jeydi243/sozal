@@ -27,32 +27,53 @@ const links = [[{
     open.value = false
   }
 }, {
-  label: 'Settings',
+  label: 'Parametres',
   to: '/settings',
   icon: 'i-lucide-settings',
   defaultOpen: true,
   children: [{
-    label: 'General',
+    label: 'Parametres',
     to: '/settings',
     exact: true,
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Members',
-    to: '/settings/members',
+    label: 'Lookups',
+    to: '/settings/lookups',
+    // icon: 'arcticons:lookup',
     onSelect: () => {
       open.value = false
     }
-  }, {
-    label: 'Notifications',
+  },
+  {
+    label: 'Organisations',
     to: '/settings/notifications',
+    // icon: 'octicon:organization-16',
     onSelect: () => {
       open.value = false
     }
-  }, {
+  },
+  {
+    label: 'Grille tarifaire',
+    to: '/settings/tarifaire',
+    // icon: 'ion:ios-pricetags-outline',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Articles',
+    to: '/settings/articles',
+    // icon: 'icon-park-outline:ad-product',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
     label: 'Security',
     to: '/settings/security',
+    // icon: 'i-lucide-shield',
     onSelect: () => {
       open.value = false
     }
@@ -115,13 +136,8 @@ onMounted(async () => {
   <UDashboardGroup>
     <UDashboardSearch :groups="groups" />
 
-    <UDashboardSidebar
-      v-model:open="open"
-      collapsible
-      resizable
-      class="bg-(--ui-bg-elevated)/25"
-      :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }"
-    >
+    <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
+      :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
       <template #header="{ collapsed }">
         <TeamsMenu :collapsed="collapsed" />
       </template>
@@ -129,18 +145,9 @@ onMounted(async () => {
       <template #default="{ collapsed }">
         <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-(--ui-border)" />
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[0]"
-          orientation="vertical"
-        />
+        <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" />
 
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          class="mt-auto"
-        />
+        <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" class="mt-auto" />
       </template>
 
       <template #footer="{ collapsed }">

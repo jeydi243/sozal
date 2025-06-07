@@ -7,7 +7,8 @@ defineProps<{
 
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
-
+const supabase = useSupabaseClient()
+const toast = useToast()
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
@@ -27,10 +28,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   label: 'Profile',
   icon: 'i-lucide-user'
 }, {
-  label: 'Billing',
-  icon: 'i-lucide-credit-card'
-}, {
-  label: 'Settings',
+  label: 'Parametres',
   icon: 'i-lucide-settings',
   to: '/settings'
 }], [{
@@ -105,74 +103,40 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     }
   }]
 }], [{
-  label: 'Templates',
-  icon: 'i-lucide-layout-template',
-  children: [{
-    label: 'Starter',
-    to: 'https://ui-pro-starter.nuxt.dev/'
-  }, {
-    label: 'Landing',
-    to: 'https://landing-template.nuxt.dev/'
-  }, {
-    label: 'Docs',
-    to: 'https://docs-template.nuxt.dev/'
-  }, {
-    label: 'SaaS',
-    to: 'https://saas-template.nuxt.dev/'
-  }, {
-    label: 'Dashboard',
-    to: 'https://dashboard-template.nuxt.dev/',
-    checked: true,
-    type: 'checkbox'
-  }]
-}], [{
   label: 'Documentation',
   icon: 'i-lucide-book-open',
   to: 'https://ui.nuxt.com/getting-started/installation/pro/nuxt',
-  target: '_blank'
-}, {
-  label: 'GitHub repository',
-  icon: 'i-simple-icons-github',
-  to: 'https://github.com/nuxt-ui-pro/dashboard',
-  target: '_blank'
-}, {
-  label: 'Upgrade to Pro',
-  icon: 'i-lucide-rocket',
-  to: 'https://ui.nuxt.com/pro/purchase',
-  target: '_blank'
-}], [{
+  target: '_blank',
+},], [{
   label: 'Log out',
-  icon: 'i-lucide-log-out'
+  icon: 'i-lucide-log-out',
+  onSelect(e: Event) {
+    e.preventDefault()
+    signOut()
+  }
 }]]))
+const signOut = async () => {
+  let user = useSupabaseUser()
+  const { error } = await supabase.auth.signOut()
+  if (error) console.log(error)
+  else toast.add({ title: 'Good Bye ' + user.email + '! ', description: 'We are sad you go ! ', color: 'warning' })
+}
 </script>
 
 <template>
-  <UDropdownMenu
-    :items="items"
-    :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }"
-  >
-    <UButton
-      v-bind="{
-        ...user,
-        label: collapsed ? undefined : user?.name,
-        trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
-      }"
-      color="neutral"
-      variant="ghost"
-      block
-      :square="collapsed"
-      class="data-[state=open]:bg-(--ui-bg-elevated)"
-      :ui="{
-        trailingIcon: 'text-(--ui-text-dimmed)'
-      }"
-    />
+  <UDropdownMenu :items="items" :content="{ align: 'center', collisionPadding: 12 }"
+    :ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }">
+    <UButton v-bind="{
+      ...user,
+      label: collapsed ? undefined : user?.name,
+      trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
+    }" color="neutral" variant="ghost" block :square="collapsed" class="data-[state=open]:bg-(--ui-bg-elevated)" :ui="{
+      trailingIcon: 'text-(--ui-text-dimmed)'
+    }" />
 
     <template #chip-leading="{ item }">
-      <span
-        :style="{ '--chip': `var(--color-${(item as any).chip}-400)` }"
-        class="ms-0.5 size-2 rounded-full bg-(--chip)"
-      />
+      <span :style="{ '--chip': `var(--color-${(item as any).chip}-400)` }"
+        class="ms-0.5 size-2 rounded-full bg-(--chip)" />
     </template>
   </UDropdownMenu>
 </template>

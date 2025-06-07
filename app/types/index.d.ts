@@ -51,6 +51,14 @@ export interface Notification {
   body: string
   date: string
 }
+export interface Classe {
+  id: number
+  table_name?: boolean
+  description: string
+  code: string
+  name: string
+  status: string
+}
 
 export type Period = 'daily' | 'weekly' | 'monthly'
 
