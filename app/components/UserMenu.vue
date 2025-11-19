@@ -119,7 +119,7 @@ const signOut = async () => {
   let user = useSupabaseUser()
   const { error } = await supabase.auth.signOut()
   if (error) console.log(error)
-  else toast.add({ title: 'Good Bye ' + user.email + '! ', description: 'We are sad you go ! ', color: 'warning' })
+  else toast.add({ title: 'Good Bye ' + user.value?.email + '! ', description: 'We are sad you go ! ', color: 'warning' })
 }
 </script>
 
