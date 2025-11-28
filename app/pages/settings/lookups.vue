@@ -88,16 +88,34 @@
       <Placeholder class="h-48 m-4" />
     </template>
   </UDrawer>
+  <USlideover v-model:open="openSlideOver" title="Details de classe" :ui="{ content: 'max-w-2xl' }">
+    <UButton label="Open" color="neutral" variant="subtle" />
+
+    <template #content>
+      <div class="max-w-2xl">
+        <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+          v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
+            getPaginationRowModel: getPaginationRowModel()
+          }" class="shrink-0 m-2" :data="classes" :columns="columns" :loading="status === 'pending'" :ui="{
+            base: 'table-fixed border-separate border-spacing-0',
+            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+            tbody: '[&>tr]:last:[&>td]:border-b-0',
+            th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+            td: 'border-b border-(--ui-border) p-2'
+          }" />
+      </div>
+    </template>
+  </USlideover>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { FormSubmitEvent, TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { breakpointsTailwind } from '@vueuse/core'
 import * as z from 'zod'
 
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Mail, User, Classe } from '~/types'
+import type { Classe } from '~/types'
 
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
@@ -106,9 +124,6 @@ const columnFilters = ref([{
   id: 'email',
   value: ''
 }])
-const { data, status } = await useFetch<Classe[]>('/api/customers', {
-  lazy: true
-})
 // const UAvatar = resolveComponent('UAvatar')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
@@ -116,6 +131,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 // const UCheckbox = resolveComponent('UCheckbox')
 const columnVisibility = ref()
 const openDetailsClasse = ref(false)
+const openSlideOver = ref(false)
 const rowSelection = ref({ 2: true })
 const toast = useToast()
 const pagination = ref({
@@ -148,15 +164,15 @@ const columns: TableColumn<Classe>[] = [
     cell: ({ row }) => h(UButton, {
       color: 'neutral',
       variant: 'ghost',
-      icon: 'material-symbols:open-in-full-rounded',
+      icon: 'material-symbols:open-in-full-rounded text-center',
       class: '-mx-2.5',
-      onClick: () => openDetailsClasse.value = !openDetailsClasse.value
+      onClick: () => {
+        // openDetailsClasse.value = !openDetailsClasse.value;
+        openSlideOver.value = !openSlideOver.value;
+      }
     }),
   },
-  {
-    accessorKey: 'id',
-    header: 'ID'
-  },
+
   {
     accessorKey: 'name',
     header: 'Name',
@@ -211,11 +227,12 @@ const columns: TableColumn<Classe>[] = [
     }
   },
   {
+    header: () => h('div', { class: 'text-center' }, 'Actions'),
     id: 'actions',
     cell: ({ row }) => {
       return h(
         'div',
-        { class: 'text-right' },
+        { class: 'text-center' },
         h(
           UDropdownMenu,
           {

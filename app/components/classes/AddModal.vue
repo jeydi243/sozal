@@ -25,11 +25,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     .select()
 
   if (error) {
-    toast.add({ title: 'Success', description: `Can't add new classe ${error.message}`, color: 'error' })
+    toast.add({ title: 'Error', description: `Can't add new classe ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Error', description: `New classe ${event.data.name} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New classe ${event.data.name} added`, color: 'success' })
+    open.value = false
   }
-  open.value = false
 }
 </script>
 

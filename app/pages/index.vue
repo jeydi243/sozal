@@ -56,7 +56,7 @@ const period = ref<Period>('daily')
 
     <template #body>
       <HomeStats :period="period" :range="range" />
-      <HomeChart :period="period" :range="range" />
+      <!-- <HomeChart :period="period" :range="range" /> -->
       <HomeSales :period="period" :range="range" />
     </template>
   </UDashboardPanel>

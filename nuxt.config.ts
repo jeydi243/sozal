@@ -11,6 +11,7 @@ export default defineNuxtConfig({
         "@nuxt/ui",
         "@vueuse/nuxt",
         "@nuxtjs/supabase",
+        "@pinia/nuxt",
     ],
 
     devtools: {

@@ -66,3 +66,17 @@ export interface Range {
   start: Date
   end: Date
 }
+
+export interface Lookup {
+  id: number
+  name: string
+}
+
+export interface Organisation {
+  id: number
+  name: string
+  description?: string
+  code?: string
+  lookup_id?: number
+  status?: string
+}

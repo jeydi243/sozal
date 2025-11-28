@@ -11,7 +11,7 @@ const links = [[{
 }, {
   label: 'Organisations',
   icon: 'octicon:organization-16',
-  to: '/settings/notifications'
+  to: '/settings/organisations'
 }, {
   label: 'Grille Tarifaire',
   icon: 'i-lucide-shield',
