@@ -12,11 +12,18 @@ const links = [[{
   label: 'Organisations',
   icon: 'octicon:organization-16',
   to: '/settings/organisations'
-}, {
+}, 
+{
   label: 'Grille Tarifaire',
   icon: 'i-lucide-shield',
   to: '/settings/tarifaire'
-}, {
+},
+{
+  label: 'Utilisateurs',
+  icon: 'i-lucide-shield',
+  to: '/settings/users'
+},
+{
   label: 'Articles',
   icon: 'icon-park-outline:ad-product',
   to: '/settings/articles'

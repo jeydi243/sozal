@@ -63,6 +63,14 @@ const links = [[{
     }
   },
   {
+    label: 'Utilisateurs',
+    to: '/settings/users',
+    // icon: 'ion:ios-pricetags-outline',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
     label: 'Articles',
     to: '/settings/articles',
     // icon: 'icon-park-outline:ad-product',
