@@ -60,7 +60,7 @@
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                     getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0 m-2" :data="Users" :columns="columns" :loading="status === 'pending'" :ui="{
+                }" class="shrink-0 m-2" :data="Users || []" :columns="columns" :loading="status === 'pending'" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -83,21 +83,19 @@
             </div>
         </template>
     </UDashboardPanel>
-    <UDrawer v-model:open="openDetailsClasse" title="Drawer with description"
-        description="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
-        <template #body>
-            <Placeholder class="h-48 m-4" />
-        </template>
-    </UDrawer>
-    <USlideover v-model:open="openSlideOver" title="Details de classe" :ui="{ content: 'max-w-2xl' }">
-        <UButton label="Open" color="neutral" variant="subtle" />
+    <USlideover description="Details des affectations aux organisations" title="Details du user"
+        :ui="{ content: 'max-w-3xl' }" v-model:open="openSlideOver">
+        <UButton label="Opend" color="neutral" variant="subtle" />
 
-        <template #content>
-            <div class="max-w-2xl">
+        <template #body>
+            <div class="flex flex-row justify-end">
+                <UsersAddAffectation :user_id="selectedUser?.id" />
+            </div>
+            <div>
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                     v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                         getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="Users" :columns="columns" :loading="status === 'pending'" :ui="{
+                    }" class="shrink-0 m-2" :data="Users || []" :columns="columns" :loading="status === 'pending'" :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                         tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -116,10 +114,12 @@ import { breakpointsTailwind } from '@vueuse/core'
 import * as z from 'zod'
 
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Classe } from '~/types'
+import type { Profil } from '~/types'
+import type { Schema } from 'zod'
 
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
+const status = ref('success')
 const statusFilter = ref('all')
 const columnFilters = ref([{
     id: 'email',
@@ -133,112 +133,66 @@ const UCheckbox = resolveComponent('UCheckbox')
 const columnVisibility = ref()
 const openDetailsClasse = ref(false)
 const openSlideOver = ref(false)
+const selectedUser = ref<Profil | null>(null)
 const rowSelection = ref({ 2: true })
 const toast = useToast()
 const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const columns: TableColumn<Classe>[] = [
-    {
-        id: 'select',
-        header: ({ table }) =>
-            h(UCheckbox, {
-                'modelValue': table.getIsSomePageRowsSelected()
-                    ? 'indeterminate'
-                    : table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-                    table.toggleAllPageRowsSelected(!!value),
-                'ariaLabel': 'Select all'
-            }),
-        cell: ({ row }) =>
-            h('div', { class: 'text-center items-center align-center' }, h(UCheckbox, {
-                'modelValue': row.getIsSelected(),
-                'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-                'ariaLabel': 'Select row'
-            }))
-
-    },
+const columns: TableColumn<Profil>[] = [
     {
         id: 'details',
         header: 'Details',
         // icon: 'material-symbols:open-in-full-rounded',
         cell: ({ row }) => h(UButton, {
-            color: 'neutral',
-            variant: 'ghost',
-            icon: 'material-symbols:open-in-full-rounded text-center',
-            class: '-mx-2.5',
+            color: 'green',
+            variant: 'solid',
+            icon: 'i-lucide-eye',
             onClick: () => {
-                // openDetailsClasse.value = !openDetailsClasse.value;
                 openSlideOver.value = !openSlideOver.value;
+                selectedUser.value = row.original;
             }
         }),
     },
 
     {
-        accessorKey: 'code',
-        header: 'Code',
+        accessorKey: 'email',
+        header: 'Email',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.email),
                     // h('p', { class: '' }, `@${row.original.name}`)
                 ])
             ])
         }
     },
     {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'first_name',
+        header: 'First Name',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.name),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.first_name),
                     // h('p', { class: '' }, `@${row.original.name}`)
                 ])
             ])
         }
     },
     {
-        accessorKey: 'description',
-        header: ({ column }) => {
-            const isSorted = column.getIsSorted()
-
-            return h(UButton, {
-                color: 'neutral',
-                variant: 'ghost',
-                label: 'Description',
-                icon: isSorted
-                    ? isSorted === 'asc'
-                        ? 'i-lucide-arrow-up-narrow-wide'
-                        : 'i-lucide-arrow-down-wide-narrow'
-                    : 'i-lucide-arrow-up-down',
-                class: '-mx-2.5',
-                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-            })
-        }
-    },
-    {
-        accessorKey: 'lookup_id',
-        header: 'Type',
-        cell: ({ row }) => row.original.lookup_id
-    },
-    {
-        accessorKey: 'status',
-        header: 'Status',
-        filterFn: 'equals',
+        accessorKey: 'last_name',
+        header: 'Last Name',
         cell: ({ row }) => {
-            const color = {
-                subscribed: 'success' as const,
-                unsubscribed: 'error' as const,
-                bounced: 'warning' as const
-            }[row.original.status]
+            return h('div', { class: 'flex items-center gap-3' }, [
 
-            return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-                row.original.status
-            )
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.last_name),
+                    // h('p', { class: '' }, `@${row.original.name}`)
+                ])
+            ])
         }
     },
     {
@@ -268,7 +222,7 @@ const columns: TableColumn<Classe>[] = [
         }
     }
 ]
-function getRowItems(row: Row<Classe>) {
+function getRowItems(row: Row<Profil>) {
     return [
         {
             type: 'label',
@@ -316,17 +270,13 @@ function getRowItems(row: Row<Classe>) {
     ]
 }
 
-async function addClasse(event: FormSubmitEvent<Schema>) {
-    toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-    console.log(event.data)
-}
-
 // const selectedMail = ref<Mail | null>()
 const { data: Users, error } = await supabase.from('profils').select()
+
 const defaultUserSchema = z.object({
-    user_name: z.string().email('Invalid user_name'),
-    first_name: z.string().email('Invalid first_name'),
-    last_name: z.string().email('Invalid last_name'),
+    user_name: z.string().min(6, 'Invalid user_name'),
+    first_name: z.string().min(2, 'Invalid first_name'),
+    last_name: z.string().min(2, 'Invalid last_name'),
     email: z.string().email('Invalid email'),
 })
 type UserSchema = z.output<typeof defaultUserSchema>
@@ -337,6 +287,6 @@ const defaultUser = reactive({
     code: '',
     name: ''
 })
-const breakpoints = useBreakpoints(breakpointsTailwind)
+
 
 </script>

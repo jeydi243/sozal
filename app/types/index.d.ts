@@ -52,7 +52,7 @@ export interface Notification {
   date: string
 }
 export interface Classe {
-  id: number
+  id: string
   table_name?: boolean
   description: string
   code: string
@@ -79,4 +79,20 @@ export interface Organisation {
   code?: string
   lookup_id?: number
   status?: string
+}
+
+export interface Profil {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  user_name: string
+}
+
+export interface Affectation {
+  id: number
+  user_id: string
+  lookup_id: string
+  organisation_id?: string
+  created_at?: string
 }

@@ -29,6 +29,15 @@ useSeoMeta({
   twitterImage: 'https://dashboard-template.nuxt.dev/social-card.png',
   twitterCard: 'summary_large_image'
 })
+
+const user = useSupabaseUser()
+const parametresStore = useParametresStore()
+
+watch(user, (newUser) => {
+  if (newUser) {
+    parametresStore.init()
+  }
+}, { immediate: true })
 </script>
 
 <template>

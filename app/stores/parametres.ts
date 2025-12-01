@@ -3,7 +3,18 @@ import type { Lookup, Classe, Organisation } from '~/types'
 
 export const useParametresStore = defineStore('parametres', () => {
   const supabase = useSupabaseClient()
-  
+
+  const getClasseById = computed(() => (id: string) => {
+    return classes.value.find(classe => classe.id === id)?.name
+  })
+
+  const getClasseItems = computed(() => {
+    return classes.value.map(classe => ({
+      label: classe.name,
+      id: classe.id
+    }))
+  })
+
   const lookups = ref<Lookup[]>([])
   const classes = ref<Classe[]>([])
   const organisations = ref<Organisation[]>([])
@@ -33,6 +44,8 @@ export const useParametresStore = defineStore('parametres', () => {
     lookups,
     classes,
     organisations,
+    getClasseById,
+    getClasseItems,
     init
   }
 })

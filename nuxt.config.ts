@@ -6,6 +6,16 @@ export default defineNuxtConfig({
             class: "bg-(--ui-bg)",
         },
     },
+    runtimeConfig: {
+        // Private keys are only available on the server
+        SUPABASE_URL: process.env.SUPABASE_URL,
+        SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+
+        // Public keys that are exposed to the client
+        public: {
+            apiBase: process.env.NUXT_PUBLIC_API_BASE || '/api',
+        },
+    },
     modules: [
         "@nuxt/eslint",
         "@nuxt/ui",
@@ -19,6 +29,10 @@ export default defineNuxtConfig({
     },
 
     css: ["~/assets/css/main.css"],
+
+    build: {
+        transpile: ['@nuxtjs/supabase'],
+    },
 
     routeRules: {
         "/api/**": {
@@ -40,7 +54,11 @@ export default defineNuxtConfig({
             },
         },
     },
-
+    nitro: {
+        externals: {
+            inline: ["@supabase/supabase-js"]
+        }
+    },
     supabase: {
         redirectOptions: {
             login: "/auth",

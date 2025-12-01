@@ -9,9 +9,9 @@
 
         <template #right>
           <div class="flex flex-wrap items-center justify-between gap-1.5">
-            <UInput :model-value="(table?.tableApi?.getColumn('email')?.getFilterValue() as string)" class="max-w-sm"
+            <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
               icon="i-lucide-search" placeholder="Filter classes..."
-              @update:model-value="table?.tableApi?.getColumn('email')?.setFilterValue($event)" />
+              @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
 
             <div class="flex flex-wrap items-center gap-1.5">
               <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
@@ -59,7 +59,7 @@
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
         v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
           getPaginationRowModel: getPaginationRowModel()
-        }" class="shrink-0 m-2" :data="classes" :columns="columns" :loading="status === 'pending'" :ui="{
+        }" class="shrink-0 m-2" :data="classes" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -88,15 +88,19 @@
       <Placeholder class="h-48 m-4" />
     </template>
   </UDrawer>
-  <USlideover v-model:open="openSlideOver" title="Details de classe" :ui="{ content: 'max-w-2xl' }">
-    <UButton label="Open" color="neutral" variant="subtle" />
+  <USlideover v-model:open="openSlideOver" description="Liste des lookups de la classe" title="Lookups"
+    :ui="{ content: 'max-w-3xl' }">
+    <template #body>
+      <div class="flex items-center justify-end gap-2">
+        <LookupsAddModal :classe_id="selectedClasse?.id ?? ''" @lookup_added="refreshLookups" />
+        <LookupsUpdateModal v-model:open="openUpdateModal" :lookup="selectedLookup" @lookup_updated="refreshLookups" />
+      </div>
 
-    <template #content>
-      <div class="max-w-2xl">
+      <div class="max-w-3xl">
         <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
           v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
             getPaginationRowModel: getPaginationRowModel()
-          }" class="shrink-0 m-2" :data="classes" :columns="columns" :loading="status === 'pending'" :ui="{
+          }" class="shrink-0 m-2" :data="lookups" :columns="columnsLookups" :loading="loadingLookups" :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
             tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -119,9 +123,11 @@ import type { Classe } from '~/types'
 
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
+const selectedLookup = ref()
+const openUpdateModal = ref(false)
 const statusFilter = ref('all')
 const columnFilters = ref([{
-  id: 'email',
+  id: 'name',
   value: ''
 }])
 // const UAvatar = resolveComponent('UAvatar')
@@ -139,35 +145,17 @@ const pagination = ref({
   pageSize: 10
 })
 const columns: TableColumn<Classe>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) =>
-  //     h(UCheckbox, {
-  //       'modelValue': table.getIsSomePageRowsSelected()
-  //         ? 'indeterminate'
-  //         : table.getIsAllPageRowsSelected(),
-  //       'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-  //         table.toggleAllPageRowsSelected(!!value),
-  //       'ariaLabel': 'Select all'
-  //     }),
-  //   cell: ({ row }) =>
-  //     h(UCheckbox, {
-  //       'modelValue': row.getIsSelected(),
-  //       'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-  //       'ariaLabel': 'Select row'
-  //     })
-  // },
   {
     id: 'details',
     header: 'Details',
     // icon: 'material-symbols:open-in-full-rounded',
     cell: ({ row }) => h(UButton, {
       color: 'neutral',
-      variant: 'ghost',
-      icon: 'material-symbols:open-in-full-rounded text-center',
-      class: '-mx-2.5',
+      variant: 'solid',
+      icon: 'i-lucide-eye',
+      class: 'text-center',
       onClick: () => {
-        // openDetailsClasse.value = !openDetailsClasse.value;
+        selectedClasse.value = row.original;
         openSlideOver.value = !openSlideOver.value;
       }
     }),
@@ -253,6 +241,101 @@ const columns: TableColumn<Classe>[] = [
     }
   }
 ]
+const columnsLookups: TableColumn<Classe>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox, {
+      'modelValue': table.getIsSomePageRowsSelected()
+        ? 'indeterminate'
+        : table.getIsAllPageRowsSelected(),
+      'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+        table.toggleAllPageRowsSelected(!!value),
+      'ariaLabel': 'Select all'
+    }))
+    ,
+    cell: ({ row }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox, {
+      'modelValue': row.getIsSelected(),
+      'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
+      'ariaLabel': 'Select row'
+    }))
+
+  },
+  {
+    id: 'details',
+    header: 'Details',
+    // icon: 'material-symbols:open-in-full-rounded',
+    cell: ({ row }) => h(UButton, {
+      color: 'neutral',
+      variant: 'ghost',
+      icon: 'material-symbols:edit-outline-rounded',
+      class: 'text-center',
+      onClick: () => {
+        selectedLookup.value = row.original
+        openUpdateModal.value = true
+        console.log('i want to update. ', openUpdateModal.value)
+      }
+    }),
+  },
+  { accessorKey: 'code', header: () => h('div', { class: 'flex flex-col items-start' }, 'Code') },
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    cell: ({ row }) => {
+      return h('div', { class: 'flex items-center gap-3' }, [
+
+        h('div', undefined, [
+          h('p', {}, row.original.name),
+          // h('p', { class: '' }, `@${row.original.name}`)
+        ])
+      ])
+    }
+  },
+  {
+    accessorKey: 'description',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Description',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : 'i-lucide-arrow-down-wide-narrow'
+          : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    }
+  },
+  {
+    header: () => h('div', { class: 'text-center' }, 'Actions'),
+    id: 'actions',
+    cell: ({ row }) => {
+      return h(
+        'div',
+        { class: 'text-center' },
+        h(
+          UDropdownMenu,
+          {
+            content: {
+              align: 'end'
+            },
+            items: getRowItems(row)
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              class: 'ml-auto'
+            })
+        )
+      )
+    }
+  }
+]
 function getRowItems(row: Row<Classe>) {
   return [
     {
@@ -306,12 +389,62 @@ async function addClasse(event: FormSubmitEvent<Schema>) {
   console.log(event.data)
 }
 
+async function refreshLookups() {
+  loadingLookups.value = true
+  lookupsError.value = null
+  try {
+    const { data, error } = await supabase
+      .from('lookups')
+      .select('*')
+      .eq('classe_id', selectedClasse.value?.id)
+    lookups.value = data || []
+    loadingLookups.value = false
+  } catch (error) {
+    lookupsError.value = error
+    loadingLookups.value = false
+  }
+}
+
 // const selectedMail = ref<Mail | null>()
 const { data: classes, error } = await supabase.from('classes').select()
+let selectedClasse = ref<Classe | null>(null)
+const lookups = ref<any[]>([]) // Define a type for Lookup if available
+const loadingLookups = ref(false)
+const lookupsError = ref<any>(null)
+
+watch(selectedClasse, async (newClasse) => {
+  if (newClasse) {
+    loadingLookups.value = true
+    lookupsError.value = null
+    try {
+      const { data, error } = await supabase
+        .from('lookups')
+        .select('*')
+        .eq('classe_id', newClasse.id)
+
+      if (error) {
+        lookupsError.value = error
+        lookups.value = []
+      } else {
+        lookups.value = data || []
+      }
+    } catch (err) {
+      lookupsError.value = err
+      lookups.value = []
+    } finally {
+      loadingLookups.value = false
+    }
+  } else {
+    lookups.value = []
+    loadingLookups.value = false
+    lookupsError.value = null
+  }
+}, { immediate: false })
+
 const defaultClasseSchema = z.object({
-  description: z.string().email('Invalid email'),
-  table_name: z.string().email('Invalid email'),
-  name: z.string().email('Invalid email'),
+  description: z.string(),
+  table_name: z.string(),
+  name: z.string(),
 })
 type Schema = z.output<typeof defaultClasseSchema>
 

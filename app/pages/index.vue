@@ -5,5 +5,5 @@ import type { Period, Range } from '~/types'
 </script>
 
 <template>
-  <WaitingDefault />
+  <WaitingDefault/>
 </template>
