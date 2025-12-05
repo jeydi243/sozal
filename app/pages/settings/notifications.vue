@@ -1,4 +1,10 @@
 <script setup lang="ts">
+useHead({
+  title: 'Notifications - Settings',
+  meta: [
+    { name: 'description', content: 'Manage notification preferences.' }
+  ]
+})
 const state = reactive<{ [key: string]: boolean }>({
   email: true,
   desktop: false,
@@ -45,26 +51,12 @@ async function onChange() {
 
 <template>
   <div v-for="(section, index) in sections" :key="index">
-    <UPageCard
-      :title="section.title"
-      :description="section.description"
-      variant="naked"
-      class="mb-4"
-    />
+    <UPageCard :title="section.title" :description="section.description" variant="naked" class="mb-4" />
 
     <UPageCard variant="subtle" :ui="{ container: 'divide-y divide-(--ui-border)' }">
-      <UFormField
-        v-for="field in section.fields"
-        :key="field.name"
-        :name="field.name"
-        :label="field.label"
-        :description="field.description"
-        class="flex items-center justify-between not-last:pb-4 gap-2"
-      >
-        <USwitch
-          v-model="state[field.name]"
-          @update:model-value="onChange"
-        />
+      <UFormField v-for="field in section.fields" :key="field.name" :name="field.name" :label="field.label"
+        :description="field.description" class="flex items-center justify-between not-last:pb-4 gap-2">
+        <USwitch v-model="state[field.name]" @update:model-value="onChange" />
       </UFormField>
     </UPageCard>
   </div>

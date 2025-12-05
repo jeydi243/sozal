@@ -117,6 +117,13 @@ import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Profil } from '~/types'
 import type { Schema } from 'zod'
 
+useHead({
+    title: 'Users - Settings',
+    meta: [
+        { name: 'description', content: 'Manage users.' }
+    ]
+})
+
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
 const status = ref('success')

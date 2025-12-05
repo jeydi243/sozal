@@ -11,6 +11,13 @@
 import * as z from 'zod'
 import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 
+useHead({
+    title: 'Login - Sozal',
+    meta: [
+        { name: 'description', content: 'Login to your Sozal account.' }
+    ]
+})
+
 let user = useSupabaseUser()
 
 const fields: AuthFormField[] = [{
@@ -60,7 +67,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             email: event.data.email,
             password: event.data.password
         })
-        
+
         console.log({ error })
 
         if (error) {

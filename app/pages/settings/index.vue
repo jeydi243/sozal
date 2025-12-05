@@ -2,6 +2,13 @@
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
+useHead({
+  title: 'General - Settings',
+  meta: [
+    { name: 'description', content: 'General configuration.' }
+  ]
+})
+
 const fileRef = ref<HTMLInputElement>()
 
 const profileSchema = z.object({

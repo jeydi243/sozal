@@ -116,8 +116,15 @@ import { upperFirst } from 'scule'
 import { breakpointsTailwind } from '@vueuse/core'
 import * as z from 'zod'
 
+useHead({
+    title: 'Organisations - Settings',
+    meta: [
+        { name: 'description', content: 'Manage organisations.' }
+    ]
+})
+
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Classe } from '~/types'
+import type { Classe, Organisation } from '~/types'
 
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
@@ -140,7 +147,7 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const columns: TableColumn<Classe>[] = [
+const columns: TableColumn<Organisation>[] = [
     {
         id: 'select',
         header: ({ table }) =>

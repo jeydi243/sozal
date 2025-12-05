@@ -1,4 +1,10 @@
 <script setup lang="ts">
+useHead({
+  title: 'Settings - Sozal',
+  meta: [
+    { name: 'description', content: 'Manage your settings.' }
+  ]
+})
 const links = [[{
   label: 'Parametres',
   icon: 'i-lucide-user',
@@ -12,7 +18,7 @@ const links = [[{
   label: 'Organisations',
   icon: 'octicon:organization-16',
   to: '/settings/organisations'
-}, 
+},
 {
   label: 'Grille Tarifaire',
   icon: 'i-lucide-shield',

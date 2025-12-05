@@ -121,6 +121,13 @@ import * as z from 'zod'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Classe } from '~/types'
 
+useHead({
+  title: 'Lookups - Settings',
+  meta: [
+    { name: 'description', content: 'Manage lookups settings.' }
+  ]
+})
+
 const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
 const selectedLookup = ref()
@@ -146,19 +153,32 @@ const pagination = ref({
 })
 const columns: TableColumn<Classe>[] = [
   {
-    id: 'details',
-    header: 'Details',
+    id: 'edit',
+    header: 'Edit',
     // icon: 'material-symbols:open-in-full-rounded',
     cell: ({ row }) => h(UButton, {
       color: 'neutral',
-      variant: 'solid',
-      icon: 'i-lucide-eye',
+      variant: 'ghost',
+      icon: 'i-lucide-edit',
       class: 'text-center',
       onClick: () => {
         selectedClasse.value = row.original;
         openSlideOver.value = !openSlideOver.value;
       }
     }),
+  },
+  {
+    accessorKey: 'code',
+    header: 'Code',
+    cell: ({ row }) => {
+      return h('div', { class: 'flex items-center gap-3' }, [
+
+        h('div', undefined, [
+          h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
+          // h('p', { class: '' }, `@${row.original.name}`)
+        ])
+      ])
+    }
   },
 
   {
@@ -213,6 +233,21 @@ const columns: TableColumn<Classe>[] = [
         row.original.status
       )
     }
+  },
+  {
+    id: 'details',
+    header: 'Lookups',
+    // icon: 'material-symbols:open-in-full-rounded',
+    cell: ({ row }) => h(UButton, {
+      color: 'neutral',
+      variant: 'solid',
+      icon: 'i-lucide-eye',
+      class: 'text-center',
+      onClick: () => {
+        selectedClasse.value = row.original;
+        openSlideOver.value = !openSlideOver.value;
+      }
+    }),
   },
   {
     header: () => h('div', { class: 'text-center' }, 'Actions'),
@@ -272,7 +307,7 @@ const columnsLookups: TableColumn<Classe>[] = [
       onClick: () => {
         selectedLookup.value = row.original
         openUpdateModal.value = true
-        console.log('i want to update. ', openUpdateModal.value)
+        console.log('i want to update. %o', selectedLookup.value)
       }
     }),
   },

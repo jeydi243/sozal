@@ -3,6 +3,14 @@ import { computed, ref, watch } from 'vue'
 import { breakpointsTailwind } from '@vueuse/core'
 import type { Mail } from '~/types'
 
+useHead({
+  title: 'Inbox - Sozal',
+  meta: [
+    { name: 'description', content: 'Check your messages.' }
+  ]
+})
+
+
 const tabItems = [{
   label: 'All',
   value: 'all'
