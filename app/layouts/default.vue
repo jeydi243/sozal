@@ -141,30 +141,33 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UDashboardGroup>
-    <UDashboardSearch :groups="groups" />
+  <div>
+    <UDashboardGroup>
+      <UDashboardSearch :groups="groups" />
 
-    <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
-      :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
-      <template #header="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
-      </template>
+      <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
+        :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
+        <template #header="{ collapsed }">
+          <TeamsMenu :collapsed="collapsed" />
+        </template>
 
-      <template #default="{ collapsed }">
-        <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-(--ui-border)" />
+        <template #default="{ collapsed }">
+          <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-(--ui-border)" />
 
-        <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" />
+          <UNavigationMenu highlight highlight-color="primary" :collapsed="collapsed" :items="links[0]"
+            orientation="vertical" />
 
-        <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" class="mt-auto" />
-      </template>
+          <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" class="mt-auto" />
+        </template>
 
-      <template #footer="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
-      </template>
-    </UDashboardSidebar>
+        <template #footer="{ collapsed }">
+          <UserMenu :collapsed="collapsed" />
+        </template>
+      </UDashboardSidebar>
 
-    <slot />
+      <slot />
 
-    <NotificationsSlideover />
-  </UDashboardGroup>
+      <NotificationsSlideover />
+    </UDashboardGroup>
+  </div>
 </template>

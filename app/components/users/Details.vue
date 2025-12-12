@@ -1,6 +1,6 @@
 <template>
     <USlideover description="Details des affectations aux organisations"
-        :title="`Details du user ${currentUser?.first_name} ${currentUser?.last_name}`" :ui="{ content: 'max-w-3xl' }"
+        :title="`${props.user?.first_name} ${props.user?.last_name}`" :ui="{ content: 'max-w-3xl' }"
         v-model:open="isOpenSlideOver">
 
 
@@ -12,9 +12,10 @@
             <div>
                 <UTable ref="table_affectations" v-model:column-filters="columnFilters"
                     v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                    v-model:pagination="pagination" :pagination-options="{
+                    v-model:pagination="pagination" empty="Aucune affectation" :pagination-options="{
                         getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations" :ui="{
+                    }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
+                    :loading="affectationsStatus === 'pending'" :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                         tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -22,18 +23,39 @@
                         td: 'border-b border-(--ui-border) p-2'
                     }" />
             </div>
+            <UModal v-model:open="isStopModalOpen" title="Confirmer l'arrêt de l'affectation">
+                <template #body>
+                    <div class="pl-4">
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Êtes-vous sûr de vouloir arrêter cette affectation ? La date de fin sera définie à
+                            aujourd'hui.
+                        </p>
+                    </div>
+
+
+                </template>
+                <template #footer="{ close }">
+                    <UButton color="neutral" variant="ghost" @click="close">
+                        Annuler
+                    </UButton>
+                    <UButton color="secondary" variant="solid" @click="stopAffectation">
+                        Confirmer
+                    </UButton>
+                </template>
+            </UModal>
         </template>
     </USlideover>
 </template>
 <script setup lang="ts">
+import type { PropType } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import * as z from 'zod'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Affectation, Profil } from '~/types'
 
 const props = defineProps({
     user: {
-        type: Object as () => Profil | null,
+        type: Object as PropType<Profil | null>,
         required: true
     },
     open: {
@@ -43,76 +65,89 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:open'])
-
 const supabase = useSupabaseClient()
-//on mounted log props.user
-onMounted(() => {
-    console.log('On mounted user is ', props.user)
-    refreshAffectations()
-})
+const toast = useToast()
 
-watch(() => props.user, () => {
-    refreshAffectations()
-})
-
-
-
-//retrieve current user based on props.user_id
-const currentUser = computed(() => props.user)
-const affectations = ref<Affectation[]>([])
-const { data: initialAffectations } = await supabase.from('affectations').select("*").eq('user_id', props.user?.user_id ?? '')
-if (initialAffectations) affectations.value = initialAffectations
-
-console.log('Current user is ', currentUser.value)
-console.log('Affectations are ', affectations.value)
-
+const { data: affectations, refresh: refreshAffectations, status: affectationsStatus } = useAsyncData(
+    `affectations-${props.user?.user_id}`,
+    async () => {
+        if (!props.user?.user_id) return []
+        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookups!inner(name, description), organisations!inner(name, description)").eq('user_id', props.user.user_id)
+        if (error) {
+            toast.add({
+                title: 'Error',
+                description: error.message,
+                color: 'error'
+            })
+            throw error
+        }
+        console.log(data)
+        return data as Affectation[]
+    },
+    {
+        watch: [() => props.user],
+        immediate: true // Ensure it runs on mount if user is present
+    }
+)
 
 const columnFilters = ref([{
-    id: 'type',
+    id: 'id',
     value: ''
 }])
+
 const isOpenSlideOver = computed({
     get: () => props.open,
     set: (value) => emit('update:open', value)
 })
 
-
-const rowSelection = ref({ 2: true })
-const toast = useToast()
+const rowSelection = ref({})
 const pagination = ref({
     pageIndex: 0,
     pageSize: 10,
 })
 const columnVisibility = ref()
 const openEdit = ref(false)
+const isStopModalOpen = ref(false)
+const selectedAffectationId = ref<number | null>(null)
+
+async function stopAffectation() {
+    if (!selectedAffectationId.value) return
+
+    const { error } = await supabase
+        .from('affectations')
+        .update({ end_date: new Date().toISOString() })
+        .eq('id', selectedAffectationId.value)
+
+    if (error) {
+        toast.add({
+            title: 'Error',
+            description: error.message,
+            color: 'error'
+        })
+    } else {
+        toast.add({
+            title: 'Succès',
+            description: 'L\'affectation a été arrêtée avec succès.',
+            color: 'success'
+        })
+        refreshAffectations()
+        isStopModalOpen.value = false
+    }
+}
+
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const table_affectations = useTemplateRef('table_affectations')
 
 const columnsAffectations: TableColumn<Affectation>[] = [
     {
-        id: 'details',
-        header: 'Details',
-        // icon: 'material-symbols:open-in-full-rounded',
-        cell: ({ row }) => h(UButton, {
-            color: 'green',
-            variant: 'solid',
-            icon: 'i-lucide-eye',
-            onClick: () => {
-                openEdit.value = !openEdit.value;
-            }
-        }),
-    },
-
-    {
-        accessorKey: 'type',
+        accessorKey: 'lookup_id',
         header: 'Type',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookup_id),
-                    // h('p', { class: '' }, `@${row.original.name}`)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookups?.name || ''),
                 ])
             ])
         }
@@ -124,8 +159,31 @@ const columnsAffectations: TableColumn<Affectation>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisation_id),
-                    // h('p', { class: '' }, `@${row.original.name}`)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisations?.name || ''),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'start_date',
+        header: 'Date de début',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.start_date ? new Date(row.original.start_date).toLocaleDateString() : ''),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'end_date',
+        header: 'Date de fin',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.end_date),
                 ])
             ])
         }
@@ -157,8 +215,9 @@ const columnsAffectations: TableColumn<Affectation>[] = [
         }
     }
 ]
+
 function getRowItemsAffectations(row: Row<Affectation>) {
-    return [
+    const items = [
         {
             type: 'label',
             label: 'Actions'
@@ -170,50 +229,27 @@ function getRowItemsAffectations(row: Row<Affectation>) {
                 navigator.clipboard.writeText(row.original.id.toString())
                 toast.add({
                     title: 'Copied to clipboard',
-                    description: 'Classe ID copied to clipboard'
-                })
-            }
-        },
-        {
-            type: 'separator'
-        },
-        {
-            type: 'separator'
-        },
-        {
-            label: 'Delete affectation',
-            icon: 'i-lucide-trash',
-            color: 'error',
-            onSelect() {
-                toast.add({
-                    title: 'Affectation deleted',
-                    description: 'The affectation has been deleted.'
+                    description: 'Affectation ID copied to clipboard'
                 })
             }
         }
-    ];
-}
-async function refreshAffectations() {
-    const { data: newAffectations, error: errorAffectations } = await supabase.from('affectations').select("*").eq('user_id', props.user?.user_id ?? '')
-    if (newAffectations) {
-        affectations.value = newAffectations
-    }
-    //show toast success refresh
-    toast.add({
-        title: 'Refresh',
-        description: 'Affectations refreshed',
-        color: 'success'
-    })
-    console.log('Affectations are ', affectations.value)
-    //show toast
-    if (errorAffectations) {
-        toast.add({
-            title: 'Error',
-            description: errorAffectations.message,
-            color: 'error'
+    ]
+
+    if (!row.original.end_date) {
+        items.push({
+            type: 'separator'
+        })
+        items.push({
+            label: "Stopper l'affectation",
+            icon: 'i-lucide-trash',
+            color: 'error',
+            onSelect() {
+                selectedAffectationId.value = row.original.id
+                isStopModalOpen.value = true
+            }
         })
     }
+
+    return items
 }
-
-
 </script>

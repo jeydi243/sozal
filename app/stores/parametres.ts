@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Lookup, Classe, Organisation } from '~/types'
+import type { Lookup, Classe, Organisation, Affectation } from '~/types'
 
 export const useParametresStore = defineStore('parametres', () => {
   const supabase = useSupabaseClient()
@@ -18,6 +18,35 @@ export const useParametresStore = defineStore('parametres', () => {
   const lookups = ref<Lookup[]>([])
   const classes = ref<Classe[]>([])
   const organisations = ref<Organisation[]>([])
+  const affectations = ref<Affectation[]>([])
+
+  const getAffectations = computed(() => affectations.value)
+
+  async function init_user() {
+    const user = useSupabaseUser()
+    if (!user.value) {
+      return {
+        data: null,
+        error: 'User not logged in',
+        loading: false
+      }
+    }
+
+    const { data: affectationsData, error: affectationsError } = await supabase
+      .from('affectations')
+      .select('*')
+      .eq('user_id', user.value.id)
+
+    if (affectationsData) affectations.value = affectationsData as unknown as Affectation[]
+
+    return {
+      data: {
+        affectations: affectationsData
+      },
+      error: affectationsError,
+      loading: false
+    }
+  }
 
   async function init() {
     const { data: lookupsData, error: lookupsError } = await supabase.from('lookups').select('*')
@@ -44,8 +73,11 @@ export const useParametresStore = defineStore('parametres', () => {
     lookups,
     classes,
     organisations,
+    affectations,
     getClasseById,
     getClasseItems,
-    init
+    init,
+    init_user,
+    getAffectations
   }
 })

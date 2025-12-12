@@ -96,4 +96,8 @@ export interface Affectation {
   lookup_id: string
   organisation_id?: string
   created_at?: string
+  start_date?: string
+  end_date?: string
+  lookups?: { name: string, description: string }
+  organisations?: { name: string, description: string }
 }

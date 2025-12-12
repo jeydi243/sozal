@@ -32,25 +32,27 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
 </script>
 
 <template>
-  <UPageCard title="Password" description="Confirm your current password before setting a new one." variant="subtle">
-    <UForm :schema="passwordSchema" :state="password" :validate="validate" class="flex flex-col gap-4 max-w-xs">
-      <UFormField name="current">
-        <UInput v-model="password.current" type="password" placeholder="Current password" class="w-full" />
-      </UFormField>
+  <div>
+    <UPageCard title="Password" description="Confirm your current password before setting a new one." variant="subtle">
+      <UForm :schema="passwordSchema" :state="password" :validate="validate" class="flex flex-col gap-4 max-w-xs">
+        <UFormField name="current">
+          <UInput v-model="password.current" type="password" placeholder="Current password" class="w-full" />
+        </UFormField>
 
-      <UFormField name="new">
-        <UInput v-model="password.new" type="password" placeholder="New password" class="w-full" />
-      </UFormField>
+        <UFormField name="new">
+          <UInput v-model="password.new" type="password" placeholder="New password" class="w-full" />
+        </UFormField>
 
-      <UButton label="Update" class="w-fit" type="submit" />
-    </UForm>
-  </UPageCard>
+        <UButton label="Update" class="w-fit" type="submit" />
+      </UForm>
+    </UPageCard>
 
-  <UPageCard title="Account"
-    description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
-    class="bg-gradient-to-tl from-(--ui-error)/10 from-5% to-(--ui-bg)">
-    <template #footer>
-      <UButton label="Delete account" color="error" />
-    </template>
-  </UPageCard>
+    <UPageCard title="Account"
+      description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
+      class="bg-gradient-to-tl from-(--ui-error)/10 from-5% to-(--ui-bg)">
+      <template #footer>
+        <UButton label="Delete account" color="error" />
+      </template>
+    </UPageCard>
+  </div>
 </template>

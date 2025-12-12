@@ -36,7 +36,7 @@ const schema = z.object({
     organisation_id: z.string()
 })
 
-const { data: lookups } = await useAsyncData('lookups', async () => {
+const { data: lookups } = await useAsyncData('add-affectation', async () => {
     const { data } = await supabase.from('lookups').select('id, name, classes!inner(*)').eq('classes.table_name', 'TYPE_AFFECTATION')
     return data
 })

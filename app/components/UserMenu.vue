@@ -112,14 +112,22 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   icon: 'i-lucide-log-out',
   onSelect(e: Event) {
     e.preventDefault()
-    signOut()
+    isLogoutModalOpen.value = true
   }
 }]]))
-const signOut = async () => {
+
+const isLogoutModalOpen = ref(false)
+
+const handleLogout = async () => {
+  isLogoutModalOpen.value = false
   let user = useSupabaseUser()
   const { error } = await supabase.auth.signOut()
   if (error) console.log(error)
-  else toast.add({ title: 'Good Bye ' + user.value?.email + '! ', description: 'We are sad you go ! ', color: 'warning' })
+
+  else {
+    navigateTo('/login')
+    toast.add({ title: 'Good Bye ' + user.value?.email + '! ', description: 'We are sad you go ! ', color: 'warning' })
+  }
 }
 </script>
 
@@ -139,4 +147,12 @@ const signOut = async () => {
         class="ms-0.5 size-2 rounded-full bg-(--chip)" />
     </template>
   </UDropdownMenu>
+
+  <UModal v-model:open="isLogoutModalOpen" title="Confirmation"
+    description="Etes-vous sûr de vouloir vous déconnecter ?" :ui="{ content: 'max-w-sm' }">
+    <template #footer>
+      <UButton label="Annuler" color="neutral" variant="ghost" @click="isLogoutModalOpen = false" />
+      <UButton label="Se déconnecter" color="error" @click="handleLogout" />
+    </template>
+  </UModal>
 </template>
