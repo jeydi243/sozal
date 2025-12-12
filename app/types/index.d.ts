@@ -87,6 +87,7 @@ export interface Profil {
   first_name: string
   last_name: string
   user_name: string
+  user_id: string
 }
 
 export interface Affectation {

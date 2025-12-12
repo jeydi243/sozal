@@ -9,6 +9,7 @@ const props = defineProps<{
 }>()
 
 const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
 
 const sampleEmails = [
   'james.anderson@example.com',
@@ -92,21 +93,28 @@ const columns: TableColumn<Sale>[] = [
 
       return h('div', { class: 'text-right font-medium' }, formatted)
     }
+  },
+  {
+    accessorKey: 'actions',
+    cell: () => {
+      return h(UButton, {
+        icon: 'i-heroicons-clipboard-document-list',
+        label: 'Consulter',
+        variant: 'ghost',
+        size: 'xs',
+        to: '/patientConsultation'
+      })
+    }
   }
 ]
 </script>
 
 <template>
-  <UTable
-    :data="data"
-    :columns="columns"
-    class="shrink-0"
-    :ui="{
-      base: 'table-fixed border-separate border-spacing-0',
-      thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-      tbody: '[&>tr]:last:[&>td]:border-b-0',
-      th: 'first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-      td: 'border-b border-(--ui-border)'
-    }"
-  />
+  <UTable :data="data" :columns="columns" class="shrink-0" :ui="{
+    base: 'table-fixed border-separate border-spacing-0',
+    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+    tbody: '[&>tr]:last:[&>td]:border-b-0',
+    th: 'first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+    td: 'border-b border-(--ui-border)'
+  }" />
 </template>

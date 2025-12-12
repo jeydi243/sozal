@@ -83,36 +83,13 @@
             </div>
         </template>
     </UDashboardPanel>
-    <USlideover description="Details des affectations aux organisations" title="Details du user"
-        :ui="{ content: 'max-w-3xl' }" v-model:open="openSlideOver">
-        <UButton label="Opend" color="neutral" variant="subtle" />
-
-        <template #body>
-            <div class="flex flex-row justify-end">
-                <UsersAddAffectation :user_id="selectedUser?.id" />
-            </div>
-            <div>
-                <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                    v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-                        getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="Users || []" :columns="columns" :loading="status === 'pending'" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
-            </div>
-        </template>
-    </USlideover>
+    <UsersDetails :user="selectedUser ?? {}" v-model:open="openDetailsUser" />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { FormSubmitEvent, TableColumn } from '@nuxt/ui'
+import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import { breakpointsTailwind } from '@vueuse/core'
 import * as z from 'zod'
-
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Profil } from '~/types'
 import type { Schema } from 'zod'
@@ -129,17 +106,14 @@ const table = useTemplateRef('table')
 const status = ref('success')
 const statusFilter = ref('all')
 const columnFilters = ref([{
-    id: 'email',
+    id: 'type',
     value: ''
 }])
-// const UAvatar = resolveComponent('UAvatar')
+
 const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
 const columnVisibility = ref()
-const openDetailsClasse = ref(false)
-const openSlideOver = ref(false)
+const openDetailsUser = ref(false)
 const selectedUser = ref<Profil | null>(null)
 const rowSelection = ref({ 2: true })
 const toast = useToast()
@@ -151,18 +125,17 @@ const columns: TableColumn<Profil>[] = [
     {
         id: 'details',
         header: 'Details',
-        // icon: 'material-symbols:open-in-full-rounded',
         cell: ({ row }) => h(UButton, {
-            color: 'green',
-            variant: 'solid',
+            color: 'primary',
+            variant: 'ghost',
             icon: 'i-lucide-eye',
             onClick: () => {
-                openSlideOver.value = !openSlideOver.value;
                 selectedUser.value = row.original;
+                openDetailsUser.value = !openDetailsUser.value;
+                console.log(row.original, openDetailsUser.value)
             }
         }),
     },
-
     {
         accessorKey: 'email',
         header: 'Email',
@@ -229,6 +202,7 @@ const columns: TableColumn<Profil>[] = [
         }
     }
 ]
+
 function getRowItems(row: Row<Profil>) {
     return [
         {
@@ -253,7 +227,7 @@ function getRowItems(row: Row<Profil>) {
             label: 'Details',
             icon: 'material-symbols:open-in-full-rounded',
             onSelect() {
-                openDetailsClasse.value = !openDetailsClasse.value
+                openDetailsUser.value = !openDetailsUser.value
             }
         },
         {
@@ -274,10 +248,10 @@ function getRowItems(row: Row<Profil>) {
                 })
             }
         }
-    ]
+    ];
 }
 
-// const selectedMail = ref<Mail | null>()
+
 const { data: Users, error } = await supabase.from('profils').select()
 
 const defaultUserSchema = z.object({
@@ -286,14 +260,5 @@ const defaultUserSchema = z.object({
     last_name: z.string().min(2, 'Invalid last_name'),
     email: z.string().email('Invalid email'),
 })
-type UserSchema = z.output<typeof defaultUserSchema>
-
-// Reset selected mail if it's not in the filtered mails
-const defaultUser = reactive({
-    description: '',
-    code: '',
-    name: ''
-})
-
 
 </script>

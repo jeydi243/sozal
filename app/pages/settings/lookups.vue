@@ -88,6 +88,7 @@
       <Placeholder class="h-48 m-4" />
     </template>
   </UDrawer>
+  <ClassesUpdateModal v-model:open="openClasseUpdateModal" :classe="selectedClasse" @classe_updated="refreshClasses" />
   <USlideover v-model:open="openSlideOver" description="Liste des lookups de la classe" title="Lookups"
     :ui="{ content: 'max-w-3xl' }">
     <template #body>
@@ -113,11 +114,9 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { FormSubmitEvent, TableColumn } from '@nuxt/ui'
+import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
-import { breakpointsTailwind } from '@vueuse/core'
 import * as z from 'zod'
-
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Classe } from '~/types'
 
@@ -132,16 +131,16 @@ const supabase = useSupabaseClient()
 const table = useTemplateRef('table')
 const selectedLookup = ref()
 const openUpdateModal = ref(false)
+const openClasseUpdateModal = ref(false)
 const statusFilter = ref('all')
 const columnFilters = ref([{
   id: 'name',
   value: ''
 }])
-// const UAvatar = resolveComponent('UAvatar')
 const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
-// const UCheckbox = resolveComponent('UCheckbox')
+const UCheckbox = resolveComponent('UCheckbox')
 const columnVisibility = ref()
 const openDetailsClasse = ref(false)
 const openSlideOver = ref(false)
@@ -151,6 +150,14 @@ const pagination = ref({
   pageIndex: 0,
   pageSize: 10
 })
+let loadingClasses = ref(false)
+let classesError = ref<any>(null)
+const { data: classes, error } = await supabase.from('classes').select()
+let selectedClasse = ref<Classe | null | Object>(null)
+const lookups = ref<any[]>([]) // Define a type for Lookup if available
+const loadingLookups = ref(false)
+const lookupsError = ref<any>(null)
+
 const columns: TableColumn<Classe>[] = [
   {
     id: 'edit',
@@ -163,7 +170,7 @@ const columns: TableColumn<Classe>[] = [
       class: 'text-center',
       onClick: () => {
         selectedClasse.value = row.original;
-        openSlideOver.value = !openSlideOver.value;
+        openClasseUpdateModal.value = !openClasseUpdateModal.value;
       }
     }),
   },
@@ -418,12 +425,6 @@ function getRowItems(row: Row<Classe>) {
     }
   ]
 }
-
-async function addClasse(event: FormSubmitEvent<Schema>) {
-  toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-  console.log(event.data)
-}
-
 async function refreshLookups() {
   loadingLookups.value = true
   lookupsError.value = null
@@ -431,7 +432,7 @@ async function refreshLookups() {
     const { data, error } = await supabase
       .from('lookups')
       .select('*')
-      .eq('classe_id', selectedClasse.value?.id)
+      .eq('classe_id', selectedClasse.value?.id ?? '')
     lookups.value = data || []
     loadingLookups.value = false
   } catch (error) {
@@ -439,13 +440,22 @@ async function refreshLookups() {
     loadingLookups.value = false
   }
 }
+async function refreshClasses() {
+  loadingClasses.value = true
+  classesError.value = null
+  try {
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+    classes.value = data || []
+    loadingClasses.value = false
+  } catch (error) {
+    classesError.value = error
+    loadingClasses.value = false
+  }
+}
 
-// const selectedMail = ref<Mail | null>()
-const { data: classes, error } = await supabase.from('classes').select()
-let selectedClasse = ref<Classe | null>(null)
-const lookups = ref<any[]>([]) // Define a type for Lookup if available
-const loadingLookups = ref(false)
-const lookupsError = ref<any>(null)
+
 
 watch(selectedClasse, async (newClasse) => {
   if (newClasse) {
@@ -483,12 +493,11 @@ const defaultClasseSchema = z.object({
 })
 type Schema = z.output<typeof defaultClasseSchema>
 
-// Reset selected mail if it's not in the filtered mails
 const defaultClasse = reactive({
   description: '',
   table_name: '',
   name: ''
 })
-const breakpoints = useBreakpoints(breakpointsTailwind)
+
 
 </script>
