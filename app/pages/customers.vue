@@ -204,8 +204,7 @@ const pagination = ref({
 </script>
 
 <template>
-  <div>
-    <UDashboardPanel id="customers">
+    <UDashboardPanel id="customers" as="div">
       <template #header>
         <UDashboardNavbar title="Customers">
           <template #leading>
@@ -289,5 +288,4 @@ const pagination = ref({
         </div>
       </template>
     </UDashboardPanel>
-  </div>
 </template>

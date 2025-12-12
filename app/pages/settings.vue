@@ -41,8 +41,8 @@ const links = [[{
 </script>
 
 <template>
-  <div>
-    <UDashboardPanel id="settings" :ui="{ body: 'p-0', root: 'p-0 m-0' }" class="p-0">
+
+    <UDashboardPanel as="div" id="settings" :ui="{ body: 'p-0', root: 'p-0 m-0' }" class="p-0">
       <template #header>
         <!-- <UDashboardNavbar title="Parametres">
         <template #leading>
@@ -61,5 +61,4 @@ const links = [[{
         <NuxtPage />
       </template>
     </UDashboardPanel>
-  </div>
 </template>

@@ -109,3 +109,11 @@ export interface Article {
   lookup_id: string
   created_at?: string
 }
+export interface Tarifaire {
+  id: number
+  name: string
+  code: string
+  description: string
+  lookup_id: string
+  organisation_id: string
+}
