@@ -238,7 +238,8 @@ function getRowItemsAffectations(row: Row<Affectation>) {
     if (!row.original.end_date) {
         items.push({
             type: 'separator'
-        })
+        });
+
         items.push({
             label: "Stopper l'affectation",
             icon: 'i-lucide-trash',

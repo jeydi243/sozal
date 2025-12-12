@@ -141,33 +141,33 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <UDashboardGroup>
-      <UDashboardSearch :groups="groups" />
 
-      <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
-        :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
-        <template #header="{ collapsed }">
-          <TeamsMenu :collapsed="collapsed" />
-        </template>
+  <UDashboardGroup>
+    <UDashboardSearch :groups="groups" />
 
-        <template #default="{ collapsed }">
-          <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-(--ui-border)" />
+    <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
+      :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
+      <template #header="{ collapsed }">
+        <TeamsMenu :collapsed="collapsed" />
+      </template>
 
-          <UNavigationMenu highlight highlight-color="primary" :collapsed="collapsed" :items="links[0]"
-            orientation="vertical" />
+      <template #default="{ collapsed }">
+        <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-(--ui-border)" />
 
-          <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" class="mt-auto" />
-        </template>
+        <UNavigationMenu highlight highlight-color="primary" :collapsed="collapsed" :items="links[0]"
+          orientation="vertical" />
 
-        <template #footer="{ collapsed }">
-          <UserMenu :collapsed="collapsed" />
-        </template>
-      </UDashboardSidebar>
+        <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" class="mt-auto" />
+      </template>
 
-      <slot />
+      <template #footer="{ collapsed }">
+        <UserMenu :collapsed="collapsed" />
+      </template>
+    </UDashboardSidebar>
 
-      <NotificationsSlideover />
-    </UDashboardGroup>
-  </div>
+    <slot />
+
+    <NotificationsSlideover />
+  </UDashboardGroup>
+
 </template>

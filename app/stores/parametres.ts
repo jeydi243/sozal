@@ -7,6 +7,9 @@ export const useParametresStore = defineStore('parametres', () => {
   const getClasseById = computed(() => (id: string) => {
     return classes.value.find(classe => classe.id === id)?.name
   })
+  const getLookupsById = computed(() => (id: string) => {
+    return lookups.value.find(lookup => lookup.id == id)?.name
+  })
 
   const getClasseItems = computed(() => {
     return classes.value.map(classe => ({
@@ -76,6 +79,7 @@ export const useParametresStore = defineStore('parametres', () => {
     affectations,
     getClasseById,
     getClasseItems,
+    getLookupsById,
     init,
     init_user,
     getAffectations

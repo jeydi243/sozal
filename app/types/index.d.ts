@@ -68,16 +68,16 @@ export interface Range {
 }
 
 export interface Lookup {
-  id: number
+  id: string
   name: string
 }
 
 export interface Organisation {
-  id: number
+  id: string
   name: string
   description?: string
   code?: string
-  lookup_id?: number
+  lookup_id?: string
   status?: string
 }
 
@@ -100,4 +100,12 @@ export interface Affectation {
   end_date?: string
   lookups?: { name: string, description: string }
   organisations?: { name: string, description: string }
+}
+export interface Article {
+  id: number
+  name: string
+  code: string
+  description: string
+  lookup_id: string
+  created_at?: string
 }
