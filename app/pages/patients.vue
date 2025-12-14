@@ -2,36 +2,42 @@
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { User } from '~/types'
+import type { Patient, User } from '~/types'
 
 useHead({
-  title: 'Patients - Sozal',
+  title: 'Patients',
   meta: [
     { name: 'description', content: 'Manage your patients.' }
   ]
 })
 
-const UAvatar = resolveComponent('UAvatar')
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
-
-const toast = useToast()
 const table = useTemplateRef('table')
+const toast = useToast()
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const UAvatar = resolveComponent('UAvatar')
+const supabase = useSupabaseClient()
+const UCheckbox = resolveComponent('UCheckbox')
+const rowSelection = ref({ 1: true })
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const columnVisibility = ref()
 
 const columnFilters = ref([{
-  id: 'email',
+  id: 'nom',
   value: ''
 }])
-const columnVisibility = ref()
-const rowSelection = ref({ 1: true })
 
-const { data, status } = await useFetch<User[]>('/api/patients', {
-  lazy: true
-})
+//use useasyncData to fetch patients data from supabase
+const { data: patients, error, refresh: refreshPatients } = await useAsyncData('patients', async () => {
+  const { data, error } = await supabase.from('patients').select();
+  if (error) {
+    throw error;
+  }
+  return data;
+});
 
-function getRowItems(row: Row<User>) {
+
+function getRowItems(row: Row<Patient>) {
   return [
     {
       type: 'label',
@@ -76,7 +82,7 @@ function getRowItems(row: Row<User>) {
   ]
 }
 
-const columns: TableColumn<User>[] = [
+const columns: TableColumn<Patient>[] = [
   {
     id: 'select',
     header: ({ table }) =>
@@ -96,12 +102,12 @@ const columns: TableColumn<User>[] = [
       })
   },
   {
-    accessorKey: 'id',
-    header: 'ID'
+    accessorKey: 'mrn',
+    header: 'Patient ID'
   },
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: 'nom',
+    header: 'Nom',
     cell: ({ row }) => {
       return h('div', { class: 'flex items-center gap-3' }, [
         h(UAvatar, {
@@ -109,21 +115,26 @@ const columns: TableColumn<User>[] = [
           size: 'lg'
         }),
         h('div', undefined, [
-          h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.name),
-          h('p', { class: '' }, `@${row.original.name}`)
+          h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom + ' ' + row.original.postnom),
+          h('p', { class: '' }, `@${row.original.nom}`)
         ])
       ])
     }
   },
+
   {
-    accessorKey: 'email',
+    accessorKey: 'prenom',
+    header: 'Prenom'
+  },
+  {
+    accessorKey: 'Genre',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
       return h(UButton, {
         color: 'neutral',
         variant: 'ghost',
-        label: 'Email',
+        label: 'Genre',
         icon: isSorted
           ? isSorted === 'asc'
             ? 'i-lucide-arrow-up-narrow-wide'
@@ -132,12 +143,8 @@ const columns: TableColumn<User>[] = [
         class: '-mx-2.5',
         onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
       })
-    }
-  },
-  {
-    accessorKey: 'location',
-    header: 'Location',
-    cell: ({ row }) => row.original.location
+    },
+    cell: ({ row }) => row.original.sexe
   },
   {
     accessorKey: 'status',
@@ -209,10 +216,11 @@ const pagination = ref({
       <UDashboardNavbar title="Patients">
         <template #leading>
           <UDashboardSidebarCollapse />
+          <UBreadcrumb :items="[{ label: 'Home', to: '/' }, { label: 'Patients', to: '/patients' }]" />
         </template>
 
         <template #right>
-          <PatientsAddModal />
+          <PatientsAddModal @patient-added="refreshPatients()" />
         </template>
       </UDashboardNavbar>
     </template>
@@ -265,7 +273,7 @@ const pagination = ref({
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
         v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
           getPaginationRowModel: getPaginationRowModel()
-        }" class="shrink-0" :data="data" :columns="columns" :loading="status === 'pending'" :ui="{
+        }" class="shrink-0" :data="patients" :columns="columns" :ui="{
           base: 'table-fixed border-separate border-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:border-b-0',

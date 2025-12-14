@@ -1,6 +1,6 @@
 <template>
 
-    <UDashboardPanel id="inbox-900" :ui="{ body: 'p-5' }"  as="div">
+    <UDashboardPanel id="inbox-900" :ui="{ body: 'p-5' }" as="div">
         <template #header>
             <UDashboardNavbar title="Tarifaires">
                 <template #leading>

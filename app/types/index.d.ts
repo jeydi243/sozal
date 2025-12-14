@@ -124,3 +124,15 @@ export interface TarifaireLine {
   articles: { name: string, description: string }
   prix: number
 }
+
+export interface Patient {
+  id: number
+  nom: string
+  prenom: string
+  postnom: string
+  sexe: string
+  date_naissance: string
+  status: string,
+  mrn: string,
+  avatar: string
+}
