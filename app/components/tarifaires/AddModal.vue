@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
+import type { FormErrorEvent, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Organisation } from '~/types'
 
 const schema = z.object({
   name: z.string().min(3, 'Too short'),
   description: z.string(),
-  code: z.string(),
+  code: z.string().optional(),
   organisation_id: z.string(),
 })
 const emit = defineEmits(['tarifaire-added'])
@@ -20,27 +20,38 @@ const state = reactive<Partial<Schema>>({
   organisation_id: undefined,
 })
 const { data: organisations } = await useAsyncData<Organisation[]>('organisation-tarifaire', async () => {
-    const { data } = await supabase.from('organisations').select('id, name, lookups!inner(*)').eq('lookups.code', 'clinique')
-    return (data || []) as unknown as Organisation[]
+  const { data } = await supabase.from('organisations').select('id, name, lookups!inner(*)').ilike('lookups.code', 'clinique')
+  return (data || []) as unknown as Organisation[]
 })
 
 const items = computed<SelectMenuItem[]>(() => organisations.value?.map(organisation => ({
-    label: organisation?.name,
-    id: String(organisation?.id)
+  label: organisation?.name,
+  id: String(organisation?.id)
 })) || [])
+
+function onError(error: FormErrorEvent) {
+  console.log(error)
+  if (error?.errors?.[0]) {
+    // const element = document.getElementById(error.errors[0].id)
+    // element?.focus()
+    // element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    toast.add({ title: 'Error', description: error.errors[0].message, color: 'error' })
+  }
+}
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const { data, error } = await supabase
-        .from('tarifaires')
-        .insert(event?.data as any)
-        .select()
+    .from('tarifaires')
+    .insert(event?.data as any)
+    .select()
 
-    if (error) {
-        toast.add({ title: 'Error', description: `Can't add new tarifaire ${error.message}`, color: 'error' })
-    } else {
-        toast.add({ title: 'Success', description: `New tarifaire ${event.data.name} added`, color: 'success' })
-        open.value = false
-        emit('tarifaire-added')
+  if (error) {
+    toast.add({ title: 'Error', description: `Can't add new tarifaire ${error.message}`, color: 'error' })
+  } else {
+    toast.add({ title: 'Success', description: `New tarifaire ${event.data.name} added`, color: 'success' })
+    open.value = false
+    emit('tarifaire-added')
+  }
 }
 </script>
 
@@ -49,7 +60,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UButton label="New tarifaire" icon="i-lucide-plus" />
 
     <template #body>
-      <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UForm  :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
         <UFormField label="Name" placeholder="John Doe" name="name">
           <UInput v-model="state.name" class="w-full" />
         </UFormField>
@@ -61,7 +72,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton label="Cancel" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="Create" color="primary" variant="solid" type="submit" />
+          <UButton label="Ajouter un tarifaire" icon="i-lucide-plus" color="primary" variant="solid" type="submit" />
         </div>
       </UForm>
     </template>

@@ -49,7 +49,7 @@
             </template>
             <template #body>
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                    v-model:row-selection="rowSelection" v-model:pagination="pagination"
+                    v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun tarifaire trouvé"
                     :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Tarifaires || []"
                     :columns="columns" :loading="status === 'pending'" :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
@@ -74,7 +74,7 @@
                 </div>
             </template>
         </UDashboardPanel>
-        <!-- <TarifairesDetails :tarifaire="selectedTarifaire" v-model:open="openDetailsTarifaire" /> -->
+        <TarifairesDetails :tarifaire="selectedTarifaire" v-model:open="openDetailsTarifaire" />
     </div>
 </template>
 <script setup lang="ts">
