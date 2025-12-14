@@ -117,3 +117,10 @@ export interface Tarifaire {
   lookup_id: string
   organisation_id: string
 }
+
+export interface TarifaireLine {
+  id: number
+  tarifaire_id: number
+  articles: { name: string, description: string }
+  prix: number
+}

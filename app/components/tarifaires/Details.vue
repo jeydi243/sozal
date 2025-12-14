@@ -6,16 +6,16 @@
 
         <template #body>
             <div class="flex flex-row justify-between">
-                <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshAffectations" />
-                <TarifairesAddArticle :tarifaire_id="props.tarifaire?.id" @tarifaire-added="refreshAffectations" />
+                <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshTarifairesLines" />
+                <TarifairesAddArticle :tarifaire_id="props.tarifaire?.id" @tarifaire-added="refreshTarifairesLines" />
             </div>
             <div>
-                <UTable ref="table_tarifaires" v-model:column-filters="columnFilters"
+                <UTable ref="table_tarifaires_lines" v-model:column-filters="columnFilters"
                     v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                    v-model:pagination="pagination" empty="Aucune tarifaire" :pagination-options="{
+                    v-model:pagination="pagination" empty="Aucune ligne de tarifaire" :pagination-options="{
                         getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="tarifaires || []" :columns="columnsAffectations"
-                    :loading="tarifairesStatus === 'pending'" :ui="{
+                    }" class="shrink-0 m-2" :data="tarifairesLines || []" :columns="columnsTarifaireLine"
+                    :loading="tarifairesLinesStatus === 'pending'" :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                         tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -39,7 +39,7 @@
                     <UButton color="neutral" variant="ghost" @click="close">
                         Annuler
                     </UButton>
-                    <UButton color="secondary" variant="solid" @click="stopAffectation">
+                    <UButton color="secondary" variant="solid" @click="stopTarrifaireLine">
                         Confirmer
                     </UButton>
                 </template>
@@ -51,7 +51,7 @@
 import type { PropType } from 'vue'
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Affectation, Tarifaire } from '~/types'
+import type { Tarifaire, TarifaireLine } from '~/types'
 
 const props = defineProps({
     tarifaire: {
@@ -68,7 +68,7 @@ const emit = defineEmits(['update:open'])
 const supabase = useSupabaseClient()
 const toast = useToast()
 
-const { data: tarifaires, refresh: refreshAffectations, status: tarifairesStatus } = useAsyncData(
+const { data: tarifairesLines, refresh: refreshTarifairesLines, status: tarifairesLinesStatus } = useAsyncData(
     `tarifaires-${props.tarifaire?.id}`,
     async () => {
         if (!props.tarifaire?.id) return []
@@ -82,7 +82,7 @@ const { data: tarifaires, refresh: refreshAffectations, status: tarifairesStatus
             throw error
         }
         console.log(data)
-        return data as Affectation[]
+        return data as TarifaireLine[]
     },
     {
         watch: [() => props.tarifaire],
@@ -107,15 +107,15 @@ const pagination = ref({
 })
 const columnVisibility = ref()
 const isStopModalOpen = ref(false)
-const selectedAffectationId = ref<number | null>(null)
+const selectedTarrifaireId = ref<number | null>(null)
 
-async function stopAffectation() {
-    if (!selectedAffectationId.value) return
+async function stopTarrifaireLine() {
+    if (!selectedTarrifaireId.value) return
 
     const { error } = await supabase
         .from('tarifaires')
         .update({ end_date: new Date().toISOString() })
-        .eq('id', selectedAffectationId.value)
+        .eq('id', selectedTarrifaireId.value)
 
     if (error) {
         toast.add({
@@ -129,16 +129,16 @@ async function stopAffectation() {
             description: 'Le tarifaire a été arrêtée avec succès.',
             color: 'success'
         })
-        refreshAffectations()
+        refreshTarifairesLines()
         isStopModalOpen.value = false
     }
 }
 
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
-const table_tarifaires = useTemplateRef('table_tarifaires')
+const table_tarifaires_lines = useTemplateRef('table_tarifaires_lines')
 
-const columnsAffectations: TableColumn<Affectation>[] = [
+const columnsTarifaireLine: TableColumn<TarifaireLine>[] = [
     {
         accessorKey: 'article_id',
         header: 'Article',
@@ -176,7 +176,7 @@ const columnsAffectations: TableColumn<Affectation>[] = [
                         content: {
                             align: 'end'
                         },
-                        items: getRowItemsAffectations(row)
+                        items: getRowItemsTarifairesLines(row)
                     },
                     () =>
                         h(UButton, {
@@ -191,7 +191,7 @@ const columnsAffectations: TableColumn<Affectation>[] = [
     }
 ]
 
-function getRowItemsAffectations(row: Row<Affectation>) {
+function getRowItemsTarifairesLines(row: Row<TarifaireLine>) {
     const items: DropdownMenuItem[] | DropdownMenuItem[][] = [
         {
             type: 'label',
@@ -210,7 +210,7 @@ function getRowItemsAffectations(row: Row<Affectation>) {
         }
     ]
 
-    if (!row.original.end_date) {
+    if (!row.original) {
 
         items.push({
             type: 'separator'
@@ -221,7 +221,7 @@ function getRowItemsAffectations(row: Row<Affectation>) {
             icon: 'i-lucide-trash',
             color: 'error',
             onSelect() {
-                selectedAffectationId.value = row.original.id
+                selectedTarrifaireId.value = row.original.id
                 isStopModalOpen.value = true
             }
         })

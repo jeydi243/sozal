@@ -1,81 +1,81 @@
 <template>
-    <div>
-        <!-- :default-size="25" :min-size="20" :max-size="25" resizable  -->
-        <UDashboardPanel id="inbox-900" :ui-pro="{ body: 'p-0' }">
-            <template #header>
-                <UDashboardNavbar title="Tarifaires">
-                    <template #leading>
-                        <!-- <UDashboardSidebarCollapse /> -->
-                    </template>
 
-                    <template #right>
-                        <div class="flex flex-wrap items-center justify-between gap-1.5">
-                            <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
-                                class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..."
-                                @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+    <UDashboardPanel id="inbox-900" :ui="{ body: 'p-5' }"  as="div">
+        <template #header>
+            <UDashboardNavbar title="Tarifaires">
+                <template #leading>
+                    <!-- <UDashboardSidebarCollapse /> -->
+                </template>
 
-                            <div class="flex flex-wrap items-center gap-1.5">
+                <template #right>
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
+                            class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..."
+                            @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
 
-                                <USelect v-model="statusFilter" :items="[
-                                    { label: 'All', value: 'all' },
-                                    { label: 'Subscribed', value: 'subscribed' },
-                                    { label: 'Actif', value: 'actif' },
-                                    { label: 'Bounced', value: 'bounced' }
-                                ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                    placeholder="Filter status" class="min-w-28" />
-                                <UDropdownMenu :items="table?.tableApi
-                                    ?.getAllColumns()
-                                    .filter((column) => column.getCanHide())
-                                    .map((column) => ({
-                                        label: upperFirst(column.id),
-                                        type: 'checkbox' as const,
-                                        checked: column.getIsVisible(),
-                                        onUpdateChecked(checked: boolean) {
-                                            table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                                        },
-                                        onSelect(e?: Event) {
-                                            e?.preventDefault()
-                                        }
-                                    }))
-                                    " :content="{ align: 'end' }">
-                                    <UButton label="Display" color="neutral" variant="outline"
-                                        trailing-icon="i-lucide-settings-2" />
-                                </UDropdownMenu>
-                            </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+
+                            <USelect v-model="statusFilter" :items="[
+                                { label: 'All', value: 'all' },
+                                { label: 'Subscribed', value: 'subscribed' },
+                                { label: 'Actif', value: 'actif' },
+                                { label: 'Bounced', value: 'bounced' }
+                            ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+                                placeholder="Filter status" class="min-w-28" />
+                            <UDropdownMenu :items="table?.tableApi
+                                ?.getAllColumns()
+                                .filter((column) => column.getCanHide())
+                                .map((column) => ({
+                                    label: upperFirst(column.id),
+                                    type: 'checkbox' as const,
+                                    checked: column.getIsVisible(),
+                                    onUpdateChecked(checked: boolean) {
+                                        table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                                    },
+                                    onSelect(e?: Event) {
+                                        e?.preventDefault()
+                                    }
+                                }))
+                                " :content="{ align: 'end' }">
+                                <UButton label="Display" color="neutral" variant="outline"
+                                    trailing-icon="i-lucide-settings-2" />
+                            </UDropdownMenu>
                         </div>
-                        <TarifairesAddModal @tarifaire-added="refreshTarifaires" />
-                    </template>
-                </UDashboardNavbar>
-            </template>
-            <template #body>
-                <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                    v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun tarifaire trouvé"
-                    :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Tarifaires || []"
-                    :columns="columns" :loading="status === 'pending'" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
-
-                <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
-                    <div class="text-sm text-(--ui-text-muted)">
-                        {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-                        {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
                     </div>
+                    <TarifairesAddModal @tarifaire-added="refreshTarifaires" />
+                </template>
+            </UDashboardNavbar>
+        </template>
+        <template #body>
+            <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+                v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun tarifaire trouvé"
+                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Tarifaires || []" :columns="columns"
+                :loading="status === 'pending'" :ui="{
+                    base: 'table-fixed border-separate border-spacing-0',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    td: 'border-b border-(--ui-border) p-2'
+                }" />
 
-                    <div class="flex items-center gap-1.5">
-                        <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-                            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-                            :total="table?.tableApi?.getFilteredRowModel().rows.length"
-                            @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
-                    </div>
+            <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+                <div class="text-sm text-(--ui-text-muted)">
+                    {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
+                    {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
                 </div>
-            </template>
-        </UDashboardPanel>
-        <TarifairesDetails :tarifaire="selectedTarifaire" v-model:open="openDetailsTarifaire" />
-    </div>
+
+                <div class="flex items-center gap-1.5">
+                    <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+                        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+                        :total="table?.tableApi?.getFilteredRowModel().rows.length"
+                        @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
+                </div>
+            </div>
+            <TarifairesDetails :tarifaire="selectedTarifaire" v-model:open="openDetailsTarifaire" />
+
+        </template>
+    </UDashboardPanel>
+
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -232,10 +232,6 @@ function getRowItems(row: Row<Tarifaire>) {
             onSelect() {
                 openDetailsTarifaire.value = !openDetailsTarifaire.value
             }
-        },
-        {
-            label: 'View customer payments',
-            icon: 'i-lucide-wallet'
         },
         {
             type: 'separator'

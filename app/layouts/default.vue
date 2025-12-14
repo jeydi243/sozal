@@ -20,9 +20,9 @@ const links = [[{
     open.value = false
   }
 }, {
-  label: 'Customers',
+  label: 'Patients',
   icon: 'i-lucide-users',
-  to: '/customers',
+  to: '/patients',
   onSelect: () => {
     open.value = false
   }
