@@ -19,14 +19,24 @@ const links = [[{
   onSelect: () => {
     open.value = false
   }
-}, {
+}, 
+{
   label: 'Patients',
   icon: 'i-lucide-users',
   to: '/patients',
   onSelect: () => {
     open.value = false
   }
-}, {
+}, 
+{
+  label: 'Partenaires',
+  icon: 'carbon:enterprise',
+  to: '/partenaires',
+  onSelect: () => {
+    open.value = false
+  }
+}, 
+{
   label: 'Parametres',
   to: '/settings',
   icon: 'i-lucide-settings',

@@ -12,7 +12,5 @@ useHead({
 </script>
 
 <template>
-  <div>
     <WaitingDefault />
-  </div>
 </template>

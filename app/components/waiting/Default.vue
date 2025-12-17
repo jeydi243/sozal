@@ -22,7 +22,7 @@ const period = ref<Period>('daily')
 </script>
 
 <template>
-  <UDashboardPanel id="home">
+  <UDashboardPanel id="home" as="div" :ui="{ body: 'p-5'}">
     <template #header>
       <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
         <template #leading>
