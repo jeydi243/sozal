@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormErrorEvent, FormSubmitEvent } from '@nuxt/ui'
+import type { FormErrorEvent, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import { CalendarDate, getLocalTimeZone } from '@internationalized/date'
+import type { Lookup } from '~/types'
 
 const schema = z.object({
   nom: z.string().min(2, 'Too short'),
@@ -19,7 +20,16 @@ const state = reactive<Partial<Schema>>({
   description: undefined,
   lookup_id: undefined
 })
-const inputDateRef = useTemplateRef('inputDateRef')
+
+const { data: lookups } = await useAsyncData<Lookup[]>('lookups-org', async () => {
+  const { data } = await supabase.from('lookups').select('id, name, description').eq('name', 'Entreprise')
+  return (data || []) as unknown as Lookup[]
+})
+
+const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
+  label: lookup?.name,
+  id: String(lookup?.id)
+})) || [])
 
 const maxDate = new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())
 const toCalendarDate = (date: Date) => {
@@ -61,6 +71,9 @@ function onError(error: FormErrorEvent) {
         </UFormField>
         <UFormField label="Description" placeholder="Description de l'entreprise" name="description">
           <UTextarea v-model="state.description" class="w-full" />
+        </UFormField>
+        <UFormField label="Type d'organisation" name="lookup_id">
+          <USelectMenu v-model="state.lookup_id" value-key="id" :items="items" class="w-full" />
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />

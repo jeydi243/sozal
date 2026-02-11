@@ -74,7 +74,7 @@ export interface Lookup {
 
 export interface Organisation {
   id: string
-  name: string
+  nom: string
   description?: string
   code?: string
   lookup_id?: string
