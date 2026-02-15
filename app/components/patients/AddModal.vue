@@ -67,7 +67,7 @@ function onError(error: FormErrorEvent) {
 
 <template>
   <UModal v-model:open="open" title="New patient" description="Add a new patient to the database">
-    <UButton label="New patient" icon="i-lucide-plus" />
+    <UButton label="Nouveau patient" icon="i-lucide-plus" />
 
     <template #body>
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">

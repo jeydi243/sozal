@@ -128,6 +128,7 @@ export interface TarifaireLine {
 export interface Patient {
   id: number
   nom: string
+  code: string
   prenom: string
   postnom: string
   sexe: string
@@ -135,4 +136,11 @@ export interface Patient {
   status: string,
   mrn: string,
   avatar: string
+}
+export interface PatientOrg {
+  id: number
+  patient_id: Patient
+  organisation_id: string
+  date_debut: string
+  date_fin: string
 }

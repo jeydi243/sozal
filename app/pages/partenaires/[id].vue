@@ -15,11 +15,11 @@
             </UDashboardNavbar>
         </template>
         <template #body>
-            This is details page of {{ route.params.id }}
-            <pre>{{ patient }}</pre>
-            <UTabs color="primary" variant="link"  :items="items" class="w-full">
+            <pre>{{ partenaire }}</pre>
+            <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
                 <template #content="{ item }">
-                    <pre>{{ item.value }}</pre> 
+                    <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisation="partenaire" />
+                    <PartenairesFactures v-else :organisation="route.params.id" />
                 </template>
             </UTabs>
         </template>
@@ -33,19 +33,24 @@ definePageMeta({
     name: 'partenaire-id',
 
 })
+useHead({
+    title: 'Partenaire',
+})
+
 const items = ref<TabsItem[]>([
     {
         label: 'Patients',
         icon: 'i-lucide-user',
-        value: 22
+        value: 'partenaire'
     },
     {
         label: 'Factures',
-        icon: 'i-lucide-lock'
+        icon: 'i-lucide-lock',
+        value: 'facture'
     }
 ])
 const route = useRoute()
-const { data: patient, error } = await useAsyncData('patient-' + route.params.id, async () => {
+const { data: partenaire, error } = await useAsyncData('partenaire-' + route.params.id, async () => {
     const client = useSupabaseClient()
     const { data, error } = await client
         .from('organisations')
