@@ -139,7 +139,7 @@ export interface Patient {
 }
 export interface PatientOrg {
   id: number
-  patient_id: Patient
+  patients: Patient
   organisation_id: string
   date_debut: string
   date_fin: string

@@ -1,23 +1,37 @@
 <template>
-    <div class="flex flex-row justify-between">
-        <UButton label="Refresh" icon="iconamoon:synchronize-light" @click="refreshPatients()" />
-        <div>
-            <PartenairesAttachPatientOrg @patient-added="refreshPatients()" class="mr-1"
-                :organisation="props.organisation" />
-            <PatientsAddModal />
+    <div class="p-2">
+        <div class="flex flex-row justify-between mb-2">
+            <div>
+                <UInput v-model="searchPatient" placeholder="Rechercher" />
+                <UButton icon="i-lucide-search" @click="refreshPatients()" class="mr-1" />
+
+            </div>
+            <div>
+                <UButton icon="iconamoon:synchronize-light" @click="refreshPatients()" class="mr-1" />
+                <PartenairesAttachPatientOrg @patient-added="refreshPatients()" class="mr-1"
+                    :organisationId="props.organisationId" />
+                <PatientsAddModal />
+            </div>
         </div>
+
+        <UTable ref="table-partenaires-patients" v-model:column-filters="columnFilters"
+            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+            v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
+            :data="Patients" :columns="columns" empty="Aucun patients attachés à cette organisation !" :ui="{
+                base: 'table-fixed border-separate border-spacing-0',
+                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                td: 'border-b border-(--ui-border) '
+            }" />
+        <USlideover side="right" inset title="Slideover with inset">
+            <UButton label="Open" color="neutral" variant="subtle" />
+
+            <template #body>
+                <Placeholder class="min-w-96 min-h-96 size-full" />
+            </template>
+        </USlideover>
     </div>
-    {{ props.organisation.id }}
-    <UTable ref="table-partenaires-patients" v-model:column-filters="columnFilters"
-        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-        v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-        :data="Patients || []" :columns="columns" :ui="{
-            base: 'table-fixed border-separate border-spacing-0',
-            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-            tbody: '[&>tr]:last:[&>td]:border-b-0',
-            th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-            td: 'border-b border-(--ui-border) p-2'
-        }" />
 </template>
 <script setup lang="ts">
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
@@ -25,19 +39,42 @@ import type { TableColumn } from '@nuxt/ui'
 import type { Patient, PatientOrg } from '~/types'
 
 const props = defineProps({
-    organisation: {
-        type: Object,
+    organisationId: {
+        type: String,
         required: true
     }
 })
+const searchPatient = ref('')
 const supabase = useSupabaseClient()
-const columnFilters = ref([{
-    id: 'nom',
-    value: ''
-}])
 const toast = useToast()
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
+
+const { data: Patients, error, refresh: refreshPatients, status } = await useAsyncData(
+    () => `patients-by-partenaires-${props.organisationId}`,
+    async () => {
+        console.log('Fetching patients for organisation:', props.organisationId)
+        const { data, error } = await supabase
+            .from('patients_organisations')
+            .select('id, patients!inner(*)!')
+            .eq('organisation_id', props.organisationId)
+
+        if (error) {
+            console.error('Supabase error fetching patients:', error)
+            throw error
+        }
+        console.log('Fetched data:', data)
+        return data
+    },
+    {
+        watch: [() => props.organisationId]
+    }
+)
+
+const columnFilters = ref([{
+    id: 'patients_nom',
+    value: ''
+}])
 const selectedPatient = ref<Patient | null>(null)
 const openDetailsPatient = ref(false)
 const paginationOptions = {
@@ -56,20 +93,6 @@ function getRowItems(row: Patient) {
             label: 'Actions'
         },
         {
-            label: 'Copie ID Article',
-            icon: 'i-lucide-copy',
-            onSelect() {
-                navigator.clipboard.writeText(row.id.toString())
-                toast.add({
-                    title: 'Copied to clipboard',
-                    description: 'Article ID copied to clipboard'
-                })
-            }
-        },
-        {
-            type: 'separator'
-        },
-        {
             label: 'Details',
             icon: 'material-symbols:open-in-full-rounded',
             onSelect() {
@@ -77,20 +100,37 @@ function getRowItems(row: Patient) {
             }
         },
         {
-            label: 'View customer payments',
+            label: 'Voir les paiements du client',
             icon: 'i-lucide-wallet'
+        },
+        {
+            label: 'Voir la couverture santé',
+            icon: 'mage:health-circle-fill'
         },
         {
             type: 'separator'
         },
         {
-            label: 'Delete article',
+            label: "Copier l'ID",
+            icon: 'i-lucide-copy',
+            onSelect() {
+                navigator.clipboard.writeText(row.id.toString())
+                toast.add({
+                    title: 'Copié dans le presse papier',
+                })
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: "Retirer ce patient de l'organisation",
             icon: 'i-lucide-trash',
             color: 'error',
             onSelect() {
                 toast.add({
-                    title: 'Article deleted',
-                    description: 'The article has been deleted.'
+                    title: 'Patient retiré',
+                    description: "Ce patient a été retiré de l'organisation "
                 })
             }
         }
@@ -100,49 +140,75 @@ const columns: TableColumn<PatientOrg>[] = [
     {
         id: 'details',
         header: 'Details',
+
         cell: ({ row }) => h(UButton, {
             color: 'primary',
             variant: 'ghost',
             icon: 'i-lucide-eye',
             onClick: () => {
-                selectedPatient.value = row.original.patient_id;
+                selectedPatient.value = row.original.patients;
                 openDetailsPatient.value = !openDetailsPatient.value;
                 // console.log(row.original, openDetailsUser.value)
             }
         }),
     },
     {
-        accessorKey: 'nom',
-        header: 'Nom',
+        accessorKey: 'patients.nom',
+        id: 'patients_nom',
+        // header: 'Nom',
+        header: ({ column }) => {
+            return h('div', { class: 'text-left px-0' }, 'Nom')
+        },
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
-
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patient_id?.nom),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.nom),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'code',
-        header: 'Code',
+        accessorKey: 'patients.postnom',
+        id: 'patients_postnom',
+        header: 'Postnom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
-
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient_id.code),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.postnom),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'description',
-        header: 'Description',
+        accessorKey: 'patients.prenom',
+        id: 'patients_prenom',
+        header: 'Prenom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
-
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient_id.nom),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.prenom),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'patients.mrn',
+        header: 'MRN',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patients.mrn),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'patients.sexe',
+        header: 'Sexe',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patients.sexe),
                 ])
             ])
         }
@@ -160,7 +226,7 @@ const columns: TableColumn<PatientOrg>[] = [
                         content: {
                             align: 'end'
                         },
-                        items: getRowItems(row.original.patient_id)
+                        items: getRowItems(row.original.patients)
                     },
                     () =>
                         h(UButton, {
@@ -174,13 +240,7 @@ const columns: TableColumn<PatientOrg>[] = [
         }
     }
 ]
-const { data: Patients, error, refresh: refreshPatients } = await useAsyncData('patients-by-partenaires', async () => {
-    const { data, error } = await supabase.from('patients_organisations').select('id, patients!inner(*)!').eq('organisation_id', props.organisation.id);
-    if (error) {
-        throw error;
-    }
-    return data;
-});
+
 </script>
 
 <style></style>

@@ -18,7 +18,7 @@
             <pre>{{ partenaire }}</pre>
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
                 <template #content="{ item }">
-                    <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisation="partenaire" />
+                    <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisationId="route.params.id as string" />
                     <PartenairesFactures v-else :organisation="route.params.id" />
                 </template>
             </UTabs>

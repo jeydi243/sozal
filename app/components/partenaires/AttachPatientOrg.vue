@@ -14,23 +14,24 @@ const open = ref(false)
 const emit = defineEmits(['patient-added'])
 const supabase = useSupabaseClient()
 type Schema = z.output<typeof schema>
-    const inputDateDebutRef = useTemplateRef('inputDateDebutRef')
+const inputDateDebutRef = useTemplateRef('inputDateDebutRef')
+
 const dateDebutModel = computed({
-  get: () => state.date_debut ? toCalendarDate(state.date_debut) : undefined,
-  set: (value: CalendarDate | null) => {
-    state.date_debut = value ? value.toDate(getLocalTimeZone()) : undefined
-  }
+    get: () => state.date_debut ? toCalendarDate(state.date_debut) : undefined,
+    set: (value: CalendarDate | null) => {
+        state.date_debut = value ? value.toDate(getLocalTimeZone()) : undefined
+    }
 })
 const props = defineProps({
-    organisation: {
-        type: Object,
+    organisationId: {
+        type: String,
         required: true
     }
 })
 
 const state = reactive<Partial<Schema>>({
     patient_id: undefined,
-    organisation_id: props.organisation?.id,
+    organisation_id: props.organisationId,
 })
 
 const { data: orga } = await useAsyncData<Organisation[]>('organisations-items', async () => {
@@ -82,16 +83,17 @@ function onError(error: FormErrorEvent) {
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Attacher un patient" description="Attacher un patient a cette entreprise">
+    <UModal v-model:open="open" title="Attacher un patient" description="Attacher un patient à cette entreprise">
         <UButton label="Attacher un nouveau patient" icon="material-symbols:deployed-code-account-rounded" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
+                <UFormField label="Organisation" name="organisation_id">
+                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="items" class="w-full"
+                        disabled />
+                </UFormField>
                 <UFormField label="Patient" name="patient_id">
                     <USelectMenu v-model="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
-                </UFormField>
-                <UFormField label="Organisation" name="organisation_id">
-                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="items" class="w-full" disabled  />
                 </UFormField>
                 <UFormField label="Date de debut" placeholder="08/12/2025" name="date_debut">
                     <UInputDate v-model="dateDebutModel" class="w-full" :max-date="maxDate">
