@@ -19,6 +19,7 @@
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
                 <template #content="{ item }">
                     <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisationId="route.params.id as string" />
+                    <PartenairesMutuelles v-else-if="item.value == 'mutuelle' && partenaire" :organisationId="route.params.id as string" />
                     <PartenairesFactures v-else :organisation="route.params.id" />
                 </template>
             </UTabs>
@@ -47,6 +48,11 @@ const items = ref<TabsItem[]>([
         label: 'Factures',
         icon: 'i-lucide-lock',
         value: 'facture'
+    },
+    {
+        label: 'Mutuelles',
+        icon: 'ic:twotone-health-and-safety',
+        value: 'mutuelle'
     }
 ])
 const route = useRoute()

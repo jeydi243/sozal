@@ -1,6 +1,6 @@
 <template>
     <USlideover description="Details des affectations aux organisations"
-        :title="`${props.user?.first_name} ${props.user?.last_name}`" :ui="{ content: 'max-w-3xl' }"
+        :description="`${props.user?.first_name} ${props.user?.last_name}`" :ui="{ content: 'max-w-3xl' }"
         v-model:open="isOpenSlideOver">
 
 

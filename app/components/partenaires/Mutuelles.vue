@@ -2,37 +2,34 @@
     <div class="p-2">
         <div class="flex flex-row justify-between mb-2">
             <div class="flex align-center">
-                <UInput v-model="searchPatient" placeholder="Rechercher" />
-                <UButton icon="i-lucide-search" class="mr-1 ml-2" />
+                <UInput v-model="searchMutuelle" placeholder="Rechercher" />
+                <UButton icon="i-lucide-search" @click="refreshMutuelles()" class="mr-1 ml-2" />
 
             </div>
             <div>
-                <UButton icon="iconamoon:synchronize-light" @click="refreshPatients()" class="mr-1" />
-                <KeepAlive max="10">
-                    <PartenairesAttachPatientOrg @patient-added="refreshPatients()" class="mr-1"
-                        :organisationId="props.organisationId" />
-                </KeepAlive>
-                <PatientsAddModal />
+                <UButton icon="iconamoon:synchronize-light" @click="refreshMutuelles()" class="mr-1" />
+                <PartenairesAddMutuelleModal />
             </div>
         </div>
 
-        <UTable ref="table-partenaires-patients" v-model:column-filters="columnFilters"
+        <UTable ref="table-partenaires-mutuelles" v-model:column-filters="columnFilters"
             v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
             v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-            :data="Patients" :columns="columns" empty="Aucun patients attachés à cette organisation !" :ui="{
+            :data="Mutuelles" :columns="columns" empty="Aucune mutuelles attachés à cette organisation !" :ui="{
                 base: 'table-fixed border-separate border-spacing-0',
                 thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                 tbody: '[&>tr]:last:[&>td]:border-b-0',
                 th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                 td: 'border-b border-(--ui-border) '
             }" />
-        <PartenairesPatientDetails :patient="selectedPatient" :open="openDetailsPatient" @update:open="openDetailsPatient = $event" />
+        <PartenairesMutuelleDetails :mutuelle="selectedMutuelle" :open="openDetailsMutuelle"
+            @update:open="openDetailsMutuelle = $event" />
     </div>
 </template>
 <script setup lang="ts">
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
-import type { Patient, PatientOrg } from '~/types'
+import type { Mutuelle } from '~/types'
 
 const props = defineProps({
     organisationId: {
@@ -40,23 +37,23 @@ const props = defineProps({
         required: true
     }
 })
-const searchPatient = ref('')
+const searchMutuelle = ref('')
 const supabase = useSupabaseClient()
 const toast = useToast()
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
-const { data: Patients, error, refresh: refreshPatients, status } = await useAsyncData(
-    () => `patients-by-partenaires-${props.organisationId}`,
+const { data: Mutuelles, error, refresh: refreshMutuelles, status } = await useAsyncData(
+    () => `mutuelles-by-partenaires-${props.organisationId}`,
     async () => {
-        console.log('Fetching patients for organisation:', props.organisationId)
+        console.log('Fetching mutuelles for organisation:', props.organisationId)
         const { data, error } = await supabase
-            .from('patients_organisations')
-            .select('id, patients!inner(*)!')
+            .from('mutuelles')
+            .select('*')
             .eq('organisation_id', props.organisationId)
 
         if (error) {
-            console.error('Supabase error fetching patients:', error)
+            console.error('Supabase error fetching mutuelles:', error)
             throw error
         }
         console.log('Fetched data:', data)
@@ -68,11 +65,11 @@ const { data: Patients, error, refresh: refreshPatients, status } = await useAsy
 )
 
 const columnFilters = ref([{
-    id: 'patients_nom',
+    id: 'mutuelles_nom',
     value: ''
 }])
-const selectedPatient = ref<Patient | null>(null)
-const openDetailsPatient = ref(false)
+const selectedMutuelle = ref<Mutuelle | null>(null)
+const openDetailsMutuelle = ref(false)
 const paginationOptions = {
     getPaginationRowModel: getPaginationRowModel()
 }
@@ -82,7 +79,7 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-function getRowItems(row: Patient) {
+function getRowItems(row: Mutuelle) {
     return [
         {
             type: 'label',
@@ -92,8 +89,8 @@ function getRowItems(row: Patient) {
             label: 'Details',
             icon: 'material-symbols:open-in-full-rounded',
             onSelect() {
-                openDetailsPatient.value = !openDetailsPatient.value
-                selectedPatient.value = row
+                openDetailsMutuelle.value = !openDetailsMutuelle.value
+                selectedMutuelle.value = row
             }
         },
         {
@@ -121,19 +118,19 @@ function getRowItems(row: Patient) {
             type: 'separator'
         },
         {
-            label: "Retirer ce patient de l'organisation",
+            label: "Retirer ce mutuelle de l'organisation",
             icon: 'i-lucide-trash',
             color: 'error',
             onSelect() {
                 toast.add({
-                    title: 'Patient retiré',
-                    description: "Ce patient a été retiré de l'organisation "
+                    title: 'Mutuelle retiré',
+                    description: "Ce mutuelle a été retiré de l'organisation "
                 })
             }
         }
     ];
 }
-const columns: TableColumn<PatientOrg>[] = [
+const columns: TableColumn<Mutuelle>[] = [
     {
         id: 'details',
         header: 'Details',
@@ -143,15 +140,15 @@ const columns: TableColumn<PatientOrg>[] = [
             variant: 'ghost',
             icon: 'i-lucide-eye',
             onClick: () => {
-                selectedPatient.value = row.original.patients;
-                openDetailsPatient.value = !openDetailsPatient.value;
+                selectedMutuelle.value = row.original;
+                openDetailsMutuelle.value = !openDetailsMutuelle.value;
                 // console.log(row.original, openDetailsUser.value)
             }
         }),
     },
     {
-        accessorKey: 'patients.nom',
-        id: 'patients_nom',
+        accessorKey: 'nom',
+        id: 'Nom',
         // header: 'Nom',
         header: ({ column }) => {
             return h('div', { class: 'text-left px-0' }, 'Nom')
@@ -159,57 +156,48 @@ const columns: TableColumn<PatientOrg>[] = [
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.nom),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.nom),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'patients.postnom',
-        id: 'patients_postnom',
-        header: 'Postnom',
+        accessorKey: 'code',
+        id: 'code',
+        header: 'Code',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.postnom),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.code),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'patients.prenom',
-        id: 'patients_prenom',
-        header: 'Prenom',
+        accessorKey: 'description',
+        id: 'description',
+        header: 'Description',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.patients?.prenom),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.description),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'patients.mrn',
-        header: 'MRN',
+        accessorKey: 'statut',
+        id: 'statut',
+        header: 'Statut',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patients.mrn),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.statut),
                 ])
             ])
         }
     },
-    {
-        accessorKey: 'patients.sexe',
-        header: 'Sexe',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patients.sexe),
-                ])
-            ])
-        }
-    },
+
     {
         header: () => h('div', { class: 'text-center' }, 'Actions'),
         id: 'actions',
@@ -223,7 +211,7 @@ const columns: TableColumn<PatientOrg>[] = [
                         content: {
                             align: 'end'
                         },
-                        items: getRowItems(row.original.patients)
+                        items: getRowItems(row.original)
                     },
                     () =>
                         h(UButton, {

@@ -144,3 +144,22 @@ export interface PatientOrg {
   date_debut: string
   date_fin: string
 }
+
+export interface Mutuelle {
+  id: string
+  nom: string
+  code: string
+  description: string
+  lookup_id: string
+  statut:string
+  organisation_id: string
+}
+export interface PatientMutuelle {
+  id: string
+  mutuelle: Mutuelle
+  patient: Patient
+  date_debut: string
+  date_fin?: string
+  statut:string
+  organisation: Organisation
+}
