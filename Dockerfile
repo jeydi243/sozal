@@ -1,25 +1,33 @@
-FROM oven/bun:1.2.2
+# ─── Stage 1: Build ──────────────────────────────────────────────────────────
+FROM oven/bun:1.3.8 AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copie des fichiers de dépendances en premier pour profiter du cache Docker
+COPY package*.json bun.lockb* ./
 
-# Copy the rest of the application code
+# Installation des dépendances
+RUN bun install --frozen-lockfile
+
+# Copie du code source
 COPY . .
 
-# Install dependencies with bun
-RUN bun install
+# Build de l'application Nuxt (génère .output/)
+RUN bun run build
 
-# Build the application
-# RUN bun run build
+# ─── Stage 2: Production ─────────────────────────────────────────────────────
+FROM oven/bun:1.3.8-slim
 
-# Expose the port the app runs on
-EXPOSE 9000
+WORKDIR /app
 
+# Copie uniquement le résultat du build depuis le stage builder
+COPY --from=builder /app/.output ./output
+
+ENV NODE_ENV=production
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=9000
 
-# Start the application
-CMD ["bun", "run", "dev"]
+EXPOSE 9000
+
+# Démarrage avec le serveur de production Nitro
+CMD ["bun", "run", "./output/server/index.mjs"]

@@ -61,8 +61,8 @@ function onError(error: FormErrorEvent) {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="New mutuelle" description="Add a new mutuelle to the database">
-    <UButton label="New mutuelle" icon="i-lucide-plus" />
+  <UModal v-model:open="open" title="Nouvelle mutuelle" description="Ajouter une nouvelle mutuelle">
+    <UButton label="Nouvelle mutuelle" icon="i-lucide-plus" />
 
     <template #body>
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
