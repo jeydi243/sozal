@@ -185,3 +185,10 @@ export interface RendezVous {
   heure: string
   statut: string
 }
+
+export interface Medecin {
+    id: string | number;
+    nom: string;
+    prenom: string;
+    postnom: string;
+}
