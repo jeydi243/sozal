@@ -176,3 +176,12 @@ export interface PatientListeAttente {
   avatar: string
   statut:string
 }
+
+export interface RendezVous {
+  id: string
+  patient: Patient
+  organisation: Organisation
+  date: string
+  heure: string
+  statut: string
+}

@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Organisation, PatientListeAttente, User } from '~/types'
+import type { PatientListeAttente } from '~/types'
 
 const table = useTemplateRef('table')
 const toast = useToast()
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const supabase = useSupabaseClient()
-const UCheckbox = resolveComponent('UCheckbox')
 const rowSelection = ref()
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const columnVisibility = ref()
@@ -28,7 +26,7 @@ const organisations = [
         value: 'organisation-2'
     }
 ]
-function getRowItems(row: Row<Organisation>) {
+function getRowItems(row: Row<PatientListeAttente>) {
     return [
         {
             type: 'label',
@@ -209,8 +207,10 @@ const selectedOrganisation = ref(organisations[0])
 
             <UDashboardToolbar>
                 <template #left>
-                    <!-- Select in which organisation -->
                     <USelectMenu :items="organisations" v-model="selectedOrganisation" />
+                </template>
+                <template #right>
+                    <UButton label="Ajouter une consultation" icon="i-lucide-plus" color="primary" variant="solid" />
                 </template>
             </UDashboardToolbar>
         </template>

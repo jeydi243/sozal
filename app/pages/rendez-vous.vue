@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { PatientListeAttente } from '~/types'
+import type { RendezVous } from '~/types'
 
 const table = useTemplateRef('table')
 const toast = useToast()
@@ -28,14 +28,14 @@ const organisations = [
         value: 'organisation-2'
     }
 ]
-function getRowItems(row: Row<PatientListeAttente>) {
+function getRowItems(row: Row<RendezVous>) {
     return [
         {
             type: 'label',
             label: 'Actions'
         },
         {
-            label: 'Copy partenaire ID',
+            label: 'Copier le rendez-vous ID',
             icon: 'i-lucide-copy',
             onSelect() {
                 navigator.clipboard.writeText(row.original.id.toString())
@@ -49,23 +49,23 @@ function getRowItems(row: Row<PatientListeAttente>) {
             type: 'separator'
         },
         {
-            label: 'View partenaire details',
+            label: 'Voir les details du patient',
             icon: 'i-lucide-list'
         },
         {
-            label: 'View partenaire payments',
+            label: 'Voir les paiements du patient',
             icon: 'i-lucide-wallet'
         },
         {
             type: 'separator'
         },
         {
-            label: 'Delete partenaire',
+            label: 'Supprimer le rendez-vous',
             icon: 'i-lucide-trash',
             color: 'error',
             onSelect() {
                 toast.add({
-                    title: 'Patient deleted',
+                    title: 'Rendez-vous supprimé',
                     description: 'The partenaire has been deleted.'
                 })
             }
@@ -73,7 +73,7 @@ function getRowItems(row: Row<PatientListeAttente>) {
     ]
 }
 
-const columns: TableColumn<PatientListeAttente>[] = [
+const columns: TableColumn<RendezVous>[] = [
     {
         id: 'Actions',
         header: 'Actions',
@@ -89,12 +89,8 @@ const columns: TableColumn<PatientListeAttente>[] = [
         header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
-                // h(UAvatar, {
-                //     ...row.original.avatar,
-                //     size: 'lg'
-                // }),
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom + ' ' + row.original.postnom + ' ' + row.original.prenom)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.nom + ' ' + row.original.patient?.postnom + ' ' + row.original.patient?.prenom)
                 ])
             ])
         }
@@ -105,7 +101,7 @@ const columns: TableColumn<PatientListeAttente>[] = [
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.mrn)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.mrn)
                 ])
             ])
         }
@@ -117,7 +113,7 @@ const columns: TableColumn<PatientListeAttente>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_naissance)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.date_naissance)
                 ])
             ])
         }
@@ -129,7 +125,7 @@ const columns: TableColumn<PatientListeAttente>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.sexe)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.sexe)
                 ])
             ])
         }
@@ -182,7 +178,7 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const { data: listePatientsAttente, error, refresh: refreshListePatientsAttente } = await useAsyncData('organisations', async () => {
+const { data: ListeRendezVous, error, refresh: refreshListeRendezVous } = await useAsyncData('organisations', async () => {
     const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.name', 'Entreprise')
     if (error) {
         throw error;
@@ -205,8 +201,12 @@ const selectedOrganisation = ref(organisations[0])
 
             <UDashboardToolbar>
                 <template #left>
-                    <!-- Select in which organisation -->
                     <USelectMenu :items="organisations" v-model="selectedOrganisation" />
+                </template>
+                <template #right>
+                    <UButton label="Ajouter un rendez-vous" icon="lucide:calendar-plus" color="primary"
+                        variant="solid" />
+                        <RdvAddModal />
                 </template>
             </UDashboardToolbar>
         </template>
@@ -215,12 +215,12 @@ const selectedOrganisation = ref(organisations[0])
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                     getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0" :data="listePatientsAttente || []" :columns="columns" :ui="{
+                }" class="shrink-0" :data="ListeRendezVous || []" :columns="columns" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) py-0 m-1'
+                    td: 'border-b border-(--ui-border) py-2 m-1'
                 }" />
         </template>
     </UDashboardPanel>
