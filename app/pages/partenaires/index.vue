@@ -268,7 +268,7 @@ const pagination = ref({
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border)'
+                    td: 'border-b border-(--ui-border) py-0 m-1'
                 }" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">

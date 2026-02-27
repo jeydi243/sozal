@@ -19,7 +19,7 @@ const links = [[{
   onSelect: () => {
     open.value = false
   }
-}, 
+},
 {
   label: 'Patients',
   icon: 'i-lucide-users',
@@ -27,7 +27,23 @@ const links = [[{
   onSelect: () => {
     open.value = false
   }
-}, 
+},
+{
+  label: 'Consultations',
+  icon: 'i-lucide-users',
+  to: '/consultations',
+  onSelect: () => {
+    open.value = false
+  }
+},
+{
+  label: 'Salle d\'examen',
+  icon: 'i-lucide-users',
+  to: '/salle-examen',
+  onSelect: () => {
+    open.value = false
+  }
+},
 {
   label: 'Partenaires',
   icon: 'carbon:enterprise',
@@ -35,7 +51,7 @@ const links = [[{
   onSelect: () => {
     open.value = false
   }
-}, 
+},
 {
   label: 'Parametres',
   to: '/settings',
@@ -129,24 +145,6 @@ onMounted(async () => {
   if (cookie.value === 'accepted') {
     return
   }
-
-  // toast.add({
-  //   title: 'We use first-party cookies to enhance your experience on our website.',
-  //   duration: 0,
-  //   close: false,
-  //   actions: [{
-  //     label: 'Accept',
-  //     color: 'neutral',
-  //     variant: 'outline',
-  //     onClick: () => {
-  //       cookie.value = 'accepted'
-  //     }
-  //   }, {
-  //     label: 'Opt out',
-  //     color: 'neutral',
-  //     variant: 'ghost'
-  //   }]
-  // })
 })
 </script>
 
@@ -155,7 +153,7 @@ onMounted(async () => {
   <UDashboardGroup as="div">
     <UDashboardSearch :groups="groups" />
 
-    <UDashboardSidebar v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
+    <UDashboardSidebar :min-size="20" v-model:open="open" collapsible resizable class="bg-(--ui-bg-elevated)/25"
       :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
       <template #header="{ collapsed }">
         <TeamsMenu :collapsed="collapsed" />

@@ -163,3 +163,16 @@ export interface PatientMutuelle {
   statut:string
   organisation: Organisation
 }
+
+export interface PatientListeAttente {
+  id: string
+  nom: string
+  prenom: string
+  postnom: string
+  sexe: string
+  date_naissance: string
+  status: string
+  mrn: string
+  avatar: string
+  statut:string
+}

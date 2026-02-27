@@ -1,5 +1,5 @@
 <template>
-    <UDashboardPanel id="patient-detail" as="div" :ui="{ body: 'p-5' }">
+    <UDashboardPanel id="partenaire-detail" as="div" :ui="{ body: 'p-4' }">
         <template #header>
             <UDashboardNavbar>
                 <template #leading>
@@ -16,6 +16,31 @@
         </template>
         <template #body>
             <pre>{{ partenaire }}</pre>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="bg-red-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
+                    <p>Nom</p>
+                    <p>{{ partenaire?.nom }}</p>
+                </div>
+                <div class="bg-teal-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
+                   <h4>Nbre Patients</h4>
+                   <p>10</p>
+                </div>
+                <div class="bg-red-300 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
+                    <h4>Nbre Mutuelles</h4>
+                    <p>10</p>
+                </div>
+                <div class="bg-blue-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
+                    <h4>Nbre Factures</h4>
+                    <p>10</p>
+                </div>
+                <div class="bg-green-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
+                    <h4>Nbre Paiements</h4>
+                    <p>10</p>
+                </div>
+                <div class="bg-purple-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4"></div>
+                <div class="bg-purple-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4"></div>
+                <div class="bg-purple-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4"></div>
+            </div>
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
                 <template #content="{ item }">
                     <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisationId="route.params.id as string" />
