@@ -45,6 +45,14 @@ const links = [[{
   }
 },
 {
+  label: 'Rendez-vous',
+  icon: 'i-lucide-calendar',
+  to: '/rendez-vous',
+  onSelect: () => {
+    open.value = false
+  }
+},
+{
   label: 'Partenaires',
   icon: 'carbon:enterprise',
   to: '/partenaires',
