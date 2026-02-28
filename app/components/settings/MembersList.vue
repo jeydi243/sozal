@@ -30,7 +30,7 @@ const items = [{
 
         <div class="text-sm min-w-0">
           <p class="text-(--ui-text-highlighted) font-medium truncate">
-            {{ member.name }}
+            {{ member.nom }}
           </p>
           <p class="text-(--ui-text-muted) truncate">
             {{ member.username }}

@@ -14,7 +14,7 @@ const q = ref('')
 
 const filteredMembers = computed(() => {
   return members.value.filter((member) => {
-    return member.name.search(new RegExp(q.value, 'i')) !== -1 || member.username.search(new RegExp(q.value, 'i')) !== -1
+    return member.prenom.search(new RegExp(q.value, 'i')) !== -1 || member.nom.search(new RegExp(q.value, 'i')) !== -1
   })
 })
 </script>

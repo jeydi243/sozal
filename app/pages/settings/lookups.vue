@@ -10,9 +10,9 @@
 
           <template #right>
             <div class="flex flex-wrap items-center justify-between gap-1.5">
-              <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)" class="max-w-sm"
+              <UInput :model-value="(table?.tableApi?.getColumn('nom')?.getFilterValue() as string)" class="max-w-sm"
                 icon="i-lucide-search" placeholder="Filter classes..."
-                @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+                @update:model-value="table?.tableApi?.getColumn('nom')?.setFilterValue($event)" />
 
               <div class="flex flex-wrap items-center gap-1.5">
                 <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
@@ -138,7 +138,7 @@ const openUpdateModal = ref(false)
 const openClasseUpdateModal = ref(false)
 const statusFilter = ref('all')
 const columnFilters = ref([{
-  id: 'name',
+  id: 'nom',
   value: ''
 }])
 const UButton = resolveComponent('UButton')
@@ -156,7 +156,7 @@ const pagination = ref({
 })
 let loadingClasses = ref(false)
 let classesError = ref<any>(null)
-const { data: classes, error } = await supabase.from('classes').select()
+const { data: classes, error } = await supabase.from<Classe[]>('classes').select()
 let selectedClasse = ref<Classe | null | Object>(null)
 const lookups = ref<any[]>([]) // Define a type for Lookup if available
 const loadingLookups = ref(false)
@@ -186,21 +186,19 @@ const columns: TableColumn<Classe>[] = [
 
         h('div', undefined, [
           h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
-          // h('p', { class: '' }, `@${row.original.name}`)
         ])
       ])
     }
   },
 
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: 'nom',
+    header: 'Nom',
     cell: ({ row }) => {
       return h('div', { class: 'flex items-center gap-3' }, [
 
         h('div', undefined, [
-          h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.name),
-          // h('p', { class: '' }, `@${row.original.name}`)
+          h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom),
         ])
       ])
     }
@@ -324,14 +322,13 @@ const columnsLookups: TableColumn<Classe>[] = [
   },
   { accessorKey: 'code', header: () => h('div', { class: 'flex flex-col items-start' }, 'Code') },
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: 'nom',
+    header: 'Nom',
     cell: ({ row }) => {
       return h('div', { class: 'flex items-center gap-3' }, [
 
         h('div', undefined, [
-          h('p', {}, row.original.name),
-          // h('p', { class: '' }, `@${row.original.name}`)
+          h('p', {}, row.original.nom),
         ])
       ])
     }
@@ -493,14 +490,14 @@ watch(selectedClasse, async (newClasse) => {
 const defaultClasseSchema = z.object({
   description: z.string(),
   table_name: z.string(),
-  name: z.string(),
+  nom: z.string(),
 })
 type Schema = z.output<typeof defaultClasseSchema>
 
 const defaultClasse = reactive({
   description: '',
   table_name: '',
-  name: ''
+  nom: ''
 })
 
 

@@ -3,7 +3,7 @@ import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 
 const schema = z.object({
-  name: z.string().min(3, 'Too short'),
+  nom: z.string().min(3, 'Too short'),
   description: z.string(),
   code: z.string(),
   lookup_id: z.string(),
@@ -13,18 +13,18 @@ const toast = useToast()
 type Schema = z.output<typeof schema>
 const supabase = useSupabaseClient()
 const state = reactive<Partial<Schema>>({
-  name: undefined,
+  nom: undefined,
   description: undefined,
   code: undefined,
   lookup_id: undefined,
 })
 const { data: lookups } = await useAsyncData('lookups', async () => {
-  const { data } = await supabase.from('lookups').select('id, name')
+  const { data } = await supabase.from('lookups').select('id, nom')
   return data
 })
 
 const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
-  label: lookup.name,
+  label: lookup.nom,
   id: lookup.id
 })) || [])
 
@@ -37,7 +37,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (error) {
     toast.add({ title: 'Error', description: `Can't add new organisation ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New classe ${event.data.name} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New classe ${event.data.nom} added`, color: 'success' })
     open.value = false
   }
 }
@@ -55,8 +55,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UFormField label="Code" placeholder="Code d'organisation" name="code">
           <UInput v-model="state.code" class="w-full" />
         </UFormField>
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="Name" placeholder="John Doe" name="nom">
+          <UInput v-model="state.nom" class="w-full" />
         </UFormField>
         <UFormField label="Description" placeholder="" name="description">
           <UTextarea v-model="state.description" class="w-full" />

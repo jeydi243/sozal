@@ -1,6 +1,6 @@
 <template>
     <USlideover description="Details des affectations aux organisations"
-        :description="`${props.user?.first_name} ${props.user?.last_name}`" :ui="{ content: 'max-w-3xl' }"
+        :description="`${props.user?.prenom} ${props.user?.nom}`" :ui="{ content: 'max-w-3xl' }"
         v-model:open="isOpenSlideOver">
 
 
@@ -72,7 +72,7 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
     `affectations-${props.user?.user_id}`,
     async () => {
         if (!props.user?.user_id) return []
-        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookups!inner(name, description), organisations!inner(name, description)").eq('user_id', props.user.user_id)
+        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookups!inner(nom, description), organisations!inner(nom, description)").eq('user_id', props.user.user_id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -147,7 +147,7 @@ const columnsAffectations: TableColumn<Affectation>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookups?.name || ''),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookup?.nom || ''),
                 ])
             ])
         }
@@ -159,7 +159,7 @@ const columnsAffectations: TableColumn<Affectation>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisations?.name || ''),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisation?.nom || ''),
                 ])
             ])
         }
@@ -243,7 +243,6 @@ function getRowItemsAffectations(row: Row<Affectation>) {
         items.push({
             label: "Stopper l'affectation",
             icon: 'i-lucide-trash',
-            color: 'error',
             onSelect() {
                 selectedAffectationId.value = row.original.id
                 isStopModalOpen.value = true

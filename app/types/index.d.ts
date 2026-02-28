@@ -5,7 +5,7 @@ export type SaleStatus = 'paid' | 'failed' | 'refunded'
 
 export interface User {
   id: number
-  name: string
+  nom: string
   email: string
   avatar?: AvatarProps
   status: UserStatus
@@ -22,7 +22,7 @@ export interface Mail {
 }
 
 export interface Member {
-  name: string
+  nom: string
   username: string
   role: 'member' | 'owner'
   avatar: Avatar
@@ -53,10 +53,10 @@ export interface Notification {
 }
 export interface Classe {
   id: string
-  table_name?: boolean
+  table_name: string
   description: string
   code: string
-  name: string
+  nom: string
   status: string
 }
 
@@ -69,7 +69,7 @@ export interface Range {
 
 export interface Lookup {
   id: string
-  name: string
+  nom: string
 }
 
 export interface Organisation {
@@ -84,8 +84,9 @@ export interface Organisation {
 export interface Profil {
   id: string
   email: string
-  first_name: string
-  last_name: string
+  nom: string
+  prenom: string
+  postnom: string
   user_name: string
   user_id: string
 }
@@ -98,12 +99,12 @@ export interface Affectation {
   created_at?: string
   start_date?: string
   end_date?: string
-  lookups?: { name: string, description: string }
-  organisations?: { name: string, description: string }
+  lookup?: { nom: string, description: string }
+  organisation?: { nom: string, description: string }
 }
 export interface Article {
   id: number
-  name: string
+  nom: string
   code: string
   description: string
   lookup_id: string
@@ -111,7 +112,7 @@ export interface Article {
 }
 export interface Tarifaire {
   id: number
-  name: string
+  nom: string
   code: string
   description: string
   lookup_id: string
@@ -120,8 +121,8 @@ export interface Tarifaire {
 
 export interface TarifaireLine {
   id: number
-  tarifaire_id: number
-  articles: { name: string, description: string }
+  tarifaire: Tarifaire
+  article: Article
   prix: number
 }
 
@@ -151,7 +152,7 @@ export interface Mutuelle {
   code: string
   description: string
   lookup_id: string
-  statut:string
+  statut: string
   organisation_id: string
 }
 export interface PatientMutuelle {
@@ -160,7 +161,7 @@ export interface PatientMutuelle {
   patient: Patient
   date_debut: string
   date_fin?: string
-  statut:string
+  statut: string
   organisation: Organisation
 }
 
@@ -174,7 +175,7 @@ export interface PatientListeAttente {
   status: string
   mrn: string
   avatar: string
-  statut:string
+  statut: string
 }
 
 export interface RendezVous {
@@ -187,8 +188,8 @@ export interface RendezVous {
 }
 
 export interface Medecin {
-    id: string | number;
-    nom: string;
-    prenom: string;
-    postnom: string;
+  id: string | number;
+  nom: string;
+  prenom: string;
+  postnom: string;
 }

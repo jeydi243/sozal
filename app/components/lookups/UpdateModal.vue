@@ -16,7 +16,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['lookup_updated', 'update:open'])
 const schema = z.object({
-  name: z.string().min(3, 'Too short'),
+  nom: z.string().min(3, 'Too short'),
   code: z.string().min(3, 'Too short'),
   classe_id: z.string().min(3, 'Too short'),
   description: z.string()
@@ -51,7 +51,7 @@ console.log('data updated: %o', data)
   if (error) {
     toast.add({ title: 'Error', description: `Can't update lookup ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `Lookup ${event.data.name} updated`, color: 'success' })
+    toast.add({ title: 'Success', description: `Lookup ${event.data.nom} updated`, color: 'success' })
     emit('lookup_updated')
     isOpen.value = false
   }
@@ -68,8 +68,8 @@ console.log('data updated: %o', data)
         <UFormField label="Classe" placeholder="_" name="classe_id">
           <USelectMenu disabled v-model="state.classe_id" value-key="id" :items="classes" class="w-full" />
         </UFormField>
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="Nom" placeholder="John Doe" name="nom">
+          <UInput v-model="state.nom" class="w-full" />
         </UFormField>
         <UFormField label="Code" placeholder="_" name="code">
           <UInput v-model="state.code" class="w-full" />

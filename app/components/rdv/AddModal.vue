@@ -2,15 +2,16 @@
 import * as z from 'zod'
 import type { FormError, FormErrorEvent, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import { CalendarDate, getLocalTimeZone } from '@internationalized/date'
-import type { Patient, Organisation, Medecin } from '~/types'
+import type { Patient, Organisation, Medecin, Article } from '~/types'
 
 const schema = z.object({
     patient_id: z.string().min(2, 'Too short'),
     medecin_id: z.string().optional(),
     organisation_id: z.string(),
     date_rdv: z.date().max(new Date(), 'Date de rdv'),
-    heure_rdv: z.string(),
-    motif: z.string(),
+    heure_rdv: z.string().optional(),
+    motif: z.string().optional(),
+    prestation_id: z.string(),
 })
 const toast = useToast()
 const open = ref(false)
@@ -39,7 +40,7 @@ const { data: patients, error, refresh: refreshPatients } = await useAsyncData<P
     return data as Patient[];
 });
 const { data: organisations, error: errorOrganisations, refresh: refreshOrganisations } = await useAsyncData<Organisation[]>('rdv-organisations', async () => {
-    const { data, error } = await supabase.from('organisations').select('id, nom')
+    const { data, error } = await supabase.from('organisations').select('id, nom, lookup:lookups!inner(*)').eq('lookups.nom', 'Clinique')
     if (error) {
         throw error;
     }
@@ -52,6 +53,14 @@ const { data: medecins, error: errorMedecins, refresh: refreshMedecins } = await
     }
     return data as Medecin[];
 });
+const { data: prestations, error: errorPrestations, refresh: refreshPrestations } = await useAsyncData<Article[]>('rdv-prestations', async () => {
+    const { data, error } = await supabase.from('articles').select('id, nom, prenom, postnom')
+    if (error) {
+        throw error;
+    }
+    return data as Article[];
+});
+
 const itemsPatients = computed<SelectMenuItem[]>(() => patients.value?.map(patient => ({
     label: patient?.nom + ' ' + patient?.prenom + ' ' + patient?.postnom,
     id: String(patient?.id)
@@ -65,6 +74,11 @@ const itemsOrganisations = computed<SelectMenuItem[]>(() => organisations.value?
 const itemsMedecins = computed<SelectMenuItem[]>(() => medecins.value?.map((medecin: Medecin) => ({
     label: medecin?.nom,
     id: String(medecin?.id)
+})) || [])
+
+const itemsPrestations = computed<SelectMenuItem[]>(() => prestations.value?.map((prestation: Article) => ({
+    label: prestation?.nom,
+    id: String(prestation?.id)
 })) || [])
 
 
@@ -105,20 +119,21 @@ function onError(error: FormErrorEvent) {
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Nouveau rendez-vous" description="Ajouter un nouveau rendez-vous">
+    <USlideover v-model:open="open" inset title="Nouveau rendez-vous" description="Ajouter un nouveau rendez-vous">
         <UButton label="Nouveau rendez-vous" icon="i-lucide-plus" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
                 <UFormField label="Patient" placeholder="John Doe" name="patient_id">
-                    <USelectMenu v-model="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
+                    <USelectMenu v-model.trim="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
                 </UFormField>
+
                 <UFormField label="Organisation" placeholder="john.doe@example.com" name="organisation_id">
-                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="itemsOrganisations"
+                    <USelectMenu v-model.trim="state.organisation_id" value-key="id" :items="itemsOrganisations"
                         class="w-full" />
                 </UFormField>
                 <UFormField label="Medecin" placeholder="john.doe@example.com" name="medecin_id">
-                    <USelectMenu v-model="state.medecin_id" value-key="id" :items="itemsMedecins" class="w-full" />
+                    <USelectMenu v-model.trim="state.medecin_id" value-key="id" :items="itemsMedecins" class="w-full" />
                 </UFormField>
                 <UFormField label="Date de rdv" placeholder="08/12/2025" name="date_rdv">
                     <UInputDate v-model="dateNaissanceModel" class="w-full" :max-date="maxDate">
@@ -134,19 +149,11 @@ function onError(error: FormErrorEvent) {
                         </template>
                     </UInputDate>
                 </UFormField>
-                <UFormField label="Heure de rdv" placeholder="08/12/2025" name="heure_rdv">
-                    <UInputDate v-model="dateNaissanceModel" class="w-full" :max-date="maxDate">
-                        <template #trailing>
-                            <UPopover :reference="inputDateRef?.inputsRef[3]?.$el">
-                                <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    aria-label="Select a date" class="px-0" />
-
-                                <template #content>
-                                    <UCalendar v-model="dateNaissanceModel" class="p-2" :max-date="maxDate" />
-                                </template>
-                            </UPopover>
-                        </template>
-                    </UInputDate>
+                <UFormField label="Heure de rdv" name="heure_rdv">
+                    <UInput v-model="state.heure_rdv" type="time" class="w-full" icon="i-lucide-clock" />
+                </UFormField>
+                <UFormField label="Prestation" name="prestation_id">
+                    <USelectMenu v-model="state.prestation_id" value-key="id" :items="itemsPrestations" class="w-full" icon="i-lucide-list" />
                 </UFormField>
 
                 <div class="flex justify-end gap-2">
@@ -155,5 +162,5 @@ function onError(error: FormErrorEvent) {
                 </div>
             </UForm>
         </template>
-    </UModal>
+    </USlideover>
 </template>

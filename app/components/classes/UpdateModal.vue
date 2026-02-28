@@ -16,7 +16,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['classe_updated', 'update:open'])
 const schema = z.object({
-    name: z.string().min(3, 'Too short'),
+    nom: z.string().min(3, 'Too short'),
     code: z.string().min(3, 'Too short'),
     description: z.string(),
     table_name: z.string()
@@ -28,7 +28,7 @@ const isOpen = computed({
 })
 
 type Schema = z.output<typeof schema>
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient<any>()
 const state = reactive<Partial<Schema>>({ ...props.classe })
 
 watch(() => props.classe, (newClasse) => {
@@ -38,17 +38,17 @@ watch(() => props.classe, (newClasse) => {
 })
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    console.log('date to update: %o with ID ', event.data, props.classe.id)
+    console.log('data to update: %o with ID %s', event.data, props.classe.id)
     const { data, error } = await supabase
         .from('classes')
-        .update(event?.data)
+        .update(event.data)
         .eq('id', props.classe.id)
         .select()
     console.log('data updated: %o', data)
     if (error) {
         toast.add({ title: 'Error', description: `Can't update classe ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `Classe ${event.data.name} updated`, color: 'success' })
+        toast.add({ title: 'Success', description: `Classe ${event.data.nom} updated`, color: 'success' })
         emit('classe_updated')
         isOpen.value = false
     }
@@ -60,8 +60,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UModal v-model:open="isOpen" title="Classe" description="Update classe">
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Name" placeholder="John Doe" name="name">
-                    <UInput v-model="state.name" class="w-full" />
+                <UFormField label="Nom" placeholder="John Doe" name="nom">
+                    <UInput v-model="state.nom" class="w-full" />
                 </UFormField>
                 <UFormField label="Code" placeholder="_" name="code">
                     <UInput v-model="state.code" class="w-full" />

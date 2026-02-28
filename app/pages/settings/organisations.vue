@@ -63,7 +63,7 @@
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                     v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                         getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="organisations" :columns="columns" :loading="status === 'pending'"
+                    }" class="shrink-0 m-2" :data="organisations || []" :columns="columns" 
                     :ui="{
                         base: 'table-fixed border-separate border-spacing-0',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
@@ -102,7 +102,7 @@
                         v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
                         v-model:pagination="pagination" :pagination-options="{
                             getPaginationRowModel: getPaginationRowModel()
-                        }" class="shrink-0 m-2" :data="organisations" :columns="columns" :ui="{
+                        }" class="shrink-0 m-2" :data="organisations || []" :columns="columns" :ui="{
                             base: 'table-fixed border-separate border-spacing-0',
                             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                             tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -194,23 +194,20 @@ const columns: TableColumn<Organisation>[] = [
         header: 'Code',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
-
                 h('div', undefined, [
                     h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
-                    // h('p', { class: '' }, `@${row.original.name}`)
                 ])
             ])
         }
     },
     {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'nom',
+        header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.name),
-                    // h('p', { class: '' }, `@${row.original.name}`)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom),
                 ])
             ])
         }
@@ -340,7 +337,7 @@ const { data: organisations, error } = await supabase.from('organisations').sele
 const defaultOrganisationSchema = z.object({
     description: z.string(),
     code: z.string(),
-    name: z.string(),
+    nom: z.string(),
 })
 type OrganisationSchema = z.output<typeof defaultOrganisationSchema>
 
@@ -348,7 +345,7 @@ type OrganisationSchema = z.output<typeof defaultOrganisationSchema>
 const defaultOrganisation = reactive({
     description: '',
     code: '',
-    name: ''
+    nom: ''
 })
 const breakpoints = useBreakpoints(breakpointsTailwind)
 

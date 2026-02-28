@@ -22,12 +22,12 @@ const state = reactive<Partial<Schema>>({
 })
 
 const { data: lookups } = await useAsyncData<Lookup[]>('lookups-org', async () => {
-  const { data } = await supabase.from('lookups').select('id, name, description').eq('name', 'Entreprise')
+  const { data } = await supabase.from('lookups').select('id, nom, description').eq('nom', 'Entreprise')
   return (data || []) as unknown as Lookup[]
 })
 
 const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
-  label: lookup?.name,
+  label: lookup?.nom,
   id: String(lookup?.id)
 })) || [])
 

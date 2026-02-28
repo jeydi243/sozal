@@ -5,10 +5,9 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 const schema = z.object({
     email: z.string().email('Invalid email'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    name: z.string().min(2, 'Name is too short').optional(),
-    first_name: z.string().min(2, 'First name is too short'),
-    last_name: z.string().min(2, 'Last name is too short'),
-    middle_name: z.string().min(2, 'Middle name is too short').optional(),
+    nom: z.string().min(2, 'Nom is too short').optional(),
+    prenom: z.string().min(2, 'Prenom is too short'),
+    postnom: z.string().min(2, 'Postnom is too short'),
 })
 
 const open = ref(false)
@@ -18,9 +17,9 @@ type Schema = z.output<typeof schema>
 const state = reactive<Partial<Schema>>({
     email: undefined,
     password: undefined,
-    first_name: undefined,
-    last_name: undefined,
-    middle_name: undefined,
+    prenom: undefined,
+    nom: undefined,
+    postnom: undefined
 })
 
 const emit = defineEmits(['user-added'])
@@ -33,9 +32,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 email: event.data.email,
                 password: event.data.password,
                 user_metadata: {
-                    first_name: event.data.first_name,
-                    last_name: event.data.last_name,
-                    middle_name: event.data.middle_name,
+                    prenom: event.data.prenom,
+                    nom: event.data.nom,
+                    postnom: event.data.postnom,
                 }
             }
         })
@@ -47,7 +46,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         // Reset form
         state.email = undefined
         state.password = undefined
-        state.name = undefined
+        state.nom = undefined
+        state.prenom = undefined
+        state.postnom = undefined
 
     } catch (error: any) {
         toast.add({ title: 'Error', description: error.statusMessage || error.message || 'Failed to add user', color: 'error' })
@@ -61,11 +62,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="First Name" name="first_name">
-                    <UInput v-model="state.first_name" class="w-full" placeholder="John Doe" />
+                <UFormField label="Prenom" name="prenom">
+                    <UInput v-model="state.prenom" class="w-full" placeholder="John Doe" />
                 </UFormField>
-                <UFormField label="Last Name" name="last_name">
-                    <UInput v-model="state.last_name" class="w-full" placeholder="Doe" />
+                <UFormField label="Nom" name="nom">
+                    <UInput v-model="state.nom" class="w-full" placeholder="Doe" />
+                </UFormField>
+                <UFormField label="Postnom" name="postnom">
+                    <UInput v-model="state.postnom" class="w-full" placeholder="Doe" />
                 </UFormField>
 
                 <UFormField label="Email" name="email">

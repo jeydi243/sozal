@@ -147,33 +147,30 @@ const columns: TableColumn<Profil>[] = [
 
                 h('div', undefined, [
                     h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.email),
-                    // h('p', { class: '' }, `@${row.original.name}`)
                 ])
             ])
         }
     },
     {
-        accessorKey: 'first_name',
-        header: 'First Name',
+        accessorKey: 'prenom',
+        header: 'Prenom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.first_name),
-                    // h('p', { class: '' }, `@${row.original.name}`)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.prenom),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'last_name',
-        header: 'Last Name',
+        accessorKey: 'nom',
+        header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.last_name),
-                    // h('p', { class: '' }, `@${row.original.name}`)
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom),
                 ])
             ])
         }
@@ -256,12 +253,5 @@ function getRowItems(row: Row<Profil>) {
 
 
 const { data: Users, error } = await supabase.from('profils').select()
-
-const defaultUserSchema = z.object({
-    user_name: z.string().min(6, 'Invalid user_name'),
-    first_name: z.string().min(2, 'Invalid first_name'),
-    last_name: z.string().min(2, 'Invalid last_name'),
-    email: z.string().email('Invalid email'),
-})
 
 </script>

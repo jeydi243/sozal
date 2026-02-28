@@ -37,7 +37,7 @@ const schema = z.object({
 })
 
 const { data: tarifaires } = await useAsyncData<Tarifaire[]>('add-article-tarifaires', async () => {
-    const { data } = await supabase.from('tarifaires').select('id, name, description')
+    const { data } = await supabase.from('tarifaires').select('id, nom, description')
     return data as any as Tarifaire[]
 })
 const { data: organisations } = await useAsyncData<Organisation[]>('organisations', async () => {
@@ -50,17 +50,17 @@ const { data: articles } = await useAsyncData<Article[]>('add-article-articles',
 })
 
 const itemsTarifaires = computed<SelectMenuItem[]>(() => tarifaires.value?.map(tarifaire => ({
-    label: tarifaire.name,
+    label: tarifaire.nom,
     id: tarifaire.id
 })) || [])
 
 const itemsOrganisations = computed<SelectMenuItem[]>(() => organisations.value?.map(organisation => ({
-    label: organisation.name,
+    label: organisation.nom,
     id: organisation.id
 })) || [])
 
 const itemsArticles = computed<SelectMenuItem[]>(() => articles.value?.map(article => ({
-    label: article.name,
+    label: article.nom,
     id: article.id
 })) || [])
 

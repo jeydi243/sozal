@@ -4,7 +4,7 @@ import type { FormErrorEvent, FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Organisation } from '~/types'
 
 const schema = z.object({
-  name: z.string().min(3, 'Too short'),
+  nom: z.string().min(3, 'Too short'),
   description: z.string(),
   code: z.string().optional(),
   organisation_id: z.string(),
@@ -15,17 +15,17 @@ const toast = useToast()
 type Schema = z.output<typeof schema>
 const supabase = useSupabaseClient()
 const state = reactive<Partial<Schema>>({
-  name: undefined,
+  nom: undefined,
   description: undefined,
   organisation_id: undefined,
 })
 const { data: organisations } = await useAsyncData<Organisation[]>('organisation-tarifaire', async () => {
-  const { data } = await supabase.from('organisations').select('id, name, lookups!inner(*)').ilike('lookups.code', 'clinique')
+  const { data } = await supabase.from('organisations').select('id, nom, lookups!inner(*)').ilike('lookups.code', 'clinique')
   return (data || []) as unknown as Organisation[]
 })
 
 const items = computed<SelectMenuItem[]>(() => organisations.value?.map(organisation => ({
-  label: organisation?.name,
+  label: organisation?.nom,
   id: String(organisation?.id)
 })) || [])
 
@@ -48,7 +48,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (error) {
     toast.add({ title: 'Error', description: `Can't add new tarifaire ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New tarifaire ${event.data.name} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New tarifaire ${event.data.nom} added`, color: 'success' })
     open.value = false
     emit('tarifaire-added')
   }
@@ -61,8 +61,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     <template #body>
       <UForm  :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="Nom" placeholder="John Doe" name="nom">
+          <UInput v-model="state.nom" class="w-full" />
         </UFormField>
         <UFormField label="Description" placeholder="" name="description">
           <UInput v-model="state.description" class="w-full" />

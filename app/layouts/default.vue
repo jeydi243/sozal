@@ -30,7 +30,7 @@ const links = [[{
 },
 {
   label: 'Consultations',
-  icon: 'i-lucide-users',
+  icon: 'hugeicons:doctor-03',
   to: '/consultations',
   onSelect: () => {
     open.value = false

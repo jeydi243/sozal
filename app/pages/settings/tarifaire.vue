@@ -9,9 +9,9 @@
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <UInput :model-value="(table?.tableApi?.getColumn('name')?.getFilterValue() as string)"
+                        <UInput :model-value="(table?.tableApi?.getColumn('nom')?.getFilterValue() as string)"
                             class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..."
-                            @update:model-value="table?.tableApi?.getColumn('name')?.setFilterValue($event)" />
+                            @update:model-value="table?.tableApi?.getColumn('nom')?.setFilterValue($event)" />
 
                         <div class="flex flex-wrap items-center gap-1.5">
 
@@ -131,13 +131,13 @@ const columns: TableColumn<Tarifaire>[] = [
         }),
     },
     {
-        accessorKey: 'name',
+        accessorKey: 'Nom',
         header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.name),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.nom),
                 ])
             ])
         }

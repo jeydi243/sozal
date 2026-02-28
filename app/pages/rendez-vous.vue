@@ -4,7 +4,11 @@ import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { RendezVous } from '~/types'
 
-const table = useTemplateRef('table')
+useHead({
+    title: 'Rendez-vous'
+})
+
+const table = useTemplateRef('table-rdv')
 const toast = useToast()
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
@@ -178,8 +182,8 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const { data: ListeRendezVous, error, refresh: refreshListeRendezVous } = await useAsyncData('organisations', async () => {
-    const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.name', 'Entreprise')
+const { data: ListeRendezVous, error, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv', async () => {
+    const { data, error } = await supabase.from('rdv').select('id, date_rdv, patient:patients!inner(*), organisation:organisations!inner(*)')
     if (error) {
         throw error;
     }
@@ -201,21 +205,20 @@ const selectedOrganisation = ref(organisations[0])
 
             <UDashboardToolbar>
                 <template #left>
-                    <USelectMenu :items="organisations" v-model="selectedOrganisation" />
+                    <USelectMenu :items="organisations" v-model="selectedOrganisation" @update:modelValue="refreshListeRendezVous()" />
                 </template>
                 <template #right>
-                    <UButton label="Ajouter un rendez-vous" icon="lucide:calendar-plus" color="primary"
-                        variant="solid" />
-                        <RdvAddModal />
+                    <UButton @click="refreshListeRendezVous()">Rafraîchir</UButton>
+                    <RdvAddModal />
                 </template>
             </UDashboardToolbar>
         </template>
 
         <template #body>
-            <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+            <UTable ref="table-rdv" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                     getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0" :data="ListeRendezVous || []" :columns="columns" :ui="{
+                }" class="shrink-0" :data="ListeRendezVous" :columns="columns" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',

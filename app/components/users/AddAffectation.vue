@@ -29,6 +29,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
+import type { Lookup, Organisation } from '~/types'
 const supabase = useSupabaseClient()
 const schema = z.object({
     user_id: z.string(),
@@ -37,7 +38,7 @@ const schema = z.object({
 })
 
 const { data: lookups } = await useAsyncData('add-affectation', async () => {
-    const { data } = await supabase.from('lookups').select('id, name, classes!inner(*)').eq('classes.table_name', 'TYPE_AFFECTATION')
+    const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'TYPE_AFFECTATION')
     return data
 })
 const { data: users } = await useAsyncData('profils', async () => {
@@ -45,20 +46,20 @@ const { data: users } = await useAsyncData('profils', async () => {
     return data
 })
 
-const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
-    label: lookup.name,
+const items = computed<SelectMenuItem[]>(() => lookups.value?.map((lookup: Lookup) => ({
+    label: lookup.nom,
     id: lookup.id
 })) || [])
 const itemsUsers = computed<SelectMenuItem[]>(() => users.value?.map(user => ({
-    label: user.first_name + ' ' + user.last_name,
+    label: user.prenom + ' ' + user.nom,
     id: user.user_id
 })) || [])
 const { data: organisations } = await useAsyncData('organisations', async () => {
     const { data } = await supabase.from('organisations').select()
     return data
 })
-const itemsOrganisations = computed<SelectMenuItem[]>(() => organisations.value?.map(organisation => ({
-    label: organisation.name,
+const itemsOrganisations = computed<SelectMenuItem[]>(() => organisations.value?.map((organisation: Organisation) => ({
+    label: organisation.nom,
     id: organisation.id
 })) || [])
 const props = defineProps({

@@ -5,15 +5,15 @@ export const useParametresStore = defineStore('parametres', () => {
   const supabase = useSupabaseClient()
 
   const getClasseById = computed(() => (id: string) => {
-    return classes.value.find(classe => classe.id === id)?.name
+    return classes.value.find(classe => classe.id === id)?.nom
   })
   const getLookupsById = computed(() => (id: string) => {
-    return lookups.value.find(lookup => lookup.id == id)?.name
+    return lookups.value.find(lookup => lookup.id == id)?.nom
   })
 
   const getClasseItems = computed(() => {
     return classes.value.map(classe => ({
-      label: classe.name,
+      label: classe.nom,
       id: classe.id
     }))
   })

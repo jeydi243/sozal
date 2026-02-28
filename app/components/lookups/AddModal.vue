@@ -10,7 +10,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['lookup_added'])
 const schema = z.object({
-  name: z.string().min(3, 'Too short'),
+  nom: z.string().min(3, 'Too short'),
   code: z.string().min(3, 'Too short'),
   classe_id: z.string().min(3, 'Too short'),
   description: z.string()
@@ -20,7 +20,7 @@ const toast = useToast()
 type Schema = z.output<typeof schema>
 const supabase = useSupabaseClient()
 const state = reactive<Partial<Schema>>({
-  name: undefined,
+  nom: undefined,
   code: undefined,
   classe_id: props.classe_id,
   description: undefined,
@@ -37,7 +37,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (error) {
     toast.add({ title: 'Error', description: `Can't add new lookup ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New lookup ${event.data.name} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New lookup ${event.data.nom} added`, color: 'success' })
     open.value = false
     emit('lookup_added')
   }
@@ -56,8 +56,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UFormField label="Classe" placeholder="_" name="classe_id">
           <USelectMenu disabled  v-model="state.classe_id" value-key="id" :items="classes" class="w-full"  />
         </UFormField>
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="Nom" placeholder="John Doe" name="nom">
+          <UInput v-model="state.nom" class="w-full" />
         </UFormField>
         <UFormField label="Code" placeholder="_" name="code">
           <UInput v-model="state.code" class="w-full" />

@@ -12,7 +12,7 @@ useHead({
 const fileRef = ref<HTMLInputElement>()
 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Too short'),
+  nom: z.string().min(2, 'Too short'),
   email: z.string().email('Invalid email'),
   username: z.string().min(2, 'Too short'),
   avatar: z.string().optional(),
@@ -22,7 +22,7 @@ const profileSchema = z.object({
 type ProfileSchema = z.output<typeof profileSchema>
 
 const profile = reactive<Partial<ProfileSchema>>({
-  name: 'Benjamin Canac',
+  nom: 'Benjamin Canac',
   email: 'ben@nuxtlabs.com',
   username: 'benjamincanac',
   avatar: undefined,
@@ -62,9 +62,9 @@ function onFileClick() {
     </UPageCard>
 
     <UPageCard variant="subtle">
-      <UFormField name="name" label="Name" description="Will appear on receipts, invoices, and other communication."
+      <UFormField name="nom" label="Nom" description="Will appear on receipts, invoices, and other communication."
         required class="flex max-sm:flex-col justify-between items-start gap-4">
-        <UInput v-model="profile.name" autocomplete="off" />
+        <UInput v-model="profile.nom" autocomplete="off" />
       </UFormField>
       <USeparator />
       <UFormField name="email" label="Email" description="Used to sign in, for email receipts and product updates."
@@ -81,7 +81,7 @@ function onFileClick() {
       <UFormField name="avatar" label="Avatar" description="JPG, GIF or PNG. 1MB Max."
         class="flex max-sm:flex-col justify-between sm:items-center gap-4">
         <div class="flex flex-wrap items-center gap-3">
-          <UAvatar :src="profile.avatar" :alt="profile.name" size="lg" />
+          <UAvatar :src="profile.avatar" :alt="profile.nom" size="lg" />
           <UButton label="Choose" color="neutral" @click="onFileClick" />
           <input ref="fileRef" type="file" class="hidden" accept=".jpg, .jpeg, .png, .gif" @change="onFileChange">
         </div>

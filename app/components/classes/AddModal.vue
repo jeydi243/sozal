@@ -3,16 +3,16 @@ import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 const schema = z.object({
-  name: z.string().min(3, 'Too short'),
+  nom: z.string().min(3, 'Too short'),
   description: z.string(),
   table_name: z.string(),
 })
 const open = ref(false)
 const toast = useToast()
 type Schema = z.output<typeof schema>
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient<any>()
 const state = reactive<Partial<Schema>>({
-  name: undefined,
+  nom: undefined,
   description: undefined,
   table_name: undefined,
 })
@@ -21,13 +21,13 @@ const state = reactive<Partial<Schema>>({
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const { data, error } = await supabase
     .from('classes')
-    .insert(event?.data)
+    .insert(event.data)
     .select()
 
   if (error) {
     toast.add({ title: 'Error', description: `Can't add new classe ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New classe ${event.data.name} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New classe ${event.data.nom} added`, color: 'success' })
     open.value = false
   }
 }
@@ -39,8 +39,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     <template #body>
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-        <UFormField label="Name" placeholder="John Doe" name="name">
-          <UInput v-model="state.name" class="w-full" />
+        <UFormField label="Nom" placeholder="John Doe" name="nom">
+          <UInput v-model="state.nom" class="w-full" />
         </UFormField>
         <UFormField label="Description" placeholder="" name="description">
           <UInput v-model="state.description" class="w-full" />

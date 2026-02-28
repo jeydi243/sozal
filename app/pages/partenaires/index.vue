@@ -32,7 +32,7 @@ const columnFilters = ref([{
 
 //use useasyncData to fetch partenaires data from supabase
 const { data: partenaires, error, refresh: refreshPartenaires } = await useAsyncData('organisations', async () => {
-    const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.name', 'Entreprise')
+    const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.nom', 'Entreprise')
     if (error) {
         throw error;
     }

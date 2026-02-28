@@ -2,6 +2,9 @@
 import type { TableColumn } from '@nuxt/ui'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { PatientListeAttente } from '~/types'
+useHead({
+    title: 'Consultations'
+})
 
 const table = useTemplateRef('table')
 const toast = useToast()
@@ -185,7 +188,7 @@ const pagination = ref({
     pageSize: 10
 })
 const { data: listePatientsAttente, error, refresh: refreshListePatientsAttente } = await useAsyncData('organisations', async () => {
-    const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.name', 'Entreprise')
+    const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.nom', 'Entreprise')
     if (error) {
         throw error;
     }

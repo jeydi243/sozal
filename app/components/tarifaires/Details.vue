@@ -1,6 +1,6 @@
 <template>
     <USlideover description="Details des tarifaires aux organisations"
-        :title="`${props.tarifaire?.name}`" :ui="{ content: 'max-w-3xl' }"
+        :title="`${props.tarifaire?.nom}`" :ui="{ content: 'max-w-3xl' }"
         v-model:open="isOpenSlideOver">
 
 
@@ -72,7 +72,7 @@ const { data: tarifairesLines, refresh: refreshTarifairesLines, status: tarifair
     `tarifaires-${props.tarifaire?.id}`,
     async () => {
         if (!props.tarifaire?.id) return []
-        const { data, error } = await supabase.from('tarifaires_lines').select("id, prix, articles!inner(name, description)").eq('tarifaire_id', props.tarifaire.id)
+        const { data, error } = await supabase.from('tarifaires_lines').select("id, prix, articles!inner(nom, description)").eq('tarifaire_id', props.tarifaire.id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -146,7 +146,7 @@ const columnsTarifaireLine: TableColumn<TarifaireLine>[] = [
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.articles?.name || ''),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.article?.nom || ''),
                 ])
             ])
         }

@@ -85,13 +85,13 @@ function onSubmit() {
       <div class="flex items-start gap-4 sm:my-1.5">
         <UAvatar
           v-bind="mail.from.avatar"
-          :alt="mail.from.name"
+          :alt="mail.from.nom"
           size="3xl"
         />
 
         <div class="min-w-0">
           <p class="font-semibold text-(--ui-text-highlighted)">
-            {{ mail.from.name }}
+            {{ mail.from.nom }}
           </p>
           <p class="text-(--ui-text-muted)">
             {{ mail.from.email }}
@@ -116,7 +116,7 @@ function onSubmit() {
           <UIcon name="i-lucide-reply" class="size-5" />
 
           <span class="text-sm truncate">
-            Reply to {{ mail.from.name }} ({{ mail.from.email }})
+            Reply to {{ mail.from.nom }} ({{ mail.from.email }})
           </span>
         </template>
 
