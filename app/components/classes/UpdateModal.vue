@@ -1,80 +1,90 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { Classe } from '~/types'
 
-const props = defineProps({
-    classe: {
-        type: Object,
-        required: true
-    },
-    open: {
-        type: Boolean,
-        required: true,
-        default: false,
+const props = defineProps<{
+    classe?: Classe
+    open: boolean
+}>()
 
-    }
-})
-const emit = defineEmits(['classe_updated', 'update:open'])
+const emit = defineEmits<{
+    classe_updated: []
+    'update:open': [value: boolean]
+}>()
+
 const schema = z.object({
-    nom: z.string().min(3, 'Too short'),
-    code: z.string().min(3, 'Too short'),
+    nom: z.string().min(3, 'Trop court'),
+    code: z.string().min(3, 'Trop court'),
     description: z.string(),
     table_name: z.string()
 })
+
 const toast = useToast()
+const supabase = useSupabaseClient()
+
 const isOpen = computed({
     get: () => props.open,
     set: (value) => emit('update:open', value)
 })
 
 type Schema = z.output<typeof schema>
-const supabase = useSupabaseClient<any>()
-const state = reactive<Partial<Schema>>({ ...props.classe })
+const state = reactive<Partial<Schema>>({
+    nom: props.classe?.nom,
+    code: props.classe?.code,
+    description: props.classe?.description,
+    table_name: props.classe?.table_name
+})
 
 watch(() => props.classe, (newClasse) => {
     if (newClasse) {
-        Object.assign(state, newClasse)
+        Object.assign(state, {
+            nom: newClasse.nom,
+            code: newClasse.code,
+            description: newClasse.description,
+            table_name: newClasse.table_name
+        })
     }
 })
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    console.log('data to update: %o with ID %s', event.data, props.classe.id)
-    const { data, error } = await supabase
+    if (!props.classe?.id) return
+
+    const { error } = await supabase
         .from('classes')
         .update(event.data)
         .eq('id', props.classe.id)
         .select()
-    console.log('data updated: %o', data)
+
     if (error) {
-        toast.add({ title: 'Error', description: `Can't update classe ${error.message}`, color: 'error' })
+        toast.add({ title: 'Erreur', description: `Impossible de mettre à jour : ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `Classe ${event.data.nom} updated`, color: 'success' })
+        toast.add({ title: 'Succès', description: `Classe "${event.data.nom}" mise à jour`, color: 'success' })
         emit('classe_updated')
         isOpen.value = false
     }
 }
-
 </script>
 
 <template>
-    <UModal v-model:open="isOpen" title="Classe" description="Update classe">
+    <UModal v-model:open="isOpen" title="Modifier la classe" description="Mettre à jour les informations de la classe">
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Nom" placeholder="John Doe" name="nom">
+                <UFormField label="Nom" name="nom">
                     <UInput v-model="state.nom" class="w-full" />
                 </UFormField>
-                <UFormField label="Code" placeholder="_" name="code">
+                <UFormField label="Code" name="code">
                     <UInput v-model="state.code" class="w-full" />
                 </UFormField>
-                <UFormField label="Description" placeholder="" name="description">
+                <UFormField label="Description" name="description">
                     <UInput v-model="state.description" class="w-full" />
                 </UFormField>
-                <UFormField label="Table name" placeholder="_" name="table_name">
+                <UFormField label="Table name" name="table_name">
                     <UInput v-model="state.table_name" class="w-full" />
                 </UFormField>
                 <div class="flex justify-end gap-2">
-                    <UButton label="Cancel" color="neutral" variant="subtle" @click="isOpen = false" />
-                    <UButton label="Update" color="primary" variant="solid" type="submit" />
+                    <UButton label="Annuler" color="neutral" variant="subtle" @click="isOpen = false" />
+                    <UButton label="Mettre à jour" color="primary" variant="solid" type="submit" />
                 </div>
             </UForm>
         </template>

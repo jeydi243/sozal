@@ -13,30 +13,40 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'fr'
   }
 })
 
-const title = 'Nuxt UI Pro - Dashboard template'
-const description = 'Nuxt UI Pro is a collection of premium Vue components built on top of Nuxt UI to create beautiful & responsive Nuxt applications in minutes.'
+const title = 'Sozal — Gestion médicale'
+const description = 'Sozal est une application de gestion médicale pour la prise en charge des patients, rendez-vous et consultations.'
 
 useSeoMeta({
   title,
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: 'https://dashboard-template.nuxt.dev/social-card.png',
-  twitterImage: 'https://dashboard-template.nuxt.dev/social-card.png',
-  twitterCard: 'summary_large_image'
 })
 
 const user = useSupabaseUser()
 const parametresStore = useParametresStore()
+const toast = useToast()
 
-watch(user, (newUser) => {
+watch(user, async (newUser) => {
   if (newUser) {
-    parametresStore.init()
-    parametresStore.init_user()
+    const { error: initError } = await parametresStore.init()
+    if (initError) {
+      console.error('[Store] Erreur init parametres:', initError)
+      toast.add({
+        title: 'Erreur de chargement',
+        description: 'Impossible de charger les paramètres. Veuillez rafraîchir la page.',
+        color: 'error'
+      })
+    }
+
+    const { error: userError } = await parametresStore.init_user()
+    if (userError) {
+      console.error('[Store] Erreur init_user:', userError)
+    }
   }
 }, { immediate: true })
 </script>
@@ -55,18 +65,18 @@ watch(user, (newUser) => {
 <style>
 .page-enter-active,
 .page-leave-active {
-  transition: all 1s;
+  transition: all 0.3s ease;
 }
 
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
-  filter: blur(1rem);
+  filter: blur(4px);
 }
 
 .layout-enter-active,
 .layout-leave-active {
-  transition: all 1s;
+  transition: all 0.3s ease;
 }
 
 .layout-enter-from,

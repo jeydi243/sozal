@@ -89,7 +89,7 @@
         <Placeholder class="h-48 m-4" />
       </template>
     </UDrawer>
-    <ClassesUpdateModal v-model:open="openClasseUpdateModal" :classe="selectedClasse"
+    <ClassesUpdateModal v-model:open="openClasseUpdateModal" :classe="selectedClasse ?? undefined"
       @classe_updated="refreshClasses" />
     <USlideover v-model:open="openSlideOver" description="Liste des lookups de la classe" title="Lookups"
       :ui="{ content: 'max-w-3xl' }">
@@ -117,7 +117,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import * as z from 'zod'
@@ -156,9 +155,13 @@ const pagination = ref({
 })
 let loadingClasses = ref(false)
 let classesError = ref<any>(null)
-const { data: classes, error } = await supabase.from<Classe[]>('classes').select()
-let selectedClasse = ref<Classe | null | Object>(null)
-const lookups = ref<any[]>([]) // Define a type for Lookup if available
+const { data: classes, refresh: refreshClassesData } = await useAsyncData<Classe[]>('lookups-classes', async () => {
+  const { data, error } = await supabase.from('classes').select()
+  if (error) throw error
+  return data as Classe[]
+})
+let selectedClasse = ref<Classe | null>(null)
+const lookups = ref<any[]>([])
 const loadingLookups = ref(false)
 const lookupsError = ref<any>(null)
 
@@ -316,7 +319,6 @@ const columnsLookups: TableColumn<Classe>[] = [
       onClick: () => {
         selectedLookup.value = row.original
         openUpdateModal.value = true
-        console.log('i want to update. %o', selectedLookup.value)
       }
     }),
   },
@@ -445,10 +447,7 @@ async function refreshClasses() {
   loadingClasses.value = true
   classesError.value = null
   try {
-    const { data, error } = await supabase
-      .from('classes')
-      .select('*')
-    classes.value = data || []
+    await refreshClassesData()
     loadingClasses.value = false
   } catch (error) {
     classesError.value = error

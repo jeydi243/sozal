@@ -89,13 +89,11 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import * as z from 'zod'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { Profil } from '~/types'
-import type { Schema } from 'zod'
 
 useHead({
     title: 'Users - Settings',

@@ -187,12 +187,11 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const { data: listePatientsAttente, error, refresh: refreshListePatientsAttente } = await useAsyncData('organisations', async () => {
+const { data: listePatientsAttente, error, refresh: refreshListePatientsAttente } = await useAsyncData('liste-attente', async () => {
     const { data, error } = await supabase.from('organisations').select('id, nom, description, lookups!inner(*)').eq('lookups.nom', 'Entreprise')
     if (error) {
         throw error;
     }
-    console.log({ data })
     return data;
 });
 const selectedOrganisation = ref(organisations[0])
@@ -203,7 +202,6 @@ const selectedOrganisation = ref(organisations[0])
         <template #header>
             <UDashboardNavbar title="Consultations" :ui="{ right: 'gap-3' }">
                 <template #leading>
-
                     <UDashboardSidebarCollapse />
                 </template>
             </UDashboardNavbar>

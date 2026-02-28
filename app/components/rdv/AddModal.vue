@@ -15,7 +15,7 @@ const schema = z.object({
 })
 const toast = useToast()
 const open = ref(false)
-const emit = defineEmits(['patient-added'])
+const emit = defineEmits(['rdv-added'])
 const supabase = useSupabaseClient()
 type Schema = z.output<typeof schema>
 
@@ -32,34 +32,40 @@ const itemsGenre = [
     { value: 'M', label: 'Masculin' },
     { value: 'F', label: 'Feminin' }
 ]
-const { data: patients, error, refresh: refreshPatients } = await useAsyncData<Patient[]>('rdv-patients', async () => {
+// ✅ Lazy fetch : les données ne sont chargées qu'à l'ouverture du slideover
+const { data: patients, execute: fetchPatients } = useAsyncData<Patient[]>('rdv-patients', async () => {
     const { data, error } = await supabase.from('patients').select('id, nom, prenom, postnom')
-    if (error) {
-        throw error;
-    }
-    return data as Patient[];
-});
-const { data: organisations, error: errorOrganisations, refresh: refreshOrganisations } = await useAsyncData<Organisation[]>('rdv-organisations', async () => {
+    if (error) throw error
+    return data as Patient[]
+}, { immediate: false, lazy: true })
+
+const { data: organisations, execute: fetchOrganisations } = useAsyncData<Organisation[]>('rdv-organisations', async () => {
     const { data, error } = await supabase.from('organisations').select('id, nom, lookup:lookups!inner(*)').eq('lookups.nom', 'Clinique')
-    if (error) {
-        throw error;
-    }
-    return data as unknown as Organisation[];
-});
-const { data: medecins, error: errorMedecins, refresh: refreshMedecins } = await useAsyncData<Medecin[]>('rdv-medecins', async () => {
+    if (error) throw error
+    return data as unknown as Organisation[]
+}, { immediate: false, lazy: true })
+
+const { data: medecins, execute: fetchMedecins } = useAsyncData<Medecin[]>('rdv-medecins', async () => {
     const { data, error } = await supabase.from('medecins').select('id, nom, prenom, postnom')
-    if (error) {
-        throw error;
+    if (error) throw error
+    return data as Medecin[]
+}, { immediate: false, lazy: true })
+
+const { data: prestations, execute: fetchPrestations } = useAsyncData<Article[]>('rdv-prestations', async () => {
+    const { data, error } = await supabase.from('articles').select('id, nom, code')
+    if (error) throw error
+    return data as Article[]
+}, { immediate: false, lazy: true })
+
+// Déclenche les fetches uniquement à l'ouverture du slideover
+watch(open, (isOpen) => {
+    if (isOpen) {
+        fetchPatients()
+        fetchOrganisations()
+        fetchMedecins()
+        fetchPrestations()
     }
-    return data as Medecin[];
-});
-const { data: prestations, error: errorPrestations, refresh: refreshPrestations } = await useAsyncData<Article[]>('rdv-prestations', async () => {
-    const { data, error } = await supabase.from('articles').select('id, nom, prenom, postnom')
-    if (error) {
-        throw error;
-    }
-    return data as Article[];
-});
+})
 
 const itemsPatients = computed<SelectMenuItem[]>(() => patients.value?.map(patient => ({
     label: patient?.nom + ' ' + patient?.prenom + ' ' + patient?.postnom,
@@ -107,9 +113,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (error) {
         toast.add({ title: 'Error', description: `Can't add new rendez-vous ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `Nouveau rendez-vous pour le ${event.data.date_rdv} à ${event.data.heure_rdv}  ajouté`, color: 'success' })
+        toast.add({ title: 'Succès', description: `Nouveau rendez-vous ajouté le ${event.data.date_rdv} à ${event.data.heure_rdv}`, color: 'success' })
         open.value = false
-        emit('patient-added')
+        emit('rdv-added')
     }
 }
 
@@ -128,11 +134,11 @@ function onError(error: FormErrorEvent) {
                     <USelectMenu v-model.trim="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
                 </UFormField>
 
-                <UFormField label="Organisation" placeholder="john.doe@example.com" name="organisation_id">
+                <UFormField label="Organisation" name="organisation_id">
                     <USelectMenu v-model.trim="state.organisation_id" value-key="id" :items="itemsOrganisations"
                         class="w-full" />
                 </UFormField>
-                <UFormField label="Medecin" placeholder="john.doe@example.com" name="medecin_id">
+                <UFormField label="Medecin" name="medecin_id">
                     <USelectMenu v-model.trim="state.medecin_id" value-key="id" :items="itemsMedecins" class="w-full" />
                 </UFormField>
                 <UFormField label="Date de rdv" placeholder="08/12/2025" name="date_rdv">
@@ -153,7 +159,8 @@ function onError(error: FormErrorEvent) {
                     <UInput v-model="state.heure_rdv" type="time" class="w-full" icon="i-lucide-clock" />
                 </UFormField>
                 <UFormField label="Prestation" name="prestation_id">
-                    <USelectMenu v-model="state.prestation_id" value-key="id" :items="itemsPrestations" class="w-full" icon="i-lucide-list" />
+                    <USelectMenu v-model="state.prestation_id" value-key="id" :items="itemsPrestations" class="w-full"
+                        icon="maki:doctor" />
                 </UFormField>
 
                 <div class="flex justify-end gap-2">

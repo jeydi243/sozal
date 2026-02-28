@@ -11,7 +11,7 @@ const items = [[{
 }, {
   label: 'New customer',
   icon: 'i-lucide-user-plus',
-  to: '/customers'
+  to: '/partenaires'
 }]]
 
 const range = shallowRef<Range>({

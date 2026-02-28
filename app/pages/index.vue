@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { sub } from 'date-fns'
-import type { Period, Range } from '~/types'
-
 useHead({
-  title: 'Home - Sozal',
+  title: 'Accueil - Sozal',
   meta: [
-    { name: 'description', content: 'Dashboard overview.' }
+    { name: 'description', content: 'Tableau de bord de gestion médicale Sozal.' }
   ]
 })
-
 </script>
 
 <template>
+  <div>
     <WaitingDefault />
+  </div>
 </template>
