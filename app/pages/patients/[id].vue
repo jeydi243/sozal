@@ -11,7 +11,8 @@
                     ]" />
                 </template>
                 <template #right>
-                    <UButton label="Modifier" color="neutral" variant="subtle" icon="i-lucide-pencil" />
+                    <UButton label="Modifier" color="neutral" variant="subtle" icon="i-lucide-pencil"
+                        @click="openEditModal = true" />
                     <UButton label="Supprimer" color="error" variant="subtle" icon="i-lucide-trash" />
                 </template>
             </UDashboardNavbar>
@@ -37,9 +38,14 @@
 
                     <div class="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
                         <!-- Avatar -->
-                        <div class="relative flex-shrink-0">
+                        <div class="relative flex-shrink-0 group cursor-pointer" @click="openAvatarModal = true">
                             <UAvatar :src="patient.avatar ?? undefined" :alt="`${patient.prenom} ${patient.nom}`"
-                                size="3xl" :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg' }" />
+                                size="3xl"
+                                :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg transition-opacity group-hover:opacity-75' }" />
+                            <div
+                                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+                                <UIcon name="i-lucide-camera" class="size-8 text-white drop-shadow-md" />
+                            </div>
                             <!-- Badge statut -->
                             <span
                                 class="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-2 ring-(--ui-bg)"
@@ -188,6 +194,10 @@
                     </UTabs>
                 </div>
 
+                <PatientsEditModal v-if="patient" v-model:open="openEditModal" :patient="patient"
+                    @patient-updated="refreshPatient" />
+                <PatientsAvatarUpdateModal v-if="patient" v-model:open="openAvatarModal" :patient="patient"
+                    @avatar-updated="refreshPatient" />
             </div>
         </template>
     </UDashboardPanel>
@@ -203,7 +213,7 @@ definePageMeta({
 const route = useRoute()
 const supabase = useSupabaseClient()
 
-const { data: patient } = await useAsyncData<Patient>('patient-' + route.params.id, async () => {
+const { data: patient, refresh: refreshPatient } = await useAsyncData<Patient>('patient-' + route.params.id, async () => {
     const { data, error } = await supabase
         .from('patients')
         .select('*')
@@ -212,6 +222,9 @@ const { data: patient } = await useAsyncData<Patient>('patient-' + route.params.
     if (error) throw error
     return data
 })
+
+const openEditModal = ref(false)
+const openAvatarModal = ref(false)
 
 useHead({
     title: computed(() => patient.value ? `${patient.value.prenom} ${patient.value.nom} — Patient` : 'Patient'),
