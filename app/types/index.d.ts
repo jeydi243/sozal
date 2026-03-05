@@ -77,7 +77,7 @@ export interface Organisation {
   nom: string
   description?: string
   code?: string
-  lookup_id?: string
+  lookup?: Lookup
   status?: string
 }
 
@@ -107,7 +107,13 @@ export interface Article {
   nom: string
   code: string
   description: string
-  lookup_id: string
+  lookup_id: Lookup
+  created_at?: string
+}
+export interface ArticleAffectation {
+  id: number
+  article_id: Article
+  organisation_id: Organisation
   created_at?: string
 }
 export interface Tarifaire {

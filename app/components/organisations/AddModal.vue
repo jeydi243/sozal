@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
+import type { Lookup } from '~/types'
 
 const schema = z.object({
   nom: z.string().min(3, 'Too short'),
@@ -23,25 +24,34 @@ const { data: lookups } = await useAsyncData('lookups', async () => {
   return data
 })
 
-const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
+const items = computed<SelectMenuItem[]>(() => lookups.value?.map((lookup: Lookup) => ({
   label: lookup.nom,
   id: lookup.id
 })) || [])
 
+const emit = defineEmits(['organisation-added'])
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const { data, error } = await supabase
     .from('organisations')
-    .insert(event?.data)
+    .insert({
+      nom: event.data.nom,
+      description: event.data.description,
+      code: event.data.code,
+      lookup_id: event.data.lookup_id
+    })
     .select()
 
   if (error) {
     toast.add({ title: 'Error', description: `Can't add new organisation ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New classe ${event.data.nom} added`, color: 'success' })
+    toast.add({ title: 'Success', description: `New organisation ${event.data.nom} added`, color: 'success' })
+    emit('organisation-added')
     open.value = false
   }
 }
 </script>
+
 
 <template>
   <UModal v-model:open="open" title="Organisation" description="Add a new organisation to the database">

@@ -11,14 +11,16 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
     const table = useTemplateRef<any>('table')
     const UButton = resolveComponent('UButton')
     const UDropdownMenu = resolveComponent('UDropdownMenu')
+    const UBadge = resolveComponent('UBadge')
+    const UCheckbox = resolveComponent('UCheckbox')
 
     const columnFilters = ref<{ id: string; value: string }[]>(
         options?.filterColumnId
             ? [{ id: options.filterColumnId, value: '' }]
             : []
     )
-    const columnVisibility = ref()
-    const rowSelection = ref()
+    const columnVisibility = ref({})
+    const rowSelection = ref({})
 
     const pagination = ref({
         pageIndex: 0,
@@ -86,6 +88,8 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
         // Resolved components (pour les render functions)
         UButton,
         UDropdownMenu,
+        UBadge,
+        UCheckbox,
         // États liés à la table
         columnFilters,
         columnVisibility,

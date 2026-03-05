@@ -8,7 +8,5 @@ useHead({
 </script>
 
 <template>
-  <div>
-    <WaitingDefault />
-  </div>
+  <WaitingDefault />
 </template>

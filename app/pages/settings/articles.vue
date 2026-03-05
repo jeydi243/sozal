@@ -18,8 +18,7 @@
                                     { label: 'Tous', value: 'all' },
                                     { label: 'Actif', value: 'actif' },
                                     { label: 'Inactif', value: 'inactif' },
-                                ]"
-                                    :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+                                ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
                                     placeholder="Filtrer le statut" class="min-w-28" />
                                 <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                                     <UButton label="Colonnes" color="neutral" variant="outline"
@@ -55,7 +54,8 @@
                 </div>
             </template>
         </UDashboardPanel>
-        <!-- <ArticlesDetails :article="selectedArticle" v-model:open="openDetailsArticle" /> -->
+        <ArticlesDetails :article="selectedArticle" v-model:open="openDetailsAffectation" />
+        <ArticlesAffectations :article="selectedArticle" v-model:open="openDetailsAffectation" />
     </div>
 </template>
 <script setup lang="ts">
@@ -95,6 +95,7 @@ const {
 } = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
 
 const openDetailsArticle = ref(false)
+const openDetailsAffectation = ref(false)
 const selectedArticle = ref<Article | null>(null)
 
 const columns: TableColumn<Article>[] = [
@@ -150,7 +151,7 @@ const columns: TableColumn<Article>[] = [
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.lookup_id)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.lookup_id.nom)),
                 ])
             ])
         }
@@ -210,9 +211,9 @@ function getRowItems(row: Row<Article>) {
         },
         {
             label: 'Voir les affectations',
-            icon: 'i-lucide-wallet',
+            icon: 'material-symbols-light:add-link',
             onSelect() {
-                openDetailsArticle.value = !openDetailsArticle.value
+                openDetailsAffectation.value = !openDetailsAffectation.value
             }
         },
         {
@@ -244,7 +245,7 @@ function getRowItems(row: Row<Article>) {
 }
 
 const { data: Articles, pending, refresh: refreshArticles } = await useAsyncData('articles', async () => {
-    const { data, error } = await supabase.from('articles').select()
+    const { data, error } = await supabase.from('articles').select('*, lookup_id(*)')
     if (error) {
         throw error
     }

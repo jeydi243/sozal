@@ -15,7 +15,7 @@
                                 @update:model-value="table?.tableApi?.getColumn('email')?.setFilterValue($event)" />
 
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <CustomersDeleteModal
+                                <!-- <CustomersDeleteModal
                                     :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
                                     <UButton v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
                                         label="Delete" color="error" variant="subtle" icon="i-lucide-trash">
@@ -25,7 +25,7 @@
                                             </UKbd>
                                         </template>
                                     </UButton>
-                                </CustomersDeleteModal>
+                                </CustomersDeleteModal> -->
 
                                 <USelect v-model="statusFilter" :items="[
                                     { label: 'All', value: 'all' },
@@ -107,7 +107,7 @@ const table = useTemplateRef('table')
 const status = ref('success')
 const statusFilter = ref('all')
 const columnFilters = ref([{
-    id: 'type',
+    id: 'email',
     value: ''
 }])
 

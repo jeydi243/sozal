@@ -182,12 +182,12 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
-const { data: ListeRendezVous, error, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv', async () => {
+const { data: ListeRendezVous, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv', async () => {
     const { data, error } = await supabase.from('rdv').select('id, date_rdv, patient:patients!inner(*), organisation:organisations!inner(*)')
     if (error) {
         throw error;
     }
-    console.log({ data })
+    console.table(data)
     return data;
 });
 const selectedOrganisation = ref(organisations[0])
