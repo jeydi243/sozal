@@ -107,17 +107,13 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'details',
-        header: 'Details',
-        cell: ({ row }) => h(UButton, {
+        header: ({ column }) => h('div', { class: 'text-center' }, [h('p', { class: 'capitalize' }, 'Details')]),
+        cell: ({ row }) => h('div', { class: 'text-center' }, [h(UButton, {
             color: 'primary',
             variant: 'ghost',
             icon: 'i-lucide-eye',
-            to: { name: 'patients-id', params: { id: row.original.id } }
-        }),
-    },
-    {
-        accessorKey: 'mrn',
-        header: 'Patient ID'
+            onClick: () => navigateTo(`/patients/${row.original.id}`)
+        })]),
     },
     {
         accessorKey: 'nom',
@@ -130,7 +126,7 @@ const columns: TableColumn<Patient>[] = [
                 }),
                 h('div', undefined, [
                     h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom + ' ' + row.original.postnom),
-                    h('p', { class: '' }, `@${row.original.nom}`)
+                    h('p', { class: '' }, `${row.original.mrn}`)
                 ])
             ])
         }
@@ -138,6 +134,10 @@ const columns: TableColumn<Patient>[] = [
     {
         accessorKey: 'prenom',
         header: 'Prenom'
+    },
+    {
+        accessorKey: 'date_naissance',
+        header: 'Date de naissance'
     },
     {
         accessorKey: 'sexe',
@@ -157,7 +157,7 @@ const columns: TableColumn<Patient>[] = [
                 onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
             })
         },
-        cell: ({ row }) => row.original.sexe
+        cell: ({ row }) => h('div', { class: 'text-center' }, [h('p', { class: 'capitalize' }, row.original.sexe)])
     },
     {
         accessorKey: 'status',
@@ -292,7 +292,7 @@ const pagination = ref({
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border)'
+                    td: 'border-b border-(--ui-border) py-1'
                 }" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">

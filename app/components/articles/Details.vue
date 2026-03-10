@@ -30,11 +30,29 @@ const { data: affectations, refresh: refreshAffectations, pending: loadingAffect
     { watch: [() => props.article?.id, () => open.value], immediate: true }
 )
 
-// Fetch organisations for selection
-const { data: organisations } = await useAsyncData<Organisation[]>('all-organisations-list', async () => {
-    const { data } = await supabase.from('organisations').select('id, nom')
-    return (data || []) as unknown as Organisation[]
-})
+// Fetch organisations for selection (excluding already assigned)
+const { data: organisations, refresh: refreshOrganisations } = await useAsyncData<Organisation[]>(
+    () => `organisations-available-${props.article?.id}`,
+    async () => {
+        if (!props.article?.id) return []
+
+        const { data: assigned } = await supabase
+            .from('article_organisations')
+            .select('organisation_id')
+            .eq('article_id', props.article.id)
+
+        let query = supabase.from('organisations').select('id, nom')
+
+        const assignedIds = assigned?.map(a => a.organisation_id) || []
+        if (assignedIds.length > 0) {
+            query = query.not('id', 'in', `(${assignedIds.join(',')})`)
+        }
+
+        const { data } = await query
+        return (data || []) as unknown as Organisation[]
+    },
+    { watch: [() => props.article?.id, () => open.value], immediate: true }
+)
 
 const orgItems = computed<SelectMenuItem[]>(() => organisations.value?.map(org => ({
     label: org.nom,
@@ -83,6 +101,7 @@ async function addAffectation() {
         toast.add({ title: 'Succès', description: 'Organisation affectée avec succès', color: 'success' })
         selectedOrgId.value = undefined
         refreshAffectations()
+        refreshOrganisations()
     }
 }
 
@@ -97,12 +116,15 @@ async function deleteAffectation(id: number) {
     } else {
         toast.add({ title: 'Succès', description: 'Affectation supprimée', color: 'success' })
         refreshAffectations()
+        refreshOrganisations()
     }
 }
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Détails & Affectations" :description="props.article?.nom || 'Article'">
+    <UModal v-model:open="open" title="Détails & Affectations" :description="props.article?.nom || 'Article'" :ui="{
+        wrapper: 'w-[600px]'
+    }">
         <template #body>
             <div v-if="props.article" class="space-y-6">
                 <!-- Détails de l'article -->

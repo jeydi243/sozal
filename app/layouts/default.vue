@@ -105,6 +105,14 @@ const links = [[{
     }
   },
   {
+    label: 'Roles et Acces',
+    to: '/settings/access',
+    // icon: 'ion:ios-pricetags-outline',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
     label: 'Articles',
     to: '/settings/articles',
     // icon: 'icon-park-outline:ad-product',

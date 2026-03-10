@@ -8,7 +8,8 @@ const schema = z.object({
     patient_id: z.string().min(2, 'Too short'),
     medecin_id: z.string().optional(),
     organisation_id: z.string(),
-    date_rdv: z.date().max(new Date(), 'Date de rdv'),
+    service_id: z.string().optional(),
+    date_rdv: z.date(),
     heure_rdv: z.string().optional(),
     motif: z.string().optional(),
     prestation_id: z.string(),
@@ -23,6 +24,7 @@ const state = reactive<Partial<Schema>>({
     patient_id: undefined,
     medecin_id: undefined,
     organisation_id: undefined,
+    service_id: undefined,
     date_rdv: undefined,
     heure_rdv: undefined,
     motif: undefined,
@@ -57,6 +59,14 @@ const { data: prestations, execute: fetchPrestations } = useAsyncData<Article[]>
     return data as Article[]
 }, { immediate: false, lazy: true })
 
+const { data: services, execute: fetchServices } = useAsyncData<Organisation[]>('rdv-services', async () => {
+    const { data, error } = await supabase.from('organisations').select('id, nom, code, lookup:lookups!inner(*)')
+        .eq('lookup.description', 'Service Médicale')
+        .eq('organisation_parent_id', state.organisation_id || '')
+    if (error) throw error
+    return data as Organisation[]
+}, { immediate: false, lazy: true })
+
 // Déclenche les fetches uniquement à l'ouverture du slideover
 watch(open, (isOpen) => {
     if (isOpen) {
@@ -64,7 +74,12 @@ watch(open, (isOpen) => {
         fetchOrganisations()
         fetchMedecins()
         fetchPrestations()
+        fetchServices()
     }
+})
+
+watch(state, () => {
+    fetchServices()
 })
 
 const itemsPatients = computed<SelectMenuItem[]>(() => patients.value?.map(patient => ({
@@ -85,6 +100,10 @@ const itemsMedecins = computed<SelectMenuItem[]>(() => medecins.value?.map((mede
 const itemsPrestations = computed<SelectMenuItem[]>(() => prestations.value?.map((prestation: Article) => ({
     label: prestation?.nom,
     id: String(prestation?.id)
+})) || [])
+const itemsServices = computed<SelectMenuItem[]>(() => services.value?.map((service: Organisation) => ({
+    label: service?.nom,
+    id: String(service?.id)
 })) || [])
 
 
@@ -134,33 +153,41 @@ function onError(error: FormErrorEvent) {
                     <USelectMenu v-model.trim="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
                 </UFormField>
 
-                <UFormField label="Organisation" name="organisation_id">
+                <!-- <UFormField label="Organisation" name="organisation_id">
                     <USelectMenu v-model.trim="state.organisation_id" value-key="id" :items="itemsOrganisations"
                         class="w-full" />
+                </UFormField> -->
+                <UFormField label="Service" name="service_id">
+                    <USelectMenu v-model="state.service_id" value-key="id" :items="itemsServices" class="w-full"
+                        icon="material-symbols:medical-services-outline" />
                 </UFormField>
                 <UFormField label="Medecin" name="medecin_id">
                     <USelectMenu v-model.trim="state.medecin_id" value-key="id" :items="itemsMedecins" class="w-full" />
                 </UFormField>
-                <UFormField label="Date de rdv" placeholder="08/12/2025" name="date_rdv">
-                    <UInputDate v-model="dateNaissanceModel" class="w-full" :max-date="maxDate">
-                        <template #trailing>
-                            <UPopover :reference="inputDateRef?.inputsRef[3]?.$el">
-                                <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    aria-label="Select a date" class="px-0" />
+                <div class="flex flex-row gap-1">
+                    <UFormField label="Date de rdv" placeholder="08/12/2025" name="date_rdv" class="w-full">
+                        <UInputDate v-model="dateNaissanceModel" class="w-full" :max-date="maxDate">
+                            <template #trailing>
+                                <UPopover :reference="inputDateRef?.inputsRef[3]?.$el">
+                                    <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
+                                        aria-label="Select a date" class="px-0" />
 
-                                <template #content>
-                                    <UCalendar v-model="dateNaissanceModel" class="p-2" :max-date="maxDate" />
-                                </template>
-                            </UPopover>
-                        </template>
-                    </UInputDate>
-                </UFormField>
-                <UFormField label="Heure de rdv" name="heure_rdv">
-                    <UInput v-model="state.heure_rdv" type="time" class="w-full" icon="i-lucide-clock" />
-                </UFormField>
+                                    <template #content>
+                                        <UCalendar v-model="dateNaissanceModel" class="p-2" :max-date="maxDate" />
+                                    </template>
+                                </UPopover>
+                            </template>
+                        </UInputDate>
+                    </UFormField>
+
+                    <UFormField label="Heure de rdv" name="heure_rdv" class="w-full">
+                        <UInput v-model="state.heure_rdv" type="time" class="w-full" icon="i-lucide-clock" />
+                    </UFormField>
+                </div>
+                
                 <UFormField label="Prestation" name="prestation_id">
                     <USelectMenu v-model="state.prestation_id" value-key="id" :items="itemsPrestations" class="w-full"
-                        icon="maki:doctor" />
+                        icon="material-symbols:medical-services-outline" />
                 </UFormField>
 
                 <div class="flex justify-end gap-2">

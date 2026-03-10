@@ -1,98 +1,101 @@
+<script setup lang="ts">
+import * as z from 'zod'
+import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
+import type { Lookup, Organisation } from '~/types'
+
+const props = defineProps<{
+    user_id: string
+}>()
+
+const emit = defineEmits(['affectation-added'])
+
+const supabase = useSupabaseClient()
+const toast = useToast()
+const open = ref(false)
+
+const schema = z.object({
+    lookup_id: z.string().min(1, 'Type requis'),
+    organisation_id: z.string().min(1, 'Organisation requise')
+})
+type Schema = z.output<typeof schema>
+
+const state = reactive<Partial<Schema>>({
+    lookup_id: undefined,
+    organisation_id: undefined,
+})
+
+// Fetch Lookups for Affectation types
+const { data: lookups } = await useAsyncData('affectation-lookups', async () => {
+    const { data, error } = await supabase
+        .from('lookups')
+        .select('id, nom, classes!inner(*)')
+        .eq('classes.table_name', 'TYPE_AFFECTATION')
+    if (error) throw error
+    return data
+})
+
+// Fetch Services (Organisations with "Service Médicale" description in lookup)
+const { data: services } = await useAsyncData('medical-services', async () => {
+    const { data, error } = await supabase
+        .from('organisations')
+        .select('id, nom, code, lookup:lookups!inner(*)')
+        .eq('lookup.description', 'Service Médicale')
+    if (error) throw error
+    return data as unknown as Organisation[]
+})
+
+const lookupItems = computed<SelectMenuItem[]>(() => lookups.value?.map((l: any) => ({
+    label: l.nom,
+    id: l.id
+})) || [])
+
+const serviceItems = computed<SelectMenuItem[]>(() => services.value?.map((s: Organisation) => ({
+    label: `${s.nom} (${s.code || 'N/A'})`,
+    id: s.id
+})) || [])
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+    const { error } = await (supabase.from('affectations') as any)
+        .insert({
+            user_id: props.user_id,
+            ...event.data
+        })
+
+    if (error) {
+        toast.add({ title: 'Erreur', description: error.message, color: 'error' })
+    } else {
+        toast.add({ title: 'Succès', description: 'Affectation ajoutée avec succès', color: 'success' })
+        open.value = false
+        emit('affectation-added')
+        
+        // Reset state
+        state.lookup_id = undefined
+        state.organisation_id = undefined
+    }
+}
+</script>
+
 <template>
-    <UModal v-model:open="open" :title="`Ajouter une affectation pour ${user_id}`" :dismissible="true">
-        <UButton icon="i-lucide-plus" label="Ajouter une affectation" color="primary" variant="solid" />
+    <UModal v-model:open="open" title="Ajouter une affectation" description="Affecter l'utilisateur à un service ou une organisation">
+        <UButton icon="i-lucide-plus" label="Affecter" color="primary" size="sm" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Utilisateur" name="user_id">
-                    <USelectMenu disabled v-model="state.user_id" value-key="id" :items="itemsUsers" class="w-full" />
+                <UFormField label="Type d'affectation" name="lookup_id">
+                    <USelectMenu v-model="state.lookup_id" value-key="id" :items="lookupItems"
+                        placeholder="Sélectionner un type..." />
                 </UFormField>
 
-                <UFormField label="Type" name="lookup_id">
-                    <USelectMenu v-model="state.lookup_id" value-key="id" :items="items" class="w-full" />
+                <UFormField label="Service / Organisation" name="organisation_id">
+                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="serviceItems"
+                        placeholder="Choisir un service..." icon="i-lucide-building" />
                 </UFormField>
 
-                <UFormField label="Organisation" name="organisation_id">
-                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="itemsOrganisations"
-                        class="w-full" />
-                    <!-- <UInput v-model="state.organisation_id" class="w-full" placeholder="John Doe" /> -->
-                </UFormField>
-
-                <div class="flex justify-end gap-2">
-                    <UButton label="Cancel" color="neutral" variant="subtle" @click="open = false" />
-                    <UButton label="Affecter a l'organisation" color="primary" variant="solid" type="submit" />
+                <div class="flex justify-end gap-2 pt-2">
+                    <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />
+                    <UButton label="Affecter" color="primary" variant="solid" type="submit" />
                 </div>
             </UForm>
         </template>
     </UModal>
 </template>
-<script setup lang="ts">
-import * as z from 'zod'
-import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
-import type { Lookup, Organisation } from '~/types'
-const supabase = useSupabaseClient()
-const schema = z.object({
-    user_id: z.string(),
-    lookup_id: z.string(),
-    organisation_id: z.string()
-})
-
-const { data: lookups } = await useAsyncData('add-affectation', async () => {
-    const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'TYPE_AFFECTATION')
-    return data
-})
-const { data: users } = await useAsyncData('profils', async () => {
-    const { data } = await supabase.from('profils').select()
-    return data
-})
-
-const items = computed<SelectMenuItem[]>(() => lookups.value?.map((lookup: Lookup) => ({
-    label: lookup.nom,
-    id: lookup.id
-})) || [])
-const itemsUsers = computed<SelectMenuItem[]>(() => users.value?.map(user => ({
-    label: user.prenom + ' ' + user.nom,
-    id: user.user_id
-})) || [])
-const { data: organisations } = await useAsyncData('organisations', async () => {
-    const { data } = await supabase.from('organisations').select()
-    return data
-})
-const itemsOrganisations = computed<SelectMenuItem[]>(() => organisations.value?.map((organisation: Organisation) => ({
-    label: organisation.nom,
-    id: organisation.id
-})) || [])
-const props = defineProps({
-    user_id: {
-        type: String
-    }
-})
-
-const open = ref(false)
-const toast = useToast()
-type Schema = z.output<typeof schema>
-
-const state = reactive<Partial<Schema>>({
-    user_id: props.user_id,
-    lookup_id: undefined,
-    organisation_id: undefined,
-})
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-    console.log(event?.data)
-    console.log(props.user_id)
-    const { data, error } = await supabase
-        .from('affectations')
-        .insert(event?.data)
-        .select()
-
-    if (error) {
-        toast.add({ title: 'Error', description: `Can't add new affectation ${error.message}`, color: 'error' })
-    } else {
-        toast.add({ title: 'Success', description: `New affectation added`, color: 'success' })
-        open.value = false
-        emit('affectation-added')
-    }
-}
-
-const emit = defineEmits(['affectation-added'])
-</script>

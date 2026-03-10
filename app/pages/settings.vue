@@ -30,6 +30,11 @@ const links = [[{
   to: '/settings/users'
 },
 {
+  label: 'Roles et Acces',
+  icon: 'i-lucide-shield',
+  to: '/settings/access'
+},
+{
   label: 'Articles',
   icon: 'icon-park-outline:ad-product',
   to: '/settings/articles'

@@ -188,6 +188,7 @@ export interface RendezVous {
   id: string
   patient: Patient
   organisation: Organisation
+  service: Organisation
   date: string
   heure: string
   statut: string

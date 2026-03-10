@@ -57,18 +57,7 @@
         </template>
     </UDashboardPanel>
 
-    <USlideover v-model:open="openSlideOver" title="Détails de l'organisation" :ui="{ content: 'max-w-2xl' }">
-        <template #content>
-            <div class="p-4">
-                <p v-if="selectedOrganisation" class="text-lg font-semibold">{{ selectedOrganisation.nom }}</p>
-                <div v-if="selectedOrganisation" class="mt-4 space-y-2 text-sm text-(--ui-text-muted)">
-                    <p><strong>Code:</strong> {{ selectedOrganisation.code || 'N/A' }}</p>
-                    <p><strong>Description:</strong> {{ selectedOrganisation.description || 'N/A' }}</p>
-                    <p><strong>Statut:</strong> {{ selectedOrganisation.status || 'Actif' }}</p>
-                </div>
-            </div>
-        </template>
-    </USlideover>
+    <OrganisationsDetails v-model:open="openSlideOver" :organisation="selectedOrganisation" />
 </template>
 
 <script setup lang="ts">
