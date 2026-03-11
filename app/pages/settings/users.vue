@@ -10,9 +10,8 @@
 
                     <template #right>
                         <div class="flex flex-wrap items-center justify-between gap-1.5">
-                            <UInput :model-value="(table?.tableApi?.getColumn('email')?.getFilterValue() as string)"
-                                class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..."
-                                @update:model-value="table?.tableApi?.getColumn('email')?.setFilterValue($event)" />
+                            <UInput v-model="searchInput"
+                                class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher un utilisateur (email)..." />
 
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <!-- <CustomersDeleteModal
@@ -122,6 +121,17 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10
 })
+
+const { copy } = useClipboard()
+const searchInput = ref('')
+
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('email')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
+})
 const columns: TableColumn<Profil>[] = [
     {
         id: 'details',
@@ -211,10 +221,10 @@ function getRowItems(row: Row<Profil>) {
             label: 'Copie ID User',
             icon: 'i-lucide-copy',
             onSelect() {
-                navigator.clipboard.writeText(row.original.id.toString())
+                copy(row.original.id.toString())
                 toast.add({
-                    title: 'Copied to clipboard',
-                    description: 'Classe ID copied to clipboard'
+                    title: 'Copié !',
+                    description: 'ID de l\'utilisateur copié dans le presse-papiers'
                 })
             }
         },

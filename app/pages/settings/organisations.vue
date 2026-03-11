@@ -8,9 +8,8 @@
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <UInput :model-value="(table?.tableApi?.getColumn('description')?.getFilterValue() as string)"
-                            class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher une organisation..."
-                            @update:model-value="table?.tableApi?.getColumn('description')?.setFilterValue($event)" />
+                        <UInput v-model="searchInput"
+                            class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher une organisation..." />
 
                         <div class="flex flex-wrap items-center gap-1.5">
                             <USelect v-model="statusFilter" :items="[
@@ -102,6 +101,17 @@ const {
 
 const openSlideOver = ref(false)
 const selectedOrganisation = ref<Organisation | null>(null)
+
+const { copy } = useClipboard()
+const searchInput = ref('')
+
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('description')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
+})
 
 const columns: TableColumn<Organisation>[] = [
     {
@@ -223,7 +233,7 @@ function getRowItems(row: Row<Organisation>) {
             label: 'Copie ID Organisation',
             icon: 'i-lucide-copy',
             onSelect() {
-                navigator.clipboard.writeText(row.original.id.toString())
+                copy(row.original.id.toString())
                 toast.add({
                     title: 'Copié !',
                     description: 'ID de l\'organisation copié dans le presse-papiers'

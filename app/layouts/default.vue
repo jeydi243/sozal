@@ -2,7 +2,7 @@
 const route = useRoute()
 const toast = useToast()
 
-const open = ref(false)
+const open = useLocalStorage('dashboard-sidebar-open', true)
 
 const links = [[{
   label: 'Home',

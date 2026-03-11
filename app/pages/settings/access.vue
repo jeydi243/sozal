@@ -54,17 +54,17 @@ const deleteAffectation = async (id: number) => {
 <template>
 
     <!-- Panel Gauche: Liste des utilisateurs -->
-    <UDashboardPanel id="users-list-panel" :default-size="10" :min-size="10" resizable>
-        <!-- <UDashboardNavbar title="Utilisateurs">
+    <div id="users-list-panel" :default-size="20" :min-size="20" resizable>
+        <UDashboardNavbar title="Utilisateurs">
             <template #trailing>
                 <UBadge v-if="users" :label="users.length" variant="subtle" />
             </template>
-        </UDashboardNavbar> -->
+        </UDashboardNavbar>
         <!-- <SettingsUserList v-model="selectedUser" :users="users || []" /> -->
-    </UDashboardPanel>
+    </div>
 
     <!-- Panel Droit: Détails ou Vide -->
-    <UDashboardPanel id="user-details-panel" v-if="selectedUser" class="flex-1">
+    <div id="user-details-panel" v-if="selectedUser" class="flex-1">
         <UDashboardNavbar title="Détails de l'utilisateur" :toggle="false">
             <template #leading>
                 <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" class="lg:hidden"
@@ -179,7 +179,7 @@ const deleteAffectation = async (id: number) => {
                 </div>
             </div>
         </div>
-    </UDashboardPanel>
+    </div>
 
     <!-- État Vide -->
     <UDashboardPanel v-else class="flex-1">

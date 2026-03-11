@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
+const { idle } = useIdle(5 * 60 * 1000) // 5 minutes
+const { isOnline } = useNetwork()
 
 const color = computed(() => colorMode.value === 'dark' ? '#111827' : 'white')
 
@@ -49,6 +51,35 @@ watch(user, async (newUser) => {
     }
   }
 }, { immediate: true })
+
+watch(idle, (isIdle) => {
+  if (isIdle && user.value) {
+    toast.add({
+      title: 'Session inactive',
+      description: 'Vous êtes inactif depuis 5 minutes. Vos données sont protégées.',
+      color: 'warning',
+      icon: 'i-lucide-shield-alert'
+    })
+  }
+})
+
+watch(isOnline, (online) => {
+  if (!online) {
+    toast.add({
+      title: 'Hors connexion',
+      description: 'Vous avez perdu votre connexion internet. Attention à vos saisies.',
+      color: 'error',
+      icon: 'i-lucide-wifi-off'
+    })
+  } else {
+    toast.add({
+      title: 'Connexion rétablie',
+      description: 'Vous êtes de nouveau en ligne.',
+      color: 'success',
+      icon: 'i-lucide-wifi'
+    })
+  }
+})
 </script>
 
 <template>

@@ -43,18 +43,10 @@ defineShortcuts({
 
 <template>
   <div class="overflow-y-auto divide-y divide-(--ui-border) h-full pb-2">
-    <div
-      v-for="(user, index) in users"
-      :key="index"
-      :ref="el => { (usersRefs as any)[user.id] = el as Element }"
-    >
-      <div
-        class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors"
-        :class="[
-          selectedUser && selectedUser.id === user.id ? 'border-(--ui-primary) bg-(--ui-primary)/10' : 'border-transparent hover:border-(--ui-primary) hover:bg-(--ui-primary)/5'
-        ]"
-        @click="selectedUser = user"
-      >
+    <div v-for="(user, index) in users" :key="index" :ref="el => { (usersRefs as any)[user.id] = el as Element }">
+      <div class="p-4 sm:px-6 text-sm cursor-pointer border-l-2 transition-colors" :class="[
+        selectedUser && selectedUser.id === user.id ? 'border-(--ui-primary) bg-(--ui-primary)/10' : 'border-transparent hover:border-(--ui-primary) hover:bg-(--ui-primary)/5'
+      ]" @click="selectedUser = user">
         <div class="flex items-center gap-3">
           <UAvatar :alt="`${user.prenom} ${user.nom}`" size="sm" />
           <div class="min-w- flex-1">

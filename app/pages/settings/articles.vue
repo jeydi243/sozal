@@ -9,9 +9,8 @@
 
                     <template #right>
                         <div class="flex flex-wrap items-center justify-between gap-1.5">
-                            <UInput :model-value="(table?.tableApi?.getColumn('nom')?.getFilterValue() as string)"
-                                class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher un article..."
-                                @update:model-value="table?.tableApi?.getColumn('nom')?.setFilterValue($event)" />
+                            <UInput v-model="searchInput"
+                                class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher un article..." />
 
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <USelect v-model="statusFilter" :items="[
@@ -97,6 +96,17 @@ const {
 const openDetailsArticle = ref(false)
 const openDetailsAffectation = ref(false)
 const selectedArticle = ref<Article | null>(null)
+
+const { copy } = useClipboard()
+const searchInput = ref('')
+
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
+})
 
 const columns: TableColumn<Article>[] = [
     {
@@ -191,7 +201,7 @@ function getRowItems(row: Row<Article>) {
             label: 'Copier l\'ID',
             icon: 'i-lucide-copy',
             onSelect() {
-                navigator.clipboard.writeText(row.original.id.toString())
+                copy(row.original.id.toString())
                 toast.add({
                     title: 'Copié',
                     description: `ID article #${row.original.id} copié dans le presse-papiers`
