@@ -2,6 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import { upperFirst } from 'scule'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import type { Patient } from '~/types'
 
 definePageMeta({
@@ -38,6 +39,23 @@ const {
     setPage,
     setStatusFilter
 } = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('lg')
+
+watch(isMobile, (mobile) => {
+    columnVisibility.value = {
+        mobile_card: mobile,
+        select: !mobile,
+        details: !mobile,
+        nom: !mobile,
+        prenom: !mobile,
+        date_naissance: !mobile,
+        sexe: !mobile,
+        status: !mobile,
+        actions: !mobile,
+    }
+}, { immediate: true })
 
 const UAvatar = resolveComponent('UAvatar')
 
@@ -99,7 +117,6 @@ function getRowItems(row: Row<Patient>) {
 const columns: TableColumn<Patient>[] = [
     {
         id: 'mobile_card',
-        class: 'lg:hidden',
         header: 'Patients',
         cell: ({ row }) => {
             const color = {
@@ -154,7 +171,6 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'select',
-        class: 'hidden lg:table-cell',
         header: ({ table }) =>
             h(UCheckbox, {
                 'modelValue': table.getIsSomePageRowsSelected()
@@ -173,8 +189,14 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'details',
-        class: 'hidden lg:table-cell',
-        header: (r) => h('div', { class: 'text-center' }, [h('p', { class: 'capitalize' }, 'Details')]),
+        header: ({ column }) => h('div', { class: 'text-center' }, [h(UButton, {
+            color: 'neutral',
+            variant: 'ghost',
+            label: 'Détails',
+            icon: column.getIsSorted() ? (column.getIsSorted() === 'asc' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow') : 'i-lucide-arrow-up-down',
+            class: '-mx-2.5',
+            onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+        })]),
         cell: ({ row }) => h('div', { class: 'text-center' }, [h(UButton, {
             color: 'primary',
             variant: 'ghost',
@@ -184,7 +206,6 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'nom',
-        class: 'hidden lg:table-cell',
         header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
@@ -201,17 +222,14 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'prenom',
-        class: 'hidden lg:table-cell',
         header: 'Prenom'
     },
     {
         accessorKey: 'date_naissance',
-        class: 'hidden lg:table-cell',
         header: 'Date de naissance'
     },
     {
         accessorKey: 'sexe',
-        class: 'hidden lg:table-cell',
         header: ({ column }) => {
             const isSorted = column.getIsSorted()
 
@@ -232,7 +250,6 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'status',
-        class: 'hidden lg:table-cell',
         header: 'Status',
         filterFn: 'equals',
         cell: ({ row }) => {
@@ -249,7 +266,6 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'actions',
-        class: 'hidden lg:table-cell',
         cell: ({ row }) => {
             return h(
                 'div',
@@ -328,11 +344,11 @@ const columns: TableColumn<Patient>[] = [
 
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0" :data="patients || []" :columns="columns" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none lg:[&>tr]:table-row hidden lg:table-header-group',
+                    base: 'table-fixed border-separate border-spacing-0 w-full',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none hidden lg:table-header-group',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) p-2'
+                    td: 'border-b border-(--ui-border) p-0 lg:p-2'
                 }" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
