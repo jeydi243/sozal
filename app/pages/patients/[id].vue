@@ -150,7 +150,7 @@
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
                                         Historique des consultations</p>
-                                    <UButton label="Nouvelle consultation" icon="i-lucide-plus" size="xs"
+                                    <UButton label="Nouvelle consultation" icon="i-lucide-plus" size="md"
                                         color="primary" variant="subtle" />
                                 </div>
                                 <div
@@ -165,7 +165,7 @@
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
                                         Rendez-vous</p>
-                                    <UButton label="Nouveau RDV" icon="i-lucide-calendar-plus" size="xs" color="primary"
+                                    <UButton label="Nouveau RDV" icon="i-lucide-calendar-plus" size="md" color="primary"
                                         variant="subtle" />
                                 </div>
                                 <div
@@ -180,7 +180,7 @@
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
                                         Couverture santé</p>
-                                    <UButton label="Ajouter une mutuelle" icon="i-lucide-plus" size="xs" color="primary"
+                                    <UButton label="Ajouter une mutuelle" icon="i-lucide-plus" size="md" color="primary"
                                         variant="subtle" />
                                 </div>
                                 <div

@@ -15,23 +15,33 @@ useHead({
     ]
 })
 
-const table = useTemplateRef('table')
-const toast = useToast()
-const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
-const UAvatar = resolveComponent('UAvatar')
 const supabase = useSupabaseClient()
-const UCheckbox = resolveComponent('UCheckbox')
-const rowSelection = ref()
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const columnVisibility = ref()
+const toast = useToast()
 
-const columnFilters = ref([{
-    id: 'nom',
-    value: ''
-}])
+const {
+    table,
+    UButton,
+    UBadge,
+    UDropdownMenu,
+    UCheckbox,
+    columnFilters,
+    columnVisibility,
+    rowSelection,
+    pagination,
+    paginationOptions,
+    statusFilter,
+    columnDisplayItems,
+    selectedRowCount,
+    totalFilteredRows,
+    currentPage,
+    currentPageSize,
+    setPage,
+    setStatusFilter
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
 
-//use useasyncData to fetch patients data from supabase
+const UAvatar = resolveComponent('UAvatar')
+
+// Fetch patients data from supabase
 const { data: patients, error, refresh: refreshPatients } = await useAsyncData('patients', async () => {
     const { data, error } = await supabase.from('patients').select();
     if (error) {
@@ -88,7 +98,63 @@ function getRowItems(row: Row<Patient>) {
 
 const columns: TableColumn<Patient>[] = [
     {
+        id: 'mobile_card',
+        class: 'lg:hidden',
+        header: 'Patients',
+        cell: ({ row }) => {
+            const color = {
+                subscribed: 'success' as const,
+                unsubscribed: 'error' as const,
+                bounced: 'warning' as const
+            }[row.original.status] || 'neutral'
+
+            return h('div', { class: 'flex flex-col gap-3 p-3 border border-(--ui-border) rounded-xl bg-(--ui-bg-elevated)/50' }, [
+                h('div', { class: 'flex items-center justify-between' }, [
+                    h('div', { class: 'flex items-center gap-3' }, [
+                        h(UAvatar, {
+                            src: row.original.avatar ?? undefined,
+                            size: 'md',
+                            alt: row.original.nom
+                        }),
+                        h('div', undefined, [
+                            h('p', { class: 'font-bold text-(--ui-text-highlighted)' }, `${row.original.nom} ${row.original.postnom}`),
+                            h('p', { class: 'text-xs text-(--ui-text-muted)' }, row.original.mrn)
+                        ])
+                    ]),
+                    h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
+                        () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
+                    )
+                ]),
+                h('div', { class: 'grid grid-cols-2 gap-2 text-xs' }, [
+                    h('div', undefined, [
+                        h('p', { class: 'text-(--ui-text-muted) mb-1' }, 'Prénom & Genre'),
+                        h('div', { class: 'flex gap-2 items-center' }, [
+                            h('span', undefined, row.original.prenom),
+                            h(UBadge, { variant: 'subtle', size: 'sm', leadingIcon: row.original.sexe === 'M' ? 'i-lucide-user' : 'i-lucide-user-round' }, () => upperFirst(row.original.sexe))
+                        ])
+                    ]),
+                    h('div', { class: 'text-right' }, [
+                        h('p', { class: 'text-(--ui-text-muted) mb-1' }, 'Statut'),
+                        h(UBadge, { variant: 'subtle', size: 'sm', color }, () => row.original.status)
+                    ])
+                ]),
+                h('div', { class: 'flex items-center justify-between text-xs border-t border-(--ui-border) pt-2' }, [
+                    h('p', { class: 'text-(--ui-text-muted)' }, 'Né(e) le ' + row.original.date_naissance),
+                    h(UButton, {
+                        label: 'Détails',
+                        color: 'primary',
+                        variant: 'ghost',
+                        size: 'sm',
+                        icon: 'i-lucide-eye',
+                        onClick: () => navigateTo(`/patients/${row.original.id}`)
+                    })
+                ])
+            ])
+        }
+    },
+    {
         id: 'select',
+        class: 'hidden lg:table-cell',
         header: ({ table }) =>
             h(UCheckbox, {
                 'modelValue': table.getIsSomePageRowsSelected()
@@ -107,7 +173,8 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'details',
-        header: ({ column }) => h('div', { class: 'text-center' }, [h('p', { class: 'capitalize' }, 'Details')]),
+        class: 'hidden lg:table-cell',
+        header: (r) => h('div', { class: 'text-center' }, [h('p', { class: 'capitalize' }, 'Details')]),
         cell: ({ row }) => h('div', { class: 'text-center' }, [h(UButton, {
             color: 'primary',
             variant: 'ghost',
@@ -117,6 +184,7 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'nom',
+        class: 'hidden lg:table-cell',
         header: 'Nom',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
@@ -133,14 +201,17 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'prenom',
+        class: 'hidden lg:table-cell',
         header: 'Prenom'
     },
     {
         accessorKey: 'date_naissance',
+        class: 'hidden lg:table-cell',
         header: 'Date de naissance'
     },
     {
         accessorKey: 'sexe',
+        class: 'hidden lg:table-cell',
         header: ({ column }) => {
             const isSorted = column.getIsSorted()
 
@@ -161,6 +232,7 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         accessorKey: 'status',
+        class: 'hidden lg:table-cell',
         header: 'Status',
         filterFn: 'equals',
         cell: ({ row }) => {
@@ -177,6 +249,7 @@ const columns: TableColumn<Patient>[] = [
     },
     {
         id: 'actions',
+        class: 'hidden lg:table-cell',
         cell: ({ row }) => {
             return h(
                 'div',
@@ -202,25 +275,7 @@ const columns: TableColumn<Patient>[] = [
     }
 ]
 
-const statusFilter = ref('all')
-
-watch(() => statusFilter.value, (newVal) => {
-    if (!table?.value?.tableApi) return
-
-    const statusColumn = table.value.tableApi.getColumn('status')
-    if (!statusColumn) return
-
-    if (newVal === 'all') {
-        statusColumn.setFilterValue(undefined)
-    } else {
-        statusColumn.setFilterValue(newVal)
-    }
-})
-
-const pagination = ref({
-    pageIndex: 0,
-    pageSize: 10
-})
+// Les watches et l'état de pagination sont maintenant gérés par useDataTable
 </script>
 
 <template>
@@ -262,22 +317,9 @@ const pagination = ref({
                         { label: 'Unsubscribed', value: 'unsubscribed' },
                         { label: 'Bounced', value: 'bounced' }
                     ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                        placeholder="Filter status" class="min-w-28" />
-                    <UDropdownMenu :items="table?.tableApi
-                        ?.getAllColumns()
-                        .filter((column) => column.getCanHide())
-                        .map((column) => ({
-                            label: upperFirst(column.id),
-                            type: 'checkbox' as const,
-                            checked: column.getIsVisible(),
-                            onUpdateChecked(checked: boolean) {
-                                table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                            },
-                            onSelect(e?: Event) {
-                                e?.preventDefault()
-                            }
-                        }))
-                        " :content="{ align: 'end' }">
+                        placeholder="Filter status" class="min-w-28"
+                        @update:model-value="setStatusFilter('status', $event)" />
+                    <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                         <UButton label="Display" color="neutral" variant="outline"
                             trailing-icon="i-lucide-settings-2" />
                     </UDropdownMenu>
@@ -285,27 +327,22 @@ const pagination = ref({
             </div>
 
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-                    getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0" :data="patients" :columns="columns" :ui="{
+                v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0" :data="patients || []" :columns="columns" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none lg:[&>tr]:table-row hidden lg:table-header-group',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) py-1'
+                    td: 'border-b border-(--ui-border) p-2'
                 }" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
                 <div class="text-sm text-(--ui-text-muted)">
-                    {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-                    {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+                    {{ selectedRowCount }} sur {{ totalFilteredRows }} ligne(s) sélectionnée(s).
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-                        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-                        :total="table?.tableApi?.getFilteredRowModel().rows.length"
-                        @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
+                    <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
+                        :total="totalFilteredRows" @update:page="setPage" />
                 </div>
             </div>
         </template>
