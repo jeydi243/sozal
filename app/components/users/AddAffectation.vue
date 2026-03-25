@@ -67,7 +67,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         toast.add({ title: 'Succès', description: 'Affectation ajoutée avec succès', color: 'success' })
         open.value = false
         emit('affectation-added')
-        
+
         // Reset state
         state.lookup_id = undefined
         state.organisation_id = undefined
@@ -76,18 +76,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Ajouter une affectation" description="Affecter l'utilisateur à un service ou une organisation">
+    <UModal v-model:open="open" title="Ajouter une affectation"
+        description="Affecter l'utilisateur à un service ou une organisation">
         <UButton icon="i-lucide-plus" label="Affecter" color="primary" size="sm" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Type d'affectation" name="lookup_id">
-                    <USelectMenu v-model="state.lookup_id" value-key="id" :items="lookupItems"
+                <UFormField label="Type d'affectation" name="lookup_id" class="w-full">
+                    <USelectMenu class="w-full" v-model="state.lookup_id" value-key="id" :items="lookupItems"
                         placeholder="Sélectionner un type..." />
                 </UFormField>
 
-                <UFormField label="Service / Organisation" name="organisation_id">
-                    <USelectMenu v-model="state.organisation_id" value-key="id" :items="serviceItems"
+                <UFormField label="Service / Organisation" name="organisation_id" class="w-full">
+                    <USelectMenu class="w-full" v-model="state.organisation_id" value-key="id" :items="serviceItems"
                         placeholder="Choisir un service..." icon="i-lucide-building" />
                 </UFormField>
 

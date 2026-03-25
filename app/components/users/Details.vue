@@ -1,27 +1,33 @@
 <template>
-    <USlideover description="Details des affectations aux organisations"
-        :description="`${props.user?.prenom} ${props.user?.nom}`" :ui="{ content: 'max-w-3xl' }"
+    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`" :ui="{ content: 'max-w-3xl' }"
         v-model:open="isOpenSlideOver">
 
 
         <template #body>
-            <div class="flex flex-row justify-between">
-                <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshAffectations" />
-                <UsersAddAffectation :user_id="props.user?.user_id" @affectation-added="refreshAffectations" />
-            </div>
+
+            <UTabs :items="items" class="h-full flex flex-col" variant="link">
+                <template #affectations>
+                    <div class="flex flex-row justify-between">
+                        <UButton icon="iconoir:refresh-double" color="primary" variant="ghost"
+                            @click="refreshAffectations" />
+                        <UsersAddAffectation :user_id="props.user?.user_id" @affectation-added="refreshAffectations" />
+                    </div>
+                    <UTable ref="table_affectations" v-model:column-filters="columnFilters"
+                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                        v-model:pagination="pagination" empty="Aucune affectation" :pagination-options="{
+                            getPaginationRowModel: getPaginationRowModel()
+                        }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
+                        :loading="affectationsStatus === 'pending'" :ui="{
+                            base: 'table-fixed border-separate border-spacing-0',
+                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                            th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                            td: 'border-b border-(--ui-border) p-2'
+                        }" />
+                </template>
+            </UTabs>
             <div>
-                <UTable ref="table_affectations" v-model:column-filters="columnFilters"
-                    v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                    v-model:pagination="pagination" empty="Aucune affectation" :pagination-options="{
-                        getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
-                    :loading="affectationsStatus === 'pending'" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
+
             </div>
             <UModal v-model:open="isStopModalOpen" title="Confirmer l'arrêt de l'affectation">
                 <template #body>
@@ -67,7 +73,13 @@ const props = defineProps({
 const emit = defineEmits(['update:open'])
 const supabase = useSupabaseClient()
 const toast = useToast()
-
+const items = [
+    {
+        label: 'Affectations',
+        icon: 'i-lucide-building',
+        slot: 'affectations'
+    }
+]
 const { data: affectations, refresh: refreshAffectations, status: affectationsStatus } = useAsyncData(
     `affectations-${props.user?.user_id}`,
     async () => {

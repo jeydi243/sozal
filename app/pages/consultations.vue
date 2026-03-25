@@ -217,15 +217,69 @@ const selectedOrganisation = ref(organisations[0])
         </template>
 
         <template #body>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Card 1 -->
+                <div class="bg-(--ui-bg) ring-1 ring-(--ui-border) rounded-xl p-5 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-(--ui-text-muted) tracking-wider uppercase">Total Waiting</p>
+                            <div class="text-4xl font-bold text-(--ui-primary)">14</div>
+                        </div>
+                        <UIcon name="i-lucide-users" class="w-8 h-8 text-(--ui-text-muted)/30" />
+                    </div>
+                    <div class="mt-4 text-sm">
+                        <span class="text-(--ui-error) font-medium">+2&uarr;</span> <span class="text-(--ui-text-muted)">since last hour</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-(--ui-bg) ring-1 ring-(--ui-border) rounded-xl p-5 flex flex-col justify-between">
+                    <div class="space-y-1">
+                        <p class="text-xs font-semibold text-(--ui-text-muted) tracking-wider uppercase">Avg. Wait Time</p>
+                        <div class="text-4xl font-bold text-(--ui-text-highlighted)">22 <span class="text-xl font-medium text-(--ui-text-muted)">mins</span></div>
+                    </div>
+                    <div class="mt-4 text-sm mt-auto">
+                        <span class="text-(--ui-primary) font-medium">-5%&darr;</span> <span class="text-(--ui-text-muted)">vitals processing up</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-(--ui-bg) ring-1 ring-(--ui-border) rounded-xl p-5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-(--ui-text-muted) tracking-wider uppercase">Rooms Occupied</p>
+                            <div class="text-4xl font-bold text-(--ui-text-highlighted)">8 <span class="text-2xl font-medium text-(--ui-text-muted)">/ 12</span></div>
+                        </div>
+                        <div class="block mt-4">
+                            <div class="w-full bg-(--ui-bg-elevated) rounded-full h-2">
+                                <div class="bg-(--ui-primary) h-2 rounded-full" style="width: 66.6%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-(--ui-warning)/10 ring-1 ring-(--ui-warning)/40 rounded-xl p-5 flex flex-col justify-between shadow-sm">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-(--ui-warning) tracking-wider uppercase drop-shadow-sm">High Priority</p>
+                        <div class="text-4xl font-bold text-(--ui-warning) drop-shadow-sm">3</div>
+                    </div>
+                    <div class="mt-4 text-sm flex items-center gap-2 text-(--ui-warning) font-medium">
+                        <div class="w-2 h-2 rounded-full bg-(--ui-warning)"></div>
+                        Requires Triage Action
+                    </div>
+                </div>
+            </div>
+
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
                     getPaginationRowModel: getPaginationRowModel()
                 }" class="shrink-0" :data="listePatientsAttente || []" :columns="columns" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
+                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) py-0 m-1'
+                    td: 'border-b border-(--ui-border) py-2 m-1'
                 }" />
         </template>
     </UDashboardPanel>

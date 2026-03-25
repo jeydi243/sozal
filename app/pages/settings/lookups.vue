@@ -10,33 +10,10 @@
 
           <template #right>
             <div class="flex flex-wrap items-center justify-between gap-1.5">
-              <UInput v-model="searchInput" class="max-w-sm"
-                icon="i-lucide-search" placeholder="Filter classes..." />
+              <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..." />
 
               <div class="flex flex-wrap items-center gap-1.5">
-
-                <USelect v-model="statusFilter" :items="[
-                  { label: 'All', value: 'all' },
-                  { label: 'Subscribed', value: 'subscribed' },
-                  { label: 'Unsubscribed', value: 'unsubscribed' },
-                  { label: 'Bounced', value: 'bounced' }
-                ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                  placeholder="Filter status" class="min-w-28" />
-                <UDropdownMenu :items="table?.tableApi
-                  ?.getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => ({
-                    label: upperFirst(column.id),
-                    type: 'checkbox' as const,
-                    checked: column.getIsVisible(),
-                    onUpdateChecked(checked: boolean) {
-                      table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                    },
-                    onSelect(e?: Event) {
-                      e?.preventDefault()
-                    }
-                  }))
-                  " :content="{ align: 'end' }">
+                <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                   <UButton label="Display" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
                 </UDropdownMenu>
               </div>
@@ -46,10 +23,9 @@
         </UDashboardNavbar>
       </template>
       <template #body>
-        <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-          v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-            getPaginationRowModel: getPaginationRowModel()
-          }" class="shrink-0 m-2" :data="classes" :columns="columns" :ui="{
+        <UTable ref="tableClasses" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+          v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions"
+          class="shrink-0 m-2" :data="classes || []" :columns="columns" :ui="{
             base: 'table-fixed border-separate border-spacing-0',
             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
             tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -59,23 +35,23 @@
 
         <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
           <div class="text-sm text-(--ui-text-muted)">
-            {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-            {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+            {{ selectedRowCount }} of {{ totalFilteredRows }} row(s) selected.
           </div>
 
           <div class="flex items-center gap-1.5">
-            <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-              :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-              :total="table?.tableApi?.getFilteredRowModel().rows.length"
-              @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
+            <UPagination :default-page="currentPage" :items-per-page="currentPageSize" :total="totalFilteredRows"
+              @update:page="setPage" />
           </div>
         </div>
       </template>
     </UDashboardPanel>
-    <UDrawer v-model:open="openDetailsClasse" title="Drawer with description"
-      description="Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
+    <UDrawer v-model:open="openDetailsClasse" title="Détails" description="Détails de la classe sélectionnée">
       <template #body>
-        <Placeholder class="h-48 m-4" />
+        <div class="p-4 text-center">
+          <p v-if="selectedClasse" class="font-medium">{{ selectedClasse.nom }}</p>
+          <p v-if="selectedClasse" class="text-sm text-(--ui-text-muted)">{{ selectedClasse.description }}</p>
+          <p v-else>Sélectionnez une classe pour voir les détails.</p>
+        </div>
       </template>
     </UDrawer>
     <ClassesUpdateModal v-model:open="openClasseUpdateModal" :classe="selectedClasse ?? undefined"
@@ -90,10 +66,10 @@
         </div>
 
         <div class="max-w-3xl">
-          <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-            v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-              getPaginationRowModel: getPaginationRowModel()
-            }" class="shrink-0 m-2" :data="lookups" :columns="columnsLookups" :loading="loadingLookups" :ui="{
+          <UTable ref="tableLookups" v-model:column-filters="columnFiltersLookups"
+            v-model:column-visibility="columnVisibilityLookups" v-model:row-selection="rowSelectionLookups"
+            v-model:pagination="paginationLookups" :pagination-options="paginationOptionsLookups" class="shrink-0 m-2"
+            :data="lookups" :columns="columnsLookups" :loading="loadingLookups" :ui="{
               base: 'table-fixed border-separate border-spacing-0',
               thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
               tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -120,34 +96,45 @@ useHead({
 })
 
 const supabase = useSupabaseClient()
-const table = useTemplateRef('table')
+const {
+  table: tableClasses,
+  UButton,
+  UDropdownMenu,
+  UCheckbox,
+  columnFilters,
+  columnVisibility,
+  rowSelection,
+  pagination,
+  paginationOptions,
+  columnDisplayItems,
+  selectedRowCount,
+  totalFilteredRows,
+  currentPage,
+  currentPageSize,
+  setPage
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
+const {
+  table: tableLookups,
+  columnFilters: columnFiltersLookups,
+  columnVisibility: columnVisibilityLookups,
+  rowSelection: rowSelectionLookups,
+  pagination: paginationLookups,
+  paginationOptions: paginationOptionsLookups,
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
 const selectedLookup = ref()
 const openUpdateModal = ref(false)
 const openClasseUpdateModal = ref(false)
-const statusFilter = ref('all')
-const columnFilters = ref([{
-  id: 'nom',
-  value: ''
-}])
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
-const columnVisibility = ref()
 const openDetailsClasse = ref(false)
 const openSlideOver = ref(false)
-const rowSelection = ref({ 2: true })
 const toast = useToast()
-const pagination = ref({
-  pageIndex: 0,
-  pageSize: 10
-})
 
 const { copy } = useClipboard()
 const searchInput = ref('')
 
 const debouncedSearch = useDebounceFn((val: string) => {
-  table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
+  tableClasses.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
 }, 300)
 
 watch(searchInput, (val) => {
@@ -168,18 +155,19 @@ const lookupsError = ref<any>(null)
 const columns: TableColumn<Classe>[] = [
   {
     id: 'edit',
-    header: 'Edit',
+    header: () => h('div', { class: 'text-center' }, 'Edit'),
     // icon: 'material-symbols:open-in-full-rounded',
-    cell: ({ row }) => h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      icon: 'i-lucide-edit',
-      class: 'text-center',
-      onClick: () => {
-        selectedClasse.value = row.original;
-        openClasseUpdateModal.value = !openClasseUpdateModal.value;
-      }
-    }),
+    cell: ({ row }) => h('div', { class: 'text-center' }, [
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        icon: 'i-lucide-edit',
+        onClick: () => {
+          selectedClasse.value = row.original;
+          openClasseUpdateModal.value = !openClasseUpdateModal.value;
+        }
+      })
+    ]),
   },
   {
     accessorKey: 'code',
@@ -231,35 +219,20 @@ const columns: TableColumn<Classe>[] = [
     cell: ({ row }) => row.original.table_name
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
-    filterFn: 'equals',
-    cell: ({ row }) => {
-      const color = {
-        subscribed: 'success' as const,
-        unsubscribed: 'error' as const,
-        bounced: 'warning' as const
-      }[row.original.status]
-
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.status
-      )
-    }
-  },
-  {
     id: 'details',
-    header: 'Lookups',
+    header: () => h('div', { class: 'text-center' }, 'Lookups'),
     // icon: 'material-symbols:open-in-full-rounded',
-    cell: ({ row }) => h(UButton, {
-      color: 'neutral',
-      variant: 'solid',
-      icon: 'i-lucide-eye',
-      class: 'text-center',
-      onClick: () => {
-        selectedClasse.value = row.original;
-        openSlideOver.value = !openSlideOver.value;
-      }
-    }),
+    cell: ({ row }) => h('div', { class: 'text-center' }, [
+      h(UButton, {
+        color: 'neutral',
+        variant: 'solid',
+        icon: 'i-lucide-eye',
+        onClick: () => {
+          selectedClasse.value = row.original;
+          openSlideOver.value = !openSlideOver.value;
+        }
+      })
+    ]),
   },
   {
     header: () => h('div', { class: 'text-center' }, 'Actions'),
@@ -311,16 +284,17 @@ const columnsLookups: TableColumn<Classe>[] = [
     id: 'details',
     header: 'Details',
     // icon: 'material-symbols:open-in-full-rounded',
-    cell: ({ row }) => h(UButton, {
-      color: 'neutral',
-      variant: 'ghost',
-      icon: 'material-symbols:edit-outline-rounded',
-      class: 'text-center',
-      onClick: () => {
-        selectedLookup.value = row.original
-        openUpdateModal.value = true
-      }
-    }),
+    cell: ({ row }) => h('div', { class: 'text-center' }, [
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        icon: 'material-symbols:edit-outline-rounded',
+        onClick: () => {
+          selectedLookup.value = row.original
+          openUpdateModal.value = true
+        }
+      })
+    ]),
   },
   { accessorKey: 'code', header: () => h('div', { class: 'flex flex-col items-start' }, 'Code') },
   {

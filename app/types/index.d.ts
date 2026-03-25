@@ -58,6 +58,11 @@ export interface Classe {
   code: string
   nom: string
   status: string
+  created_at: string,
+  updated_at: string,
+  update:Date,
+  start_date: Date,
+  end_date: Date
 }
 
 export type Period = 'daily' | 'weekly' | 'monthly'
