@@ -3,6 +3,7 @@ import type { Lookup, Classe, Organisation, Affectation } from '~/types'
 
 export const useParametresStore = defineStore('parametres', () => {
   const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
 
   const getClasseById = computed(() => (id: string) => {
     return classes.value.find(classe => classe.id === id)?.nom
@@ -26,7 +27,6 @@ export const useParametresStore = defineStore('parametres', () => {
   const getAffectations = computed(() => affectations.value)
 
   async function init_user() {
-    const user = useSupabaseUser()
     if (!user.value) {
       return {
         data: null,

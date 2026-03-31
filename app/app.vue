@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
-const { idle } = useIdle(5 * 60 * 1000) // 5 minutes
+const { idle } = useIdle(2 * 60 * 1000) // 2 minutes
 const { isOnline } = useNetwork()
 
 const color = computed(() => colorMode.value === 'dark' ? '#111827' : 'white')
@@ -56,7 +56,7 @@ watch(idle, (isIdle) => {
   if (isIdle && user.value) {
     toast.add({
       title: 'Session inactive',
-      description: 'Vous êtes inactif depuis 5 minutes. Vos données sont protégées.',
+      description: 'Vous êtes inactif depuis 2 minutes. Vos données sont protégées.',
       color: 'warning',
       icon: 'i-lucide-shield-alert'
     })
