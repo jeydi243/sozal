@@ -10,6 +10,22 @@
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
                         <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
                             placeholder="Rechercher un patient..." />
+
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <USelect v-model="statusFilter" :items="[
+                                { label: 'Toutes', value: 'all' },
+                                { label: 'Confirmé', value: 'confirme' },
+                                { label: 'En attente', value: 'attente' },
+                                { label: 'Annulé', value: 'annule' }
+                            ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+                                placeholder="Filtrer par statut" class="min-w-28"
+                                @update:model-value="setStatusFilter('statut', $event)" />
+
+                            <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
+                                <UButton label="Affichage" color="neutral" variant="outline"
+                                    trailing-icon="i-lucide-settings-2" />
+                            </UDropdownMenu>
+                        </div>
                     </div>
                     <RdvAddModal @rdv-added="refreshListeRendezVous" />
                 </template>
@@ -47,6 +63,7 @@ import { type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
 import type { RendezVous } from '~/types'
 
+// 1. SEO
 useHead({
     title: 'Rendez-vous - Sozal',
     meta: [
@@ -54,15 +71,22 @@ useHead({
     ]
 })
 
+// 2. Services et composables
 const supabase = useSupabaseClient()
 const toast = useToast()
 
-// Utilisation du composable centralisé useDataTable
+// 3. resolveComponent() — obligatoire avant tout usage dans h()
+const UButton = resolveComponent('UButton')
+const UBadge = resolveComponent('UBadge')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const UCheckbox = resolveComponent('UCheckbox')
+
+// 4. Refs d'état UI
+const searchInput = ref('')
+
+// 5. useDataTable (si page avec tableau)
 const {
     table,
-    UButton,
-    UBadge,
-    UDropdownMenu,
     columnFilters,
     columnVisibility,
     rowSelection,
@@ -78,8 +102,7 @@ const {
     setStatusFilter
 } = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
 
-const searchInput = ref('')
-
+// 6. Définition des colonnes (array statique TypeScript)
 const debouncedSearch = useDebounceFn((val: string) => {
     table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
 }, 300)

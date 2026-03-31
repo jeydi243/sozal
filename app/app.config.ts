@@ -8,7 +8,7 @@ export default defineAppConfig({
             base: 'fixed inset-0 flex overflow-hidden'
         },
         container: {
-            base: 'w-full mx-auto px-4 sm:px-6 lg:px-8'
+            base: 'w-full mx-auto px-4 sm:px-6 lg:px-5'
         },
         dashboardPanel: {
             slots: {

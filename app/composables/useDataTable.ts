@@ -1,6 +1,7 @@
+import { ref, computed, useTemplateRef } from 'vue'
+import { UButton, UDropdownMenu, UBadge, UCheckbox } from '#components'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import { upperFirst } from 'scule'
-
 /**
  * Composable réutilisable pour la gestion des tables avec pagination,
  * filtres et visibilité des colonnes.
@@ -9,11 +10,6 @@ import { upperFirst } from 'scule'
  */
 export function useDataTable(options?: { pageSize?: number; filterColumnId?: string }) {
     const table = useTemplateRef<any>('table')
-    const UButton = resolveComponent('UButton')
-    const UDropdownMenu = resolveComponent('UDropdownMenu')
-    const UBadge = resolveComponent('UBadge')
-    const UCheckbox = resolveComponent('UCheckbox')
-
     const columnFilters = ref<{ id: string; value: string }[]>(
         options?.filterColumnId
             ? [{ id: options.filterColumnId, value: '' }]
