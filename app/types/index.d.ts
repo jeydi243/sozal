@@ -104,8 +104,8 @@ export interface Affectation {
   created_at?: string
   start_date?: string
   end_date?: string
-  lookup?: { nom: string, description: string }
-  organisation?: { nom: string, description: string }
+  lookup?: Lookup
+  organisation?: Organisation
 }
 export interface Article {
   id: number
@@ -194,7 +194,7 @@ export interface RendezVous {
   patient: Patient
   organisation: Organisation
   service: Organisation
-  date: string
+  date_rdv: string
   heure: string
   statut: string
 }

@@ -4,6 +4,25 @@
 
 
         <template #body>
+            <!-- Design Information Utilisateur -->
+            <div class="p-4 mx-4 mb-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
+                <div class="flex items-center gap-4">
+                    <UAvatar :alt="props.user?.prenom?.[0]" size="xl" class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
+                    <div class="space-y-0.5">
+                        <h2 class="text-xl font-bold text-(--ui-text-highlighted) tracking-tight">
+                            {{ props.user?.prenom }} {{ props.user?.nom }} <span v-if="props.user?.postnom" class="uppercase text-sm font-medium opacity-70">{{ props.user?.postnom }}</span>
+                        </h2>
+                        <div class="flex items-center gap-2 text-sm text-(--ui-text-muted)">
+                            <UIcon name="i-lucide-mail" class="w-4 h-4" />
+                            <span>{{ props.user?.email }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <UButton color="neutral" variant="subtle" label="Modifier" icon="i-lucide-pencil" @click="openEdit = true" 
+                        class="rounded-full px-4" />
+                </div>
+            </div>
 
             <UTabs :items="items" class="h-full flex flex-col" variant="link">
                 <template #affectations>
@@ -50,6 +69,8 @@
                     </UButton>
                 </template>
             </UModal>
+            
+            <UsersEditModal :user="props.user" v-model:open="openEdit" />
         </template>
     </USlideover>
 </template>
@@ -84,7 +105,7 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
     `affectations-${props.user?.user_id}`,
     async () => {
         if (!props.user?.user_id) return []
-        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookups!inner(nom, description), organisations!inner(nom, description)").eq('user_id', props.user.user_id)
+        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookup:lookups!inner(*), organisation:organisations!inner(*)").eq('user_id', props.user.user_id)
         if (error) {
             toast.add({
                 title: 'Error',

@@ -1,77 +1,130 @@
+<template>
+    <UDashboardPanel id="rendez-vous" as="div" :ui-pro="{ body: 'p-0' }">
+        <template #header>
+            <UDashboardNavbar title="Rendez-vous">
+                <template #leading>
+                    <!-- <UDashboardSidebarCollapse /> -->
+                </template>
+
+                <template #right>
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
+                            placeholder="Rechercher un patient..." />
+
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <USelect v-model="statusFilter" :items="[
+                                { label: 'Tous', value: 'all' },
+                                { label: 'Confirmé', value: 'confirme' },
+                                { label: 'En attente', value: 'attente' },
+                                { label: 'Annulé', value: 'annule' }
+                            ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+                                placeholder="Filtrer par statut" class="min-w-28" 
+                                @update:model-value="setStatusFilter('statut', $event)" />
+
+                            <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
+                                <UButton label="Affichage" color="neutral" variant="outline"
+                                    trailing-icon="i-lucide-settings-2" />
+                            </UDropdownMenu>
+                        </div>
+                    </div>
+                    <RdvAddModal @rdv-added="refreshListeRendezVous" />
+                </template>
+            </UDashboardNavbar>
+        </template>
+
+        <template #body>
+            <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+                v-model:row-selection="rowSelection" v-model:pagination="pagination"
+                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="ListeRendezVous || []" :columns="columns"
+                :loading="pending" :ui="{
+                    base: 'table-fixed border-separate border-spacing-0',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    td: 'border-b border-(--ui-border) p-2'
+                }" />
+
+            <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+                <div class="text-sm text-(--ui-text-muted)">
+                    {{ selectedRowCount }} sur {{ totalFilteredRows }} ligne(s) sélectionnée(s).
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
+                        :total="totalFilteredRows" @update:page="setPage" />
+                </div>
+            </div>
+        </template>
+    </UDashboardPanel>
+</template>
+
 <script setup lang="ts">
+import { type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
-import { upperFirst } from 'scule'
-import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { RendezVous } from '~/types'
 
 useHead({
-    title: 'Rendez-vous'
+    title: 'Rendez-vous - Sozal',
+    meta: [
+        { name: 'description', content: 'Gérer les rendez-vous.' }
+    ]
 })
 
-const table = useTemplateRef('table-rdv')
-const toast = useToast()
-const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
 const supabase = useSupabaseClient()
-const UCheckbox = resolveComponent('UCheckbox')
-const rowSelection = ref()
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const columnVisibility = ref()
+const toast = useToast()
 
-const columnFilters = ref([{
-    id: 'nom',
-    value: ''
-}])
-const organisations = [
-    {
-        label: 'Organisation 1',
-        value: 'organisation-1'
-    },
-    {
-        label: 'Organisation 2',
-        value: 'organisation-2'
-    }
-]
+// Utilisation du composable centralisé useDataTable
+const {
+    table,
+    UButton,
+    UBadge,
+    UDropdownMenu,
+    columnFilters,
+    columnVisibility,
+    rowSelection,
+    pagination,
+    paginationOptions,
+    statusFilter,
+    columnDisplayItems,
+    selectedRowCount,
+    totalFilteredRows,
+    currentPage,
+    currentPageSize,
+    setPage,
+    setStatusFilter
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
+const searchInput = ref('')
+
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
+})
+
 function getRowItems(row: Row<RendezVous>) {
     return [
+        { type: 'label', label: 'Actions' },
         {
-            type: 'label',
-            label: 'Actions'
-        },
-        {
-            label: 'Copier le rendez-vous ID',
+            label: 'Copier ID RDV',
             icon: 'i-lucide-copy',
             onSelect() {
                 navigator.clipboard.writeText(row.original.id.toString())
-                toast.add({
-                    title: 'Copied to clipboard',
-                    description: 'Patient ID copied to clipboard'
-                })
+                toast.add({ title: 'Copié !', description: 'ID du rendez-vous copié.' })
             }
         },
+        { type: 'separator' },
+        { label: 'Détails patient', icon: 'i-lucide-user' },
+        { label: 'Paiements', icon: 'i-lucide-wallet' },
+        { type: 'separator' },
         {
-            type: 'separator'
-        },
-        {
-            label: 'Voir les details du patient',
-            icon: 'i-lucide-list'
-        },
-        {
-            label: 'Voir les paiements du patient',
-            icon: 'i-lucide-wallet'
-        },
-        {
-            type: 'separator'
-        },
-        {
-            label: 'Supprimer le rendez-vous',
+            label: 'Supprimer',
             icon: 'i-lucide-trash',
             color: 'error',
             onSelect() {
-                toast.add({
-                    title: 'Rendez-vous supprimé',
-                    description: 'The partenaire has been deleted.'
-                })
+                toast.add({ title: 'Suppression', description: 'Action non implémentée.', color: 'warning' })
             }
         }
     ]
@@ -79,154 +132,75 @@ function getRowItems(row: Row<RendezVous>) {
 
 const columns: TableColumn<RendezVous>[] = [
     {
-        id: 'Actions',
-        header: 'Actions',
+        id: 'consultation',
+        header: 'Action',
         cell: ({ row }) => h(UButton, {
             color: 'primary',
-            variant: 'solid',
+            variant: 'subtle',
+            size: 'xs',
             label: 'Consulter',
-            to: { name: 'partenaire-id', params: { id: row.original.id } }
+            icon: 'i-lucide-calendar-search',
+            to: `/rendez-vous/${row.original.id}`
         }),
     },
     {
-        accessorKey: 'nom',
-        header: 'Nom',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.nom + ' ' + row.original.patient?.postnom + ' ' + row.original.patient?.prenom)
-                ])
+        id: 'nom',
+        header: 'Patient',
+        accessorFn: (row) => `${row.patient?.nom} ${row.patient?.postnom} ${row.patient?.prenom}`,
+        cell: ({ row }) => h('div', { class: 'flex items-center gap-3' }, [
+            h('div', undefined, [
+                h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.getValue('nom')),
+                h('p', { class: 'text-xs text-(--ui-text-muted)' }, row.original.patient?.mrn)
             ])
+        ])
+    },
+    {
+        accessorKey: 'date_rdv', // Assumed correct from the select query
+        header: 'Date RDV',
+        cell: ({ row }) => {
+            const date = row.original.date_rdv ? new Date(row.original.date_rdv).toLocaleDateString('fr-FR') : 'N/A'
+            return h('p', { class: 'text-(--ui-text-highlighted)' }, date)
         }
     },
     {
-        accessorKey: 'mrn',
-        header: 'MRN',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.mrn)
-                ])
-            ])
-        }
-    },
-    {
-        accessorKey: 'date_naissance',
-        header: 'Date de naissance',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.date_naissance)
-                ])
-            ])
-        }
-    },
-    {
-        accessorKey: 'sexe',
+        id: 'sexe',
         header: 'Sexe',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.patient?.sexe)
-                ])
-            ])
-        }
+        cell: ({ row }) => h('p', { class: 'capitalize' }, row.original.patient?.sexe)
     },
     {
-        accessorKey: 'status',
-        header: 'Status',
+        accessorKey: 'statut',
+        header: 'Statut',
         filterFn: 'equals',
         cell: ({ row }) => {
+            const statusStr = row.original?.statut || 'attente'
             const color = {
-                subscribed: 'success' as const,
-                unsubscribed: 'error' as const,
-                bounced: 'warning' as const
-            }[row.original?.statut]
+                confirme: 'success' as const,
+                attente: 'warning' as const,
+                annule: 'error' as const
+            }[statusStr] || 'neutral'
 
-            return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-                row.original?.statut
-            )
+            return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => statusStr)
         }
     },
     {
+        header: () => h('div', { class: 'text-center' }, 'Actions'),
         id: 'actions',
-        cell: ({ row }) => {
-            return h(
-                'div',
-                { class: 'text-right' },
-                h(
-                    UDropdownMenu,
-                    {
-                        content: {
-                            align: 'end'
-                        },
-                        items: getRowItems(row)
-                    },
-                    () =>
-                        h(UButton, {
-                            icon: 'i-lucide-ellipsis-vertical',
-                            color: 'neutral',
-                            variant: 'ghost',
-                            class: 'ml-auto'
-                        })
-                )
+        cell: ({ row }) => h('div', { class: 'text-center' },
+            h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
+                () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost', class: 'ml-auto' })
             )
-        }
+        )
     }
 ]
 
-const statusFilter = ref('all')
-const pagination = ref({
-    pageIndex: 0,
-    pageSize: 10
+const { data: ListeRendezVous, pending, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv-list', async () => {
+    const { data, error } = await supabase
+        .from('rdv')
+        .select('id, date_rdv, statut, patient:patients!inner(*), organisation:organisations!inner(*)')
+    if (error) throw error
+    console.log(data)
+    return data
 })
-const { data: ListeRendezVous, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv', async () => {
-    const { data, error } = await supabase.from('rdv').select('id, date_rdv, patient:patients!inner(*), organisation:organisations!inner(*)')
-    if (error) {
-        throw error;
-    }
-    console.table(data)
-    return data;
-});
-const selectedOrganisation = ref(organisations[0])
 </script>
-
-<template>
-    <UDashboardPanel id="rendez-vous" as="div" :ui="{ body: 'p-5' }">
-        <template #header>
-            <UDashboardNavbar title="Rendez-vous" :ui="{ right: 'gap-3' }">
-                <template #leading>
-
-                    <UDashboardSidebarCollapse />
-                </template>
-            </UDashboardNavbar>
-
-            <UDashboardToolbar>
-                <template #left>
-                    <USelectMenu :items="organisations" v-model="selectedOrganisation" @update:modelValue="refreshListeRendezVous()" />
-                </template>
-                <template #right>
-                    <UButton @click="refreshListeRendezVous()">Rafraîchir</UButton>
-                    <RdvAddModal />
-                </template>
-            </UDashboardToolbar>
-        </template>
-
-        <template #body>
-            <UTable ref="table-rdv" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-                    getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0" :data="ListeRendezVous" :columns="columns" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                    tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) py-2 m-1'
-                }" />
-        </template>
-    </UDashboardPanel>
-</template>
 
 <style scoped></style>
