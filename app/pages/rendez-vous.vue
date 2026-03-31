@@ -10,22 +10,6 @@
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
                         <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
                             placeholder="Rechercher un patient..." />
-
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <USelect v-model="statusFilter" :items="[
-                                { label: 'Tous', value: 'all' },
-                                { label: 'Confirmé', value: 'confirme' },
-                                { label: 'En attente', value: 'attente' },
-                                { label: 'Annulé', value: 'annule' }
-                            ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                placeholder="Filtrer par statut" class="min-w-28" 
-                                @update:model-value="setStatusFilter('statut', $event)" />
-
-                            <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
-                                <UButton label="Affichage" color="neutral" variant="outline"
-                                    trailing-icon="i-lucide-settings-2" />
-                            </UDropdownMenu>
-                        </div>
                     </div>
                     <RdvAddModal @rdv-added="refreshListeRendezVous" />
                 </template>
@@ -35,8 +19,8 @@
         <template #body>
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination"
-                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="ListeRendezVous || []" :columns="columns"
-                :loading="pending" :ui="{
+                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="ListeRendezVous || []"
+                :columns="columns" :loading="pending" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',

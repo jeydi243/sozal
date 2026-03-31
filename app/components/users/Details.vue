@@ -29,7 +29,7 @@
                     <div class="flex flex-row justify-between">
                         <UButton icon="iconoir:refresh-double" color="primary" variant="ghost"
                             @click="refreshAffectations" />
-                        <UsersAddAffectation :user_id="props.user?.user_id" @affectation-added="refreshAffectations" />
+                        <UsersAddAffectation :user_id="props.user?.user_id || null" @affectation-added="refreshAffectations" />
                     </div>
                     <UTable ref="table_affectations" v-model:column-filters="columnFilters"
                         v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
@@ -270,7 +270,8 @@ function getRowItemsAffectations(row: Row<Affectation>) {
 
     if (!row.original.end_date) {
         items.push({
-            type: 'separator'
+            type: 'separator',
+            label: ''
         });
 
         items.push({

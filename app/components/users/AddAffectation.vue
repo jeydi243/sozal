@@ -4,7 +4,7 @@ import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Lookup, Organisation } from '~/types'
 
 const props = defineProps<{
-    user_id: string
+    user_id: string | null
 }>()
 
 const emit = defineEmits(['affectation-added'])

@@ -254,8 +254,8 @@ const columns: TableColumn<Patient>[] = [
         filterFn: 'equals',
         cell: ({ row }) => {
             const color = {
-                subscribed: 'success' as const,
-                unsubscribed: 'error' as const,
+                actif: 'success' as const,
+                inactif: 'error' as const,
                 bounced: 'warning' as const
             }[row.original.status]
 
