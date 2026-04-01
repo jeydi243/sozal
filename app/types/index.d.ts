@@ -122,7 +122,7 @@ export interface ArticleAffectation {
   created_at?: string
 }
 export interface Tarifaire {
-  id: number
+  id: string
   nom: string
   code: string
   description: string 

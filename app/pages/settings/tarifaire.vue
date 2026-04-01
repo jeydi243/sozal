@@ -1,6 +1,5 @@
 <template>
-
-    <UDashboardPanel id="inbox-900" :ui="{ body: 'p-5' }" as="div">
+    <UDashboardPanel id="tarifaires" :ui="{ body: 'p-0' }">
         <template #header>
             <UDashboardNavbar title="Tarifaires">
                 <template #leading>
@@ -9,35 +8,20 @@
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <UInput :model-value="(table?.tableApi?.getColumn('nom')?.getFilterValue() as string)"
-                            class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..."
-                            @update:model-value="table?.tableApi?.getColumn('nom')?.setFilterValue($event)" />
+                        <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
+                            placeholder="Rechercher un tarifaire..." />
 
                         <div class="flex flex-wrap items-center gap-1.5">
-
                             <USelect v-model="statusFilter" :items="[
-                                { label: 'All', value: 'all' },
+                                { label: 'Toutes', value: 'all' },
                                 { label: 'Subscribed', value: 'subscribed' },
                                 { label: 'Actif', value: 'actif' },
                                 { label: 'Bounced', value: 'bounced' }
                             ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                placeholder="Filter status" class="min-w-28" />
-                            <UDropdownMenu :items="table?.tableApi
-                                ?.getAllColumns()
-                                .filter((column) => column.getCanHide())
-                                .map((column) => ({
-                                    label: upperFirst(column.id),
-                                    type: 'checkbox' as const,
-                                    checked: column.getIsVisible(),
-                                    onUpdateChecked(checked: boolean) {
-                                        table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-                                    },
-                                    onSelect(e?: Event) {
-                                        e?.preventDefault()
-                                    }
-                                }))
-                                " :content="{ align: 'end' }">
-                                <UButton label="Display" color="neutral" variant="outline"
+                                placeholder="Filtrer par statut" class="min-w-28" />
+
+                            <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
+                                <UButton label="Affichage" color="neutral" variant="outline"
                                     trailing-icon="i-lucide-settings-2" />
                             </UDropdownMenu>
                         </div>
@@ -48,9 +32,9 @@
         </template>
         <template #body>
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun tarifaire trouvé"
+                v-model:row-selection="rowSelection" v-model:pagination="pagination"
                 :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Tarifaires || []" :columns="columns"
-                :loading="status === 'pending'" :ui="{
+                :loading="pending" :ui="{
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -60,190 +44,176 @@
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
                 <div class="text-sm text-(--ui-text-muted)">
-                    {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-                    {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+                    {{ selectedRowCount }} sur {{ totalFilteredRows }} ligne(s) sélectionnée(s).
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-                        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-                        :total="table?.tableApi?.getFilteredRowModel().rows.length"
-                        @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
+                    <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
+                        :total="totalFilteredRows" @update:page="setPage" />
                 </div>
             </div>
             <TarifairesDetails :tarifaire="selectedTarifaire" v-model:open="openDetailsTarifaire" />
-
         </template>
     </UDashboardPanel>
-
 </template>
+
 <script setup lang="ts">
-import { ref } from 'vue'
-import { upperFirst } from 'scule'
-import { getPaginationRowModel, type Row } from '@tanstack/table-core'
+import { type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
 import type { Tarifaire } from '~/types'
 
+// 1. SEO
 useHead({
-    title: 'Tarifaires',
+    title: 'Tarifaires - Paramètres',
     meta: [
-        { name: 'description', content: 'Manage tarifaires.' }
+        { name: 'description', content: 'Gérer les tarifaires.' }
     ]
 })
 
+// 2. Services et composables
 const supabase = useSupabaseClient()
-const table = useTemplateRef('table')
-const status = ref('success')
-const statusFilter = ref('all')
-const columnFilters = ref([{
-    id: 'name',
-    value: ''
-}])
-const { getLookupsById } = useParametresStore()
+const toast = useToast()
 
-const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const columnVisibility = ref()
+const {
+    table,
+    UButton,
+    UDropdownMenu,
+    UBadge,
+    UCheckbox,
+    columnFilters,
+    columnVisibility,
+    rowSelection,
+    pagination,
+    paginationOptions,
+    statusFilter,
+    buildColumnDisplayItems,
+    selectedRowCount,
+    totalFilteredRows,
+    currentPage,
+    currentPageSize,
+    setPage
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
+// 3. UI State
 const openDetailsTarifaire = ref(false)
 const selectedTarifaire = ref<Tarifaire | null>(null)
-const rowSelection = ref({ 2: true })
-const toast = useToast()
-const pagination = ref({
-    pageIndex: 0,
-    pageSize: 10
+const searchInput = ref('')
+
+// 4. Column display items
+const columnDisplayItems = buildColumnDisplayItems(['details', 'code', 'nom', 'description', 'organisation', 'actions'])
+
+// 5. Search Logic
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
 })
-const paginationOptions = {
-    getPaginationRowModel: getPaginationRowModel()
-}
+
+// 6. Definition des colonnes
 const columns: TableColumn<Tarifaire>[] = [
     {
         id: 'details',
-        header: 'Details',
-        cell: ({ row }) => h(UButton, {
-            color: 'primary',
+        header: () => h('div', { class: 'flex items-center justify-center' }, 'Détails'),
+        cell: ({ row }) => h('div', { class: 'flex items-center justify-center' }, h(UButton, {
+            color: 'neutral',
             variant: 'ghost',
-            icon: 'i-lucide-eye',
+            icon: 'solar:pen-new-square-line-duotone',
+            class: '-mx-2.5',
             onClick: () => {
-                selectedTarifaire.value = row.original;
-                openDetailsTarifaire.value = !openDetailsTarifaire.value;
-                // console.log(row.original, openDetailsUser.value)
+                selectedTarifaire.value = row.original
+                openDetailsTarifaire.value = true
             }
-        }),
+        })
+    ),
     },
     {
         accessorKey: 'code',
         header: 'Code',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
-                ])
-            ])
-        }
+        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code)
+    },
+    {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.nom)
     },
     {
         accessorKey: 'description',
         header: 'Description',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.description),
-                ])
-            ])
-        }
+        cell: ({ row }) => h('p', { class: 'text-(--ui-text-muted)' }, row.original.description)
     },
     {
         accessorKey: 'organisation',
         header: 'Organisation',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisation?.nom),
-                ])
-            ])
-        }
+        cell: ({ row }) => h('p', undefined, row.original.organisation?.nom || 'N/A')
     },
     {
         header: () => h('div', { class: 'text-center' }, 'Actions'),
         id: 'actions',
-        cell: ({ row }) => {
-            return h(
-                'div',
-                { class: 'text-center' },
-                h(
-                    UDropdownMenu,
-                    {
-                        content: {
-                            align: 'end'
-                        },
-                        items: getRowItems(row)
-                    },
-                    () =>
-                        h(UButton, {
-                            icon: 'i-lucide-ellipsis-vertical',
-                            color: 'neutral',
-                            variant: 'ghost',
-                            class: 'ml-auto'
-                        })
-                )
-            )
-        }
+        cell: ({ row }) => h('div', { class: 'text-center' },
+            h(UDropdownMenu, {
+                content: { align: 'end' },
+                items: getRowItems(row)
+            }, () => h(UButton, {
+                icon: 'i-lucide-ellipsis-vertical',
+                color: 'neutral',
+                variant: 'ghost',
+                class: 'ml-auto'
+            }))
+        )
     }
 ]
 
+// 7. Fonctions utilitaires
 function getRowItems(row: Row<Tarifaire>) {
     return [
+        { type: 'label', label: 'Actions' },
         {
-            type: 'label',
-            label: 'Actions'
-        },
-        {
-            label: 'Copie ID Tarifaire',
+            label: 'Copier ID Tarifaire',
             icon: 'i-lucide-copy',
             onSelect() {
                 navigator.clipboard.writeText(row.original.id.toString())
                 toast.add({
-                    title: 'Copied to clipboard',
-                    description: 'Tarifaire ID copied to clipboard'
+                    title: 'Copié !',
+                    description: 'ID Tarifaire copié dans le presse-papiers',
+                    color: 'success'
                 })
             }
         },
+        { type: 'separator' },
         {
-            type: 'separator'
-        },
-        {
-            label: 'Details',
-            icon: 'material-symbols:open-in-full-rounded',
+            label: 'Détails',
+            icon: 'i-lucide-maximize-2',
             onSelect() {
-                openDetailsTarifaire.value = !openDetailsTarifaire.value
+                selectedTarifaire.value = row.original
+                openDetailsTarifaire.value = true
             }
         },
+        { type: 'separator' },
         {
-            type: 'separator'
-        },
-        {
-            label: 'Delete tarifaire',
+            label: 'Supprimer',
             icon: 'i-lucide-trash',
             color: 'error',
-            onSelect() {
-                toast.add({
-                    title: 'Tarifaire deleted',
-                    description: 'The tarifaire has been deleted.'
-                })
+            async onSelect() {
+                const { error } = await supabase.from('tarifaires').delete().eq('id', row.original.id)
+                if (error) {
+                    toast.add({ title: 'Erreur', description: error.message, color: 'error' })
+                } else {
+                    toast.add({ title: 'Succès', description: 'Tarifaire supprimé avec succès', color: 'success' })
+                    await refreshTarifaires()
+                }
             }
         }
-    ];
+    ]
 }
 
-const { data: Tarifaires, error, refresh: refreshTarifaires } = await useAsyncData('tarifaires', async () => {
-    const { data, error } = await supabase.from('tarifaires').select('code, description, nom, organisation:organisations!inner(*), lookups!inner(*)');
-    if (error) {
-        throw error;
-    }
-    return data;
-});
-
+// 8. Chargement des données
+const { data: Tarifaires, pending, refresh: refreshTarifaires } = await useAsyncData('tarifaires', async () => {
+    const { data, error } = await supabase
+        .from('tarifaires')
+        .select('*, organisation:organisations!inner(*)')
+    if (error) throw error
+    return data
+})
 </script>

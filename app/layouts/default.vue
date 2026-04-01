@@ -46,7 +46,7 @@ const links = [[{
 },
 {
   label: 'Rendez-vous',
-  icon: 'i-lucide-calendar',
+  icon: 'solar:calendar-mark-bold-duotone',
   to: '/rendez-vous',
   onSelect: () => {
     open.value = false
@@ -54,7 +54,7 @@ const links = [[{
 },
 {
   label: 'Partenaires',
-  icon: 'carbon:enterprise',
+  icon: 'solar:buildings-2-bold-duotone',
   to: '/partenaires',
   onSelect: () => {
     open.value = false
@@ -67,6 +67,7 @@ const links = [[{
   defaultOpen: true,
   children: [{
     label: 'Parametres',
+    icon:'solar:settings-bold-duotone',
     to: '/settings',
     exact: true,
     onSelect: () => {
@@ -75,7 +76,7 @@ const links = [[{
   }, {
     label: 'Lookups',
     to: '/settings/lookups',
-    // icon: 'arcticons:lookup',
+    icon: 'solar:card-transfer-bold-duotone',
     onSelect: () => {
       open.value = false
     }
