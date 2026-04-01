@@ -90,7 +90,7 @@ const {
     pagination,
     paginationOptions,
     statusFilter,
-    columnDisplayItems,
+    buildColumnDisplayItems,
     selectedRowCount,
     totalFilteredRows,
     currentPage,
@@ -98,6 +98,9 @@ const {
     setPage,
     setStatusFilter
 } = useDataTable({ filterColumnId: 'description', pageSize: 10 })
+
+// IDs des colonnes cachables — liste STATIQUE, sans jamais toucher à tableApi
+const columnDisplayItems = buildColumnDisplayItems(['select', 'details', 'code', 'nom', 'description', 'type', 'status', 'actions'])
 
 const openSlideOver = ref(false)
 const selectedOrganisation = ref<Organisation | null>(null)

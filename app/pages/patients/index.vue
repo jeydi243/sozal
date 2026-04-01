@@ -72,7 +72,7 @@ const { data: patients, error, refresh: refreshPatients } = await useAsyncData('
 function getRowItems(row: Row<Patient>) {
     return [
         {
-            type: 'label',
+            type: 'label' as const,
             label: 'Actions'
         },
         {
@@ -87,7 +87,7 @@ function getRowItems(row: Row<Patient>) {
             }
         },
         {
-            type: 'separator'
+            type: 'separator' as const
         },
         {
             label: 'View patient details',
@@ -98,12 +98,12 @@ function getRowItems(row: Row<Patient>) {
             icon: 'i-lucide-wallet'
         },
         {
-            type: 'separator'
+            type: 'separator' as const
         },
         {
             label: 'Delete patient',
             icon: 'i-lucide-trash',
-            color: 'error',
+            color: 'error' as const,
             onSelect() {
                 toast.add({
                     title: 'Patient deleted',

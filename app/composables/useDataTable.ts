@@ -15,8 +15,8 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
             ? [{ id: options.filterColumnId, value: '' }]
             : []
     )
-    const columnVisibility = ref({})
-    const rowSelection = ref({})
+    const columnVisibility = ref<Record<string, boolean>>({})
+    const rowSelection = ref<Record<string, boolean>>({})
 
     const pagination = ref({
         pageIndex: 0,
@@ -29,23 +29,26 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
 
     const statusFilter = ref('all')
 
-    /** Génère les items du dropdown "Display" pour afficher/masquer les colonnes */
-    const columnDisplayItems = computed(() =>
-        table.value?.tableApi
-            ?.getAllColumns()
-            .filter((column: any) => column.getCanHide())
-            .map((column: any) => ({
-                label: upperFirst(column.id),
+    /**
+     * Génère les items du dropdown "Affichage" à partir d'une liste statique d'IDs de colonnes.
+     * N'utilise JAMAIS tableApi pour éviter les boucles de réactivité infinies.
+     * @param columnIds - Tableau d'IDs de colonnes cachables
+     */
+    function buildColumnDisplayItems(columnIds: string[]) {
+        return computed(() =>
+            columnIds.map((id) => ({
+                label: upperFirst(id),
                 type: 'checkbox' as const,
-                checked: column.getIsVisible(),
+                checked: columnVisibility.value[id] !== false,
                 onUpdateChecked(checked: boolean) {
-                    table.value?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                    columnVisibility.value[id] = !!checked
                 },
                 onSelect(e?: Event) {
                     e?.preventDefault()
                 }
-            })) ?? []
-    )
+            }))
+        )
+    }
 
     /** Nombre de lignes sélectionnées (filtrées) */
     const selectedRowCount = computed(
@@ -93,8 +96,8 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
         pagination,
         paginationOptions,
         statusFilter,
-        // Computed helpers
-        columnDisplayItems,
+        // Helpers
+        buildColumnDisplayItems,
         selectedRowCount,
         totalFilteredRows,
         currentPage,

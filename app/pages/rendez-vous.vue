@@ -8,8 +8,8 @@
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
-                            placeholder="Rechercher un patient..." />
+                        <UInput v-model="searchInput" class="max-w-sm"
+                            icon="i-lucide-search" placeholder="Rechercher un patient..." />
 
                         <div class="flex flex-wrap items-center gap-1.5">
                             <USelect v-model="statusFilter" :items="[
@@ -18,8 +18,7 @@
                                 { label: 'En attente', value: 'attente' },
                                 { label: 'Annulé', value: 'annule' }
                             ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                placeholder="Filtrer par statut" class="min-w-28"
-                                @update:model-value="setStatusFilter('statut', $event)" />
+                                placeholder="Filtrer par statut" class="min-w-28" />
 
                             <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                                 <UButton label="Affichage" color="neutral" variant="outline"
@@ -64,6 +63,10 @@ import type { TableColumn } from '@nuxt/ui'
 import type { RendezVous } from '~/types'
 
 // 1. SEO
+definePageMeta({
+    pageTransition: false
+})
+
 useHead({
     title: 'Rendez-vous - Sozal',
     meta: [
@@ -75,45 +78,46 @@ useHead({
 const supabase = useSupabaseClient()
 const toast = useToast()
 
-// 3. resolveComponent() — obligatoire avant tout usage dans h()
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
-
-// 4. Refs d'état UI
+// 3. Composants (fournis par useDataTable pour les render functions)
 const searchInput = ref('')
 
-// 5. useDataTable (si page avec tableau)
 const {
     table,
+    UButton,
+    UBadge,
+    UDropdownMenu,
     columnFilters,
     columnVisibility,
     rowSelection,
     pagination,
     paginationOptions,
     statusFilter,
-    columnDisplayItems,
+    buildColumnDisplayItems,
     selectedRowCount,
     totalFilteredRows,
     currentPage,
     currentPageSize,
     setPage,
-    setStatusFilter
 } = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
 
-// 6. Définition des colonnes (array statique TypeScript)
-const debouncedSearch = useDebounceFn((val: string) => {
-    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
-}, 300)
+// IDs des colonnes cachables — liste STATIQUE, sans jamais toucher à tableApi
+const columnDisplayItems = buildColumnDisplayItems(['consultation', 'nom', 'date_rdv', 'sexe', 'statut', 'actions'])
 
+// Synchronisation de la recherche globale sans passer par tableApi pour éviter les boucles de rendu
 watch(searchInput, (val) => {
-    debouncedSearch(val)
+    const filterIndex = columnFilters.value.findIndex(f => f.id === 'nom')
+    if (filterIndex !== -1) {
+        columnFilters.value[filterIndex].value = val
+    } else {
+        columnFilters.value.push({ id: 'nom', value: val })
+    }
 })
 
+
+// 6. Définition des colonnes (array statique TypeScript)
 function getRowItems(row: Row<RendezVous>) {
     return [
-        { type: 'label', label: 'Actions' },
+        { type: 'label' as const, label: 'Actions' },
         {
             label: 'Copier ID RDV',
             icon: 'i-lucide-copy',
@@ -122,14 +126,14 @@ function getRowItems(row: Row<RendezVous>) {
                 toast.add({ title: 'Copié !', description: 'ID du rendez-vous copié.' })
             }
         },
-        { type: 'separator' },
+        { type: 'separator' as const },
         { label: 'Détails patient', icon: 'i-lucide-user' },
         { label: 'Paiements', icon: 'i-lucide-wallet' },
-        { type: 'separator' },
+        { type: 'separator' as const },
         {
             label: 'Supprimer',
             icon: 'i-lucide-trash',
-            color: 'error',
+            color: 'error' as const,
             onSelect() {
                 toast.add({ title: 'Suppression', description: 'Action non implémentée.', color: 'warning' })
             }
@@ -203,10 +207,15 @@ const columns: TableColumn<RendezVous>[] = [
 const { data: ListeRendezVous, pending, refresh: refreshListeRendezVous } = await useAsyncData<RendezVous[]>('rdv-list', async () => {
     const { data, error } = await supabase
         .from('rdv')
-        .select('id, date_rdv, statut, patient:patients!inner(*), organisation:organisations!inner(*)')
+        .select(`
+            id, 
+            date_rdv, 
+            statut, 
+            patient:patients!inner(id, nom, prenom, postnom, mrn, sexe), 
+            organisation:organisations!inner(id, nom)
+        `)
     if (error) throw error
-    console.log(data)
-    return data
+    return data as unknown as RendezVous[]
 })
 </script>
 
