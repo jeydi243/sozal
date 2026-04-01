@@ -66,7 +66,7 @@ const itemsArticles = computed<SelectMenuItem[]>(() => articles.value?.map(artic
 
 const props = defineProps({
     tarifaire_id: {
-        type: String
+        type: String as PropType<string | null>
     }
 })
 
@@ -75,7 +75,7 @@ const toast = useToast()
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-    tarifaire_id: props.tarifaire_id,
+    tarifaire_id: props.tarifaire_id || undefined,
     article_id: undefined,
     prix: undefined,
 })

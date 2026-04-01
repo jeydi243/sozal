@@ -141,6 +141,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 function onError(error: FormErrorEvent) {
     toast.add({ title: 'Error', description: error.errors[0]?.message, color: 'error' })
 }
+
 </script>
 
 <template>

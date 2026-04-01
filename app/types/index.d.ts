@@ -125,9 +125,8 @@ export interface Tarifaire {
   id: number
   nom: string
   code: string
-  description: string
-  lookup_id: string
-  organisation_id: string
+  description: string 
+  organisation: Organisation
 }
 
 export interface TarifaireLine {
@@ -135,6 +134,8 @@ export interface TarifaireLine {
   tarifaire: Tarifaire
   article: Article
   prix: number
+  date_debut: string
+  date_fin?: string
 }
 
 export interface Patient {

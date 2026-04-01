@@ -1,7 +1,6 @@
 <template>
-    <USlideover description="Details des tarifaires aux organisations"
-        :title="`${props.tarifaire?.nom}`" :ui="{ content: 'max-w-3xl' }"
-        v-model:open="isOpenSlideOver">
+    <USlideover description="Details du tarifaire" inset :title="`${props.tarifaire?.code}`"
+        :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
 
 
         <template #body>
@@ -72,7 +71,7 @@ const { data: tarifairesLines, refresh: refreshTarifairesLines, status: tarifair
     `tarifaires-${props.tarifaire?.id}`,
     async () => {
         if (!props.tarifaire?.id) return []
-        const { data, error } = await supabase.from('tarifaires_lines').select("id, prix, articles!inner(nom, description)").eq('tarifaire_id', props.tarifaire.id)
+        const { data, error } = await supabase.from('tarifaires_lines').select("id, prix, article:articles!inner(nom, description)").eq('tarifaire_id', props.tarifaire.id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -164,6 +163,18 @@ const columnsTarifaireLine: TableColumn<TarifaireLine>[] = [
         }
     },
     {
+        accessorKey: 'date_debut',
+        header: 'Date début',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_debut),
+                ])
+            ])
+        }
+    },
+    {
         header: () => h('div', { class: 'text-center' }, 'Actions'),
         id: 'actions',
         cell: ({ row }) => {
@@ -206,6 +217,14 @@ function getRowItemsTarifairesLines(row: Row<TarifaireLine>) {
                     title: 'Copied to clipboard',
                     description: 'Article ID copied to clipboard'
                 })
+            }
+        },
+        {
+            label: 'Mettre fin',
+            icon: 'i-lucide-stop',
+            onSelect() {
+                selectedTarrifaireId.value = row.original.id
+                isStopModalOpen.value = true
             }
         }
     ]

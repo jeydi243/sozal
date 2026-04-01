@@ -131,18 +131,6 @@ const columns: TableColumn<Tarifaire>[] = [
         }),
     },
     {
-        accessorKey: 'Nom',
-        header: 'Nom',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.nom),
-                ])
-            ])
-        }
-    },
-    {
         accessorKey: 'code',
         header: 'Code',
         cell: ({ row }) => {
@@ -167,13 +155,13 @@ const columns: TableColumn<Tarifaire>[] = [
         }
     },
     {
-        accessorKey: 'lookup_id',
-        header: 'Type',
+        accessorKey: 'organisation',
+        header: 'Organisation',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.lookup_id)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisation?.nom),
                 ])
             ])
         }
@@ -251,7 +239,7 @@ function getRowItems(row: Row<Tarifaire>) {
 }
 
 const { data: Tarifaires, error, refresh: refreshTarifaires } = await useAsyncData('tarifaires', async () => {
-    const { data, error } = await supabase.from('tarifaires').select();
+    const { data, error } = await supabase.from('tarifaires').select('code, description, nom, organisation:organisations!inner(*), lookups!inner(*)');
     if (error) {
         throw error;
     }
