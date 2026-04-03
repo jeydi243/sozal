@@ -60,7 +60,7 @@ export interface Classe {
   status: string
   created_at: string,
   updated_at: string,
-  update:Date,
+  update: Date,
   start_date: Date,
   end_date: Date
 }
@@ -125,7 +125,7 @@ export interface Tarifaire {
   id: string
   nom: string
   code: string
-  description: string 
+  description: string
   organisation: Organisation
 }
 
@@ -215,4 +215,13 @@ export interface Role {
   entite: string
   date_debut: string;
   date_fin: string;
+}
+
+export interface UserRole {
+  id: string
+  user_id: string
+  role: Role
+  created_at: string
+  start_date: string
+  end_date: string
 }

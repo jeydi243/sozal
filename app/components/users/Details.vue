@@ -5,12 +5,15 @@
 
         <template #body>
             <!-- Design Information Utilisateur -->
-            <div class="p-4 mx-4 mb-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
+            <div
+                class="p-4 mx-4 mb-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
                 <div class="flex items-center gap-4">
-                    <UAvatar :alt="props.user?.prenom?.[0]" size="xl" class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
+                    <UAvatar :alt="props.user?.prenom?.[0]" size="xl"
+                        class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
                     <div class="space-y-0.5">
                         <h2 class="text-xl font-bold text-(--ui-text-highlighted) tracking-tight">
-                            {{ props.user?.prenom }} {{ props.user?.nom }} <span v-if="props.user?.postnom" class="uppercase text-sm font-medium opacity-70">{{ props.user?.postnom }}</span>
+                            {{ props.user?.prenom }} {{ props.user?.nom }} <span v-if="props.user?.postnom"
+                                class="uppercase text-sm font-medium opacity-70">{{ props.user?.postnom }}</span>
                         </h2>
                         <div class="flex items-center gap-2 text-sm text-(--ui-text-muted)">
                             <UIcon name="i-lucide-mail" class="w-4 h-4" />
@@ -19,8 +22,8 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <UButton color="neutral" variant="subtle" label="Modifier" icon="i-lucide-pencil" @click="openEdit = true" 
-                        class="rounded-full px-4" />
+                    <UButton color="neutral" variant="subtle" label="Modifier" icon="i-lucide-pencil"
+                        @click="openEdit = true" class="rounded-full px-4" />
                 </div>
             </div>
 
@@ -29,7 +32,8 @@
                     <div class="flex flex-row justify-between">
                         <UButton icon="iconoir:refresh-double" color="primary" variant="ghost"
                             @click="refreshAffectations" />
-                        <UsersAddAffectation :user_id="props.user?.user_id || null" @affectation-added="refreshAffectations" />
+                        <UsersAddAffectation :user_id="props.user?.user_id || null"
+                            @affectation-added="refreshAffectations" />
                     </div>
                     <UTable ref="table_affectations" v-model:column-filters="columnFilters"
                         v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
@@ -44,10 +48,25 @@
                             td: 'border-b border-(--ui-border) p-2'
                         }" />
                 </template>
+                <template #roles>
+                    <div class="flex flex-row justify-between">
+                        <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshRoles" />
+                        <UsersAddRole :user_id="props.user?.user_id || null" @role-added="refreshRoles" />
+                    </div>
+                    <UTable ref="table_roles" v-model:column-filters="columnFilters"
+                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                        v-model:pagination="pagination" empty="Aucun rôle ajouté" :pagination-options="{
+                            getPaginationRowModel: getPaginationRowModel()
+                        }" class="shrink-0 m-2" :data="roles || []" :columns="columnsRoles"
+                        :loading="rolesStatus === 'pending'" :ui="{
+                            base: 'table-fixed border-separate border-spacing-0',
+                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                            td: 'border-b border-(--ui-border) p-2'
+                        }" />
+                </template>
             </UTabs>
-            <div>
-
-            </div>
             <UModal v-model:open="isStopModalOpen" title="Confirmer l'arrêt de l'affectation">
                 <template #body>
                     <div class="pl-4">
@@ -69,7 +88,28 @@
                     </UButton>
                 </template>
             </UModal>
-            
+            <UModal v-model:open="isStopModalOpen" title="Confirmer l'arret du rôle">
+                <template #body>
+                    <div class="pl-4">
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Êtes-vous sûr de vouloir arrêter d'attribuer ce rôle ? La date de fin sera définie à
+                            aujourd'hui.
+                        </p>
+                    </div>
+
+
+                </template>
+                <template #footer="{ close }">
+                    <UButton color="neutral" variant="ghost" @click="close">
+                        Annuler
+                    </UButton>
+                    <UButton color="secondary" variant="solid" @click="stopRole">
+                        Confirmer
+                    </UButton>
+                </template>
+            </UModal>
+
             <UsersEditModal :user="props.user" v-model:open="openEdit" />
         </template>
     </USlideover>
@@ -78,8 +118,12 @@
 import type { PropType } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Affectation, Profil } from '~/types'
+import type { Affectation, Profil, Role, UserRole } from '~/types'
 
+const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const table_affectations = useTemplateRef('table_affectations')
+const table_roles = useTemplateRef('table_roles')
 const props = defineProps({
     user: {
         type: Object as PropType<Profil | null>,
@@ -99,7 +143,11 @@ const items = [
         label: 'Affectations',
         icon: 'i-lucide-building',
         slot: 'affectations'
-    }
+    }, {
+        label: 'Roles',
+        icon: 'i-lucide-user-cog',
+        slot: 'roles'
+    },
 ]
 const { data: affectations, refresh: refreshAffectations, status: affectationsStatus } = useAsyncData(
     `affectations-${props.user?.user_id}`,
@@ -122,6 +170,27 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
         immediate: true // Ensure it runs on mount if user is present
     }
 )
+const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData(
+    `roles-${props.user?.user_id}`,
+    async () => {
+        if (!props.user?.user_id) return []
+        const { data, error } = await supabase.from('roles').select("id, code, nom, start_date, end_date").eq('user_id', props.user.user_id)
+        if (error) {
+            toast.add({
+                title: 'Error',
+                description: error.message,
+                color: 'error'
+            })
+            throw error
+        }
+        console.log(data)
+        return data as Role[]
+    },
+    {
+        watch: [() => props.user],
+        immediate: true // Ensure it runs on mount if user is present
+    }
+)
 
 const columnFilters = ref([{
     id: 'id',
@@ -138,9 +207,10 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 10,
 })
-const columnVisibility = ref()
 const openEdit = ref(false)
 const isStopModalOpen = ref(false)
+const columnVisibility = ref()
+const selectedRoleId = ref<number | null>(null)
 const selectedAffectationId = ref<number | null>(null)
 
 async function stopAffectation() {
@@ -148,7 +218,7 @@ async function stopAffectation() {
 
     const { error } = await supabase
         .from('affectations')
-        .update({ end_date: new Date().toISOString() })
+        .update({ end_date: new Date().toISOString() } as never)
         .eq('id', selectedAffectationId.value)
 
     if (error) {
@@ -167,11 +237,30 @@ async function stopAffectation() {
         isStopModalOpen.value = false
     }
 }
+async function stopRole() {
+    if (!selectedRoleId.value) return
 
-const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const table_affectations = useTemplateRef('table_affectations')
+    const { error } = await supabase
+        .from('roles')
+        .update({ end_date: new Date().toISOString() } as never)
+        .eq('id', selectedRoleId.value)
 
+    if (error) {
+        toast.add({
+            title: 'Error',
+            description: error.message,
+            color: 'error'
+        })
+    } else {
+        toast.add({
+            title: 'Succès',
+            description: 'L\'affectation a été arrêtée avec succès.',
+            color: 'success'
+        })
+        refreshAffectations()
+        isStopModalOpen.value = false
+    }
+}
 const columnsAffectations: TableColumn<Affectation>[] = [
     {
         accessorKey: 'lookup_id',
@@ -193,6 +282,82 @@ const columnsAffectations: TableColumn<Affectation>[] = [
 
                 h('div', undefined, [
                     h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.organisation?.nom || ''),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'start_date',
+        header: 'Date de début',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.start_date ? new Date(row.original.start_date).toLocaleDateString() : ''),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'end_date',
+        header: 'Date de fin',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.end_date),
+                ])
+            ])
+        }
+    },
+    {
+        header: () => h('div', { class: 'text-center' }, 'Actions'),
+        id: 'actions',
+        cell: ({ row }) => {
+            return h(
+                'div',
+                { class: 'text-center' },
+                h(
+                    UDropdownMenu,
+                    {
+                        content: {
+                            align: 'end'
+                        },
+                        items: getRowItemsAffectations(row)
+                    },
+                    () =>
+                        h(UButton, {
+                            icon: 'i-lucide-ellipsis-vertical',
+                            color: 'neutral',
+                            variant: 'ghost',
+                            class: 'ml-auto'
+                        })
+                )
+            )
+        }
+    }
+]
+const columnsRoles: TableColumn<UserRole>[] = [
+    {
+        accessorKey: 'code',
+        header: 'Code',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.role?.code || ''),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.role?.nom || ''),
                 ])
             ])
         }

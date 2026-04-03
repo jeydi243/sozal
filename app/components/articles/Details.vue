@@ -171,7 +171,7 @@ async function deleteAffectation(id: number) {
 
                     <!-- Liste des affectations -->
                     <UTable :data="affectations || []" :columns="columns" :loading="loadingAffectations"
-                        class="border border-(--ui-border) rounded-md overflow-hidden" :ui="{
+                        class="border border-(--ui-border) rounded-md overflow-hidden border border-(--ui-border) rounded-lg" :ui="{
                             base: 'table-fixed border-separate border-spacing-0',
                             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                             tbody: '[&>tr]:last:[&>td]:border-b-0',

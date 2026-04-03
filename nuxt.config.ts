@@ -61,6 +61,9 @@ export default defineNuxtConfig({
             inline: ["@supabase/supabase-js"]
         }
     },
+    icon: {
+        serverBundle: 'local',
+    },  
     supabase: {
         redirectOptions: {
             login: "/auth",

@@ -84,7 +84,7 @@ const links = [[{
   {
     label: 'Organisations',
     to: '/settings/organisations',
-    // icon: 'octicon:organization-16',
+    icon: 'octicon:organization-16',
     onSelect: () => {
       open.value = false
     }
