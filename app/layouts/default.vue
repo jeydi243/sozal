@@ -92,7 +92,7 @@ const links = [[{
   {
     label: 'Grille tarifaire',
     to: '/settings/tarifaire',
-    // icon: 'ion:ios-pricetags-outline',
+    icon: 'solar:tag-price-bold-duotone',
     onSelect: () => {
       open.value = false
     }
@@ -100,7 +100,7 @@ const links = [[{
   {
     label: 'Utilisateurs',
     to: '/settings/users',
-    // icon: 'ion:ios-pricetags-outline',
+    icon: 'solar:users-group-two-rounded-line-duotone',
     onSelect: () => {
       open.value = false
     }
@@ -116,7 +116,7 @@ const links = [[{
   {
     label: 'Articles',
     to: '/settings/articles',
-    // icon: 'icon-park-outline:ad-product',
+    icon: 'solar:layers-minimalistic-bold-duotone',
     onSelect: () => {
       open.value = false
     }
@@ -124,7 +124,7 @@ const links = [[{
   {
     label: 'Security',
     to: '/settings/security',
-    // icon: 'i-lucide-shield',
+    icon: 'solar:folder-security-bold-duotone',
     onSelect: () => {
       open.value = false
     }

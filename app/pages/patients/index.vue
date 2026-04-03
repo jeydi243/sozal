@@ -31,7 +31,6 @@ const {
     pagination,
     paginationOptions,
     statusFilter,
-    columnDisplayItems,
     selectedRowCount,
     totalFilteredRows,
     currentPage,

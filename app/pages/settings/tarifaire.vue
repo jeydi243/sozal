@@ -126,7 +126,7 @@ const columns: TableColumn<Tarifaire>[] = [
                 openDetailsTarifaire.value = true
             }
         })
-    ),
+        ),
     },
     {
         accessorKey: 'code',
@@ -154,7 +154,7 @@ const columns: TableColumn<Tarifaire>[] = [
         cell: ({ row }) => h('div', { class: 'text-center' },
             h(UDropdownMenu, {
                 content: { align: 'end' },
-                items: getRowItems(row)
+                children: getRowItems(row)
             }, () => h(UButton, {
                 icon: 'i-lucide-ellipsis-vertical',
                 color: 'neutral',

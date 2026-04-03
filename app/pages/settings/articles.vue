@@ -9,21 +9,8 @@
 
                     <template #right>
                         <div class="flex flex-wrap items-center justify-between gap-1.5">
-                            <UInput v-model="searchInput"
-                                class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher un article..." />
-
-                            <div class="flex flex-wrap items-center gap-1.5">
-                                <USelect v-model="statusFilter" :items="[
-                                    { label: 'Tous', value: 'all' },
-                                    { label: 'Actif', value: 'actif' },
-                                    { label: 'Inactif', value: 'inactif' },
-                                ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                    placeholder="Filtrer le statut" class="min-w-28" />
-                                <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
-                                    <UButton label="Colonnes" color="neutral" variant="outline"
-                                        trailing-icon="i-lucide-settings-2" />
-                                </UDropdownMenu>
-                            </div>
+                            <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
+                                placeholder="Rechercher un article..." />
                         </div>
                         <ArticlesAddModal @article-added="refreshArticles" />
                     </template>
@@ -85,7 +72,6 @@ const {
     pagination,
     paginationOptions,
     statusFilter,
-    columnDisplayItems,
     selectedRowCount,
     totalFilteredRows,
     currentPage,
@@ -177,7 +163,7 @@ const columns: TableColumn<Article>[] = [
                     UDropdownMenu,
                     {
                         content: { align: 'end' },
-                        items: getRowItems(row)
+                        children: getRowItems(row)
                     },
                     () => h(UButton, {
                         icon: 'i-lucide-ellipsis-vertical',

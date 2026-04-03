@@ -106,7 +106,6 @@ const {
   rowSelection,
   pagination,
   paginationOptions,
-  columnDisplayItems,
   selectedRowCount,
   totalFilteredRows,
   currentPage,

@@ -105,9 +105,9 @@ const columnDisplayItems = buildColumnDisplayItems(['consultation', 'nom', 'date
 
 // Synchronisation de la recherche globale sans passer par tableApi pour éviter les boucles de rendu
 watch(searchInput, (val) => {
-    const filterIndex = columnFilters.value.findIndex(f => f.id === 'nom')
-    if (filterIndex !== -1) {
-        columnFilters.value[filterIndex].value = val
+    const filter = columnFilters.value.find(f => f.id === 'nom')
+    if (filter) {
+        filter.value = val
     } else {
         columnFilters.value.push({ id: 'nom', value: val })
     }

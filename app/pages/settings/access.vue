@@ -1,108 +1,249 @@
-<script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { Profil } from '~/types'
+<template>
+    <div>
+        <UDashboardPanel id="inbox-900" :ui-pro="{ body: 'p-0' }">
+            <template #header>
+                <UDashboardNavbar title="Roles">
+                    <template #leading>
+                        <!-- <UDashboardSidebarCollapse /> -->
+                    </template>
 
-const supabase = useSupabaseClient()
-const toast = useToast()
-const { copy } = useClipboard()
+                    <template #right>
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
+                                placeholder="Rechercher un article..." />
+
+                        </div>
+                        <RolesAddModal @role-added="refreshRoles" />
+                    </template>
+                </UDashboardNavbar>
+            </template>
+            <template #body>
+                <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
+                    v-model:row-selection="rowSelection" v-model:pagination="pagination"
+                    :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Roles || []"
+                    :columns="columns" :loading="pending" :ui="{
+                        base: 'table-fixed border-separate border-spacing-0',
+                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                        tbody: '[&>tr]:last:[&>td]:border-b-0',
+                        th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                        td: 'border-b border-(--ui-border) p-2'
+                    }" />
+
+                <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+                    <div class="text-sm text-(--ui-text-muted)">
+                        {{ selectedRowCount }} sur {{ totalFilteredRows }} ligne(s) sélectionnée(s).
+                    </div>
+
+                    <div class="flex items-center gap-1.5">
+                        <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
+                            :total="totalFilteredRows" @update:page="setPage" />
+                    </div>
+                </div>
+            </template>
+        </UDashboardPanel>
+        <RolesDetails :role="selectedRole" v-model:open="openDetailsAffectation" />
+        <!-- <RolesAffectations :role="selectedRole" v-model:open="openDetailsAffectation" /> -->
+    </div>
+</template>
+<script setup lang="ts">
+import { type Row } from '@tanstack/table-core'
+import type { TableColumn } from '@nuxt/ui'
+import type { Role } from '~/types'
 
 useHead({
-    title: 'Rôles et Accès - Sozal',
+    title: 'Roles et Acces',
     meta: [
-        { name: 'description', content: 'Gérer les accès et affectations des utilisateurs.' }
+        { name: 'description', content: 'Gérer les roles et acces.' }
     ]
 })
 
-// Fetch all users
-const { data: users } = await useAsyncData('profils-all', async () => {
-    const { data, error } = await supabase.from('profils').select('*')
-    if (error) throw error
-    return data as Profil[]
+const supabase = useSupabaseClient()
+const { getLookupsById } = useParametresStore()
+const toast = useToast()
+
+// ✅ Utilisation du composable centralisé
+const {
+    table,
+    UButton,
+    UDropdownMenu,
+    columnFilters,
+    columnVisibility,
+    rowSelection,
+    pagination,
+    paginationOptions,
+    selectedRowCount,
+    totalFilteredRows,
+    currentPage,
+    currentPageSize,
+    setPage
+} = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
+
+const openDetailsRole = ref(false)
+const openDetailsAffectation = ref(false)
+const selectedRole = ref<Role | null>(null)
+
+const { copy } = useClipboard()
+const searchInput = ref('')
+
+const debouncedSearch = useDebounceFn((val: string) => {
+    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
+}, 300)
+
+watch(searchInput, (val) => {
+    debouncedSearch(val)
 })
 
-const selectedUser = ref<Profil | null>(null)
-
-// Fetch existing affectations for the selected user
-const { data: affectations, refresh: refreshAffectations, pending: loadingAffectations } = await useAsyncData(
-    () => `user-affectations-${selectedUser.value?.user_id}`,
-    async () => {
-        if (!selectedUser.value?.user_id) return []
-        const { data, error } = await supabase
-            .from('affectations')
-            .select('*, lookup:lookups(*), organisation:organisations(*)')
-            .eq('user_id', selectedUser.value.user_id)
-        if (error) throw error
-        return data
+const columns: TableColumn<Role>[] = [
+    {
+        id: 'details',
+        header: 'Détails',
+        cell: ({ row }) => h(UButton, {
+            color: 'primary',
+            variant: 'ghost',
+            icon: 'i-lucide-eye',
+            onClick: () => {
+                selectedRole.value = row.original
+                openDetailsRole.value = !openDetailsRole.value
+            }
+        }),
     },
-    { watch: [() => selectedUser.value?.user_id], immediate: true }
-)
-
-const deleteAffectation = async (id: number) => {
-    const { error } = await supabase
-        .from('affectations')
-        .delete()
-        .eq('id', id)
-
-    if (error) {
-        toast.add({ title: 'Erreur', description: error.message, color: 'error' })
-    } else {
-        toast.add({ title: 'Succès', description: 'Affectation supprimée', color: 'success' })
-        refreshAffectations()
+    {
+        accessorKey: 'nom',
+        header: 'Nom',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original?.nom),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'code',
+        header: 'Code',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'description',
+        header: 'Description',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.description),
+                ])
+            ])
+        }
+    },
+    {
+        accessorKey: 'lookup_id',
+        header: 'Type',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.nom)),
+                ])
+            ])
+        }
+    },
+    {
+        header: () => h('div', { class: 'text-center' }, 'Actions'),
+        id: 'actions',
+        cell: ({ row }) => {
+            return h(
+                'div',
+                { class: 'text-center' },
+                h(
+                    UDropdownMenu,
+                    {
+                        content: { align: 'end' },
+                        children: getRowItems(row)
+                    },
+                    () => h(UButton, {
+                        icon: 'i-lucide-ellipsis-vertical',
+                        color: 'neutral',
+                        variant: 'ghost',
+                        class: 'ml-auto'
+                    })
+                )
+            )
+        }
     }
+]
+
+function getRowItems(row: Row<Role>) {
+    return [
+        {
+            type: 'label',
+            label: 'Actions'
+        },
+        {
+            label: 'Copier l\'ID',
+            icon: 'i-lucide-copy',
+            onSelect() {
+                copy(row.original.id.toString())
+                toast.add({
+                    title: 'Copié',
+                    description: `ID article #${row.original.id} copié dans le presse-papiers`
+                })
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: 'Voir les détails',
+            icon: 'material-symbols:open-in-full-rounded',
+            onSelect() {
+                selectedRole.value = row.original
+                openDetailsRole.value = true
+            }
+        },
+        {
+            label: 'Voir les affectations',
+            icon: 'material-symbols-light:add-link',
+            onSelect() {
+                openDetailsAffectation.value = !openDetailsAffectation.value
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: 'Supprimer l\'article',
+            icon: 'i-lucide-trash',
+            color: 'error',
+            async onSelect() {
+                const { error } = await supabase.from('articles').delete().eq('id', row.original.id)
+                if (error) {
+                    toast.add({
+                        title: 'Erreur',
+                        description: `Impossible de supprimer l'article : ${error.message}`,
+                        color: 'error'
+                    })
+                } else {
+                    toast.add({
+                        title: 'Role supprimé',
+                        description: `L'article "${row.original.nom}" a été supprimé.`,
+                        color: 'success'
+                    })
+                    await refreshRoles()
+                }
+            }
+        }
+    ]
 }
+
+const { data: Roles, pending, refresh: refreshRoles } = await useAsyncData('roles', async () => {
+    const { data, error } = await supabase.from('roles').select('*')
+    if (error) {
+        throw error
+    }
+    return data
+})
 </script>
-
-<template>
-    <div class="flex flex-row">
-        <!-- Panel Gauche: Liste des utilisateurs -->
-        <div id="users-list-panel" class="w-[20%] h-screen overflow-y-hidden border-r border-(--ui-border)">
-            <UDashboardNavbar title="Utilisateurs">
-                <template #trailing>
-                    <UBadge v-if="users" :label="users.length" variant="subtle" />
-                </template>
-            </UDashboardNavbar>
-            <SettingsUserList v-model="selectedUser" :users="users || []" />
-        </div>
-
-        <!-- Panel Droit: Détails Premium v2 -->
-        <div id="user-details-panel" v-if="selectedUser" class="flex-1 relative overflow-hidden bg-(--ui-bg)">
-            <!-- Background Decorative Elements -->
-            <div
-                class="absolute top-0 right-0 w-[500px] h-[500px] bg-(--ui-primary)/5 blur-[120px] rounded-full -mr-64 -mt-64 animate-pulse">
-            </div>
-            <div
-                class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/5 blur-[100px] rounded-full -ml-32 -mb-32">
-            </div>
-
-            <UDashboardNavbar :toggle="false" class="border-b  backdrop-blur-xl bg-(--ui-bg)/60 sticky top-0 z-20">
-                <template #right>
-                    <div class="flex items-center gap-2">
-                        <UTooltip text="Fermer le dossier">
-                            <UButton icon="i-lucide-x" color="neutral" variant="ghost"
-                                class="hidden lg:flex rounded-full" @click="selectedUser = null" />
-                        </UTooltip>
-                    </div>
-                </template>
-            </UDashboardNavbar>
-
-
-        </div>
-
-        <!-- État Vide -->
-        <div v-else class="flex-1">
-            <div class="flex flex-1 items-center justify-center bg-(--ui-bg-elevated)/20 h-screen">
-                <div class="text-center">
-                    <div class="relative inline-block mb-4">
-                        <UIcon name="i-lucide-users" class="size-20 text-(--ui-text-dimmed) opacity-10" />
-                        <UIcon name="i-lucide-mouse-pointer-2"
-                            class="size-8 text-(--ui-primary) absolute bottom-0 right-0 animate-bounce" />
-                    </div>
-                    <p class="text-lg font-medium text-(--ui-text-muted)">Gestion des Accès</p>
-                    <p class="text-sm text-(--ui-text-dimmed)">Sélectionnez un utilisateur dans la liste pour voir ses
-                        détails
-                        et ses affectations.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>

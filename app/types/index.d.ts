@@ -206,3 +206,12 @@ export interface Medecin {
   prenom: string;
   postnom: string;
 }
+
+export interface Role {
+  id: string;
+  nom: string;
+  description: string;
+  code: string;
+  entite: string
+  created_at?: string;
+}
