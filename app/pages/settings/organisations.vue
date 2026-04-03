@@ -39,7 +39,7 @@
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                     td: 'border-b border-(--ui-border) p-2'
                 }" />
 
@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { type Row } from '@tanstack/table-core'
-import type { TableColumn } from '@nuxt/ui'
+import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
 import type { Organisation } from '~/types'
 import { storeToRefs } from 'pinia'
 
@@ -120,16 +120,16 @@ const columns: TableColumn<Organisation>[] = [
     {
         id: 'select',
         header: ({ table }) =>
-            h(UCheckbox, {
+            h(UCheckbox as any, {
                 modelValue: table.getIsAllPageRowsSelected(),
                 indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: boolean) => table.toggleAllPageRowsSelected(!!value),
+                'onUpdate:modelValue': (value: any) => table.toggleAllPageRowsSelected(!!value),
                 'aria-label': 'Tout sélectionner'
             }),
         cell: ({ row }) =>
-            h('div', { class: 'flex items-center justify-center' }, h(UCheckbox, {
+            h('div', { class: 'flex items-center justify-center' }, h(UCheckbox as any, {
                 modelValue: row.getIsSelected(),
-                'onUpdate:modelValue': (value: boolean) => row.toggleSelected(!!value),
+                'onUpdate:modelValue': (value: any) => row.toggleSelected(!!value),
                 'aria-label': 'Sélectionner ligne'
             }))
     },
@@ -226,10 +226,10 @@ const columns: TableColumn<Organisation>[] = [
     }
 ]
 
-function getRowItems(row: Row<Organisation>) {
-    return [
+function getRowItems(row: Row<Organisation>): DropdownMenuItem[][] {
+    return [[
         {
-            type: 'label',
+            type: 'label' as const,
             label: 'Actions'
         },
         {
@@ -243,7 +243,7 @@ function getRowItems(row: Row<Organisation>) {
                 })
             }
         },
-        { type: 'separator' },
+        { type: 'separator' as const },
         {
             label: 'Détails',
             icon: 'i-lucide-maximize-2',
@@ -252,11 +252,11 @@ function getRowItems(row: Row<Organisation>) {
                 openSlideOver.value = true
             }
         },
-        { type: 'separator' },
+        { type: 'separator' as const },
         {
             label: 'Supprimer',
             icon: 'i-lucide-trash',
-            color: 'error',
+            color: 'error' as const,
             onSelect() {
                 toast.add({
                     title: 'Action non disponible',
@@ -264,7 +264,7 @@ function getRowItems(row: Row<Organisation>) {
                 })
             }
         }
-    ]
+    ]]
 }
 
 const { data: organisations, pending, refresh: refreshOrganisations } = await useAsyncData('organisations', async () => {

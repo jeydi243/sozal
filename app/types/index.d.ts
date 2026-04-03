@@ -213,5 +213,6 @@ export interface Role {
   description: string;
   code: string;
   entite: string
-  created_at?: string;
+  date_debut: string;
+  date_fin: string;
 }

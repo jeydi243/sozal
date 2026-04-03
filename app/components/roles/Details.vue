@@ -11,6 +11,8 @@ const toast = useToast()
 const selectedOrgId = ref<string | undefined>(undefined)
 const isAddingRecord = ref(false)
 
+const UButton = resolveComponent('UButton')
+
 // Fetch affectations (organisations) for the current article
 const { data: affectations, refresh: refreshAffectations, pending: loadingAffectations } = await useAsyncData(
     () => `article-affectations-${props.role?.id}`,
@@ -73,7 +75,7 @@ const columns: TableColumn<any>[] = [
     {
         id: 'actions',
         header: '',
-        cell: ({ row }) => h('div', { class: 'flex justify-end' }, h(resolveComponent('UButton'), {
+        cell: ({ row }) => h('div', { class: 'flex justify-end' }, h(UButton, {
             color: 'error',
             variant: 'ghost',
             icon: 'i-lucide-trash',
@@ -89,10 +91,10 @@ async function addAffectation() {
     isAddingRecord.value = true
     const { error } = await supabase
         .from('role_organisations')
-        .insert({
+        .insert([{
             role_id: props.role.id,
             organisation_id: selectedOrgId.value
-        })
+        }])
 
     isAddingRecord.value = false
     if (error) {

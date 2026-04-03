@@ -20,12 +20,12 @@
             <template #body>
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                     v-model:row-selection="rowSelection" v-model:pagination="pagination"
-                    :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Roles || []"
-                    :columns="columns" :loading="pending" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
+                    :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Roles || []" :columns="columns"
+                    :loading="pending" :ui="{
+                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                        tbody: '[&>tr]:last:[&>td]:border-b-0 ',
+                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                         td: 'border-b border-(--ui-border) p-2'
                     }" />
 
@@ -61,11 +61,13 @@ const supabase = useSupabaseClient()
 const { getLookupsById } = useParametresStore()
 const toast = useToast()
 
+// 3. resolveComponent() — obligatoire avant tout usage dans h()
+const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+
 // ✅ Utilisation du composable centralisé
 const {
     table,
-    UButton,
-    UDropdownMenu,
     columnFilters,
     columnVisibility,
     rowSelection,
@@ -106,6 +108,16 @@ const columns: TableColumn<Role>[] = [
                 openDetailsRole.value = !openDetailsRole.value
             }
         }),
+    }, {
+        accessorKey: 'code',
+        header: 'Code',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
+                ])
+            ])
+        }
     },
     {
         accessorKey: 'nom',
@@ -118,17 +130,7 @@ const columns: TableColumn<Role>[] = [
             ])
         }
     },
-    {
-        accessorKey: 'code',
-        header: 'Code',
-        cell: ({ row }) => {
-            return h('div', { class: 'flex items-center gap-3' }, [
-                h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
-                ])
-            ])
-        }
-    },
+
     {
         accessorKey: 'description',
         header: 'Description',
@@ -141,12 +143,12 @@ const columns: TableColumn<Role>[] = [
         }
     },
     {
-        accessorKey: 'lookup_id',
-        header: 'Type',
+        accessorKey: 'entite',
+        header: 'Entite',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.nom)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.entite)),
                 ])
             ])
         }
@@ -162,7 +164,7 @@ const columns: TableColumn<Role>[] = [
                     UDropdownMenu,
                     {
                         content: { align: 'end' },
-                        children: getRowItems(row)
+                        items: getRowItems(row)
                     },
                     () => h(UButton, {
                         icon: 'i-lucide-ellipsis-vertical',
@@ -179,7 +181,7 @@ const columns: TableColumn<Role>[] = [
 function getRowItems(row: Row<Role>) {
     return [
         {
-            type: 'label',
+            type: 'label' as const,
             label: 'Actions'
         },
         {
@@ -194,7 +196,7 @@ function getRowItems(row: Row<Role>) {
             }
         },
         {
-            type: 'separator'
+            type: 'separator' as const
         },
         {
             label: 'Voir les détails',
@@ -212,7 +214,7 @@ function getRowItems(row: Row<Role>) {
             }
         },
         {
-            type: 'separator'
+            type: 'separator' as const
         },
         {
             label: 'Supprimer l\'article',

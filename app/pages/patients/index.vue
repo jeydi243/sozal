@@ -162,7 +162,7 @@ const columns: TableColumn<Patient>[] = [
                         variant: 'ghost',
                         size: 'sm',
                         icon: 'i-lucide-eye',
-                        onClick: () => navigateTo(`/patients/${row.original.id}`)
+                        onClick: () => { navigateTo(`/patients/${row.original.id}`) }
                     })
                 ])
             ])
@@ -175,14 +175,14 @@ const columns: TableColumn<Patient>[] = [
                 'modelValue': table.getIsSomePageRowsSelected()
                     ? 'indeterminate'
                     : table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                'onUpdate:modelValue': (value: any) =>
                     table.toggleAllPageRowsSelected(!!value),
                 'ariaLabel': 'Select all'
             }),
         cell: ({ row }) =>
             h(UCheckbox, {
                 'modelValue': row.getIsSelected(),
-                'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
+                'onUpdate:modelValue': (value: any) => row.toggleSelected(!!value),
                 'ariaLabel': 'Select row'
             })
     },
@@ -200,7 +200,7 @@ const columns: TableColumn<Patient>[] = [
             color: 'primary',
             variant: 'ghost',
             icon: 'i-lucide-eye',
-            onClick: () => navigateTo(`/patients/${row.original.id}`)
+            onClick: () => { navigateTo(`/patients/${row.original.id}`) }
         })]),
     },
     {
@@ -346,7 +346,7 @@ const columns: TableColumn<Patient>[] = [
                     base: 'table-fixed border-separate border-spacing-0 w-full',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none hidden lg:table-header-group',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                     td: 'border-b border-(--ui-border) p-0 lg:p-2'
                 }" />
 

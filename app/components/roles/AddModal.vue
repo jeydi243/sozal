@@ -4,10 +4,10 @@ import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Role, Lookup } from '~/types'
 
 const RoleSchema = z.object({
-    code: z.string().min(6, 'Code must be at least 6 characters'),
+    code: z.string().min(3, 'Code must be at least 6 characters'),
     nom: z.string().min(6, 'Name must be at least 6 characters'),
     description: z.string().min(5, 'Description must be at least 5 characters'),
-    entite: z.string()
+    entite: z.string().optional()
 })
 const supabase = useSupabaseClient()
 const open = ref(false)
@@ -50,7 +50,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
     <UModal v-model:open="open" title="Rôle" description="Ajouter un rôle ">
-        <UButton label="Add role" icon="i-lucide-plus" />
+        <UButton label="Ajouter un rôle" icon="i-lucide-plus" />
 
         <template #body>
             <UForm :schema="RoleSchema" :state="state" class="space-y-4" @submit="onSubmit">

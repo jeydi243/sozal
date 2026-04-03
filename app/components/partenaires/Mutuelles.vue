@@ -16,10 +16,10 @@
             v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
             v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
             :data="Mutuelles" :columns="columns" empty="Aucune mutuelles attachés à cette organisation !" :ui="{
-                base: 'table-fixed border-separate border-spacing-0',
+                base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
                 thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                 tbody: '[&>tr]:last:[&>td]:border-b-0',
-                th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                 td: 'border-b border-(--ui-border) '
             }" />
         <PartenairesMutuelleDetails :mutuelle="selectedMutuelle" :open="openDetailsMutuelle"

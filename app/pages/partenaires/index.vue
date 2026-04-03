@@ -140,14 +140,15 @@ const columns: TableColumn<Organisation>[] = [
         header: 'Status',
         filterFn: 'equals',
         cell: ({ row }) => {
-            const color = {
-                subscribed: 'success' as const,
-                unsubscribed: 'error' as const,
-                bounced: 'warning' as const
-            }[row.original.status]
+            const colorMap: Record<string, string> = {
+                subscribed: 'success',
+                unsubscribed: 'error',
+                bounced: 'warning'
+            }
+            const color = colorMap[row.original.status || ''] || 'neutral'
 
             return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-                row.original.status
+                row.original.status || 'Unknown'
             )
         }
     },
@@ -267,7 +268,7 @@ const pagination = ref({
                     base: 'table-fixed border-separate border-spacing-0',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
                     td: 'border-b border-(--ui-border) py-0 m-1'
                 }" />
 
