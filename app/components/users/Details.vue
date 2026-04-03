@@ -210,8 +210,8 @@ const pagination = ref({
 const openEdit = ref(false)
 const isStopModalOpen = ref(false)
 const columnVisibility = ref()
-const selectedRoleId = ref<number | null>(null)
-const selectedAffectationId = ref<number | null>(null)
+const selectedRoleId = ref<string | null>(null)
+const selectedAffectationId = ref<string | null>(null)
 
 async function stopAffectation() {
     if (!selectedAffectationId.value) return
@@ -387,6 +387,7 @@ const columnsRoles: TableColumn<UserRole>[] = [
         }
     },
     {
+        accessorKey: 'action',
         header: () => h('div', { class: 'text-center' }, 'Actions'),
         id: 'actions',
         cell: ({ row }) => {
@@ -399,7 +400,7 @@ const columnsRoles: TableColumn<UserRole>[] = [
                         content: {
                             align: 'end'
                         },
-                        items: getRowItemsAffectations(row)
+                        items: getRowItemsRoles(row)
                     },
                     () =>
                         h(UButton, {
@@ -444,6 +445,43 @@ function getRowItemsAffectations(row: Row<Affectation>) {
             icon: 'i-lucide-trash',
             onSelect() {
                 selectedAffectationId.value = row.original.id
+                isStopModalOpen.value = true
+            }
+        })
+    }
+
+    return items
+}
+function getRowItemsRoles(row: Row<UserRole>) {
+    const items = [
+        {
+            type: 'label',
+            label: 'Actions'
+        },
+        {
+            label: 'Copie ID',
+            icon: 'i-lucide-copy',
+            onSelect() {
+                navigator.clipboard.writeText(row.original.id.toString())
+                toast.add({
+                    title: 'Copied to clipboard',
+                    description: 'Affectation ID copied to clipboard'
+                })
+            }
+        }
+    ]
+
+    if (!row.original.end_date) {
+        items.push({
+            type: 'separator',
+            label: ''
+        });
+
+        items.push({
+            label: "Stopper l'affectation",
+            icon: 'i-lucide-trash',
+            onSelect() {
+                selectedRoleId.value = row.original.id
                 isStopModalOpen.value = true
             }
         })

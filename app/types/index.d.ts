@@ -97,7 +97,7 @@ export interface Profil {
 }
 
 export interface Affectation {
-  id: number
+  id: string
   user_id: string
   lookup_id: string
   organisation_id?: string
@@ -108,7 +108,7 @@ export interface Affectation {
   organisation?: Organisation
 }
 export interface Article {
-  id: number
+  id: string
   nom: string
   code: string
   description: string
