@@ -31,7 +31,7 @@ const classes = computed(() => paramStore.getClasseItems)
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const { data, error } = await supabase
     .from('lookups')
-    .insert(event?.data)
+    .insert(event?.data as never)
     .select()
 
   if (error) {

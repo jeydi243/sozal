@@ -1,12 +1,12 @@
 <template>
-    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`" :ui="{ content: 'max-w-3xl' }"
-        v-model:open="isOpenSlideOver">
+    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`"
+        description="Description de l'utilisateur" :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
 
 
         <template #body>
             <!-- Design Information Utilisateur -->
             <div
-                class="p-4 mx-4 mb-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
+                class="p-4 mx-4 mb-4 rounded-lg border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
                 <div class="flex items-center gap-4">
                     <UAvatar :alt="props.user?.prenom?.[0]" size="xl"
                         class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
@@ -35,7 +35,7 @@
                         <UsersAddAffectation :user_id="props.user?.user_id || null"
                             @affectation-added="refreshAffectations" />
                     </div>
-                    <UTable ref="table_affectations" v-model:column-filters="columnFilters"
+                    <UTable ref="table_affectations" v-model:column-filters="columnFiltersAffectations"
                         v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
                         v-model:pagination="pagination" empty="Aucune affectation" :pagination-options="{
                             getPaginationRowModel: getPaginationRowModel()
@@ -51,9 +51,9 @@
                 <template #roles>
                     <div class="flex flex-row justify-between">
                         <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshRoles" />
-                        <UsersAddRole :user_id="props.user?.user_id || null" @role-added="refreshRoles" />
+                        <UsersAddRole :user="props.user" @role-added="refreshRoles" />
                     </div>
-                    <UTable ref="table_roles" v-model:column-filters="columnFilters"
+                    <UTable ref="table_roles" v-model:column-filters="columnFiltersRoles"
                         v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
                         v-model:pagination="pagination" empty="Aucun rôle ajouté" :pagination-options="{
                             getPaginationRowModel: getPaginationRowModel()
@@ -62,7 +62,7 @@
                             base: 'table-fixed border-separate border-spacing-0',
                             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                             tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                             td: 'border-b border-(--ui-border) p-2'
                         }" />
                 </template>
@@ -88,7 +88,7 @@
                     </UButton>
                 </template>
             </UModal>
-            <UModal v-model:open="isStopModalOpen" title="Confirmer l'arret du rôle">
+            <UModal v-model:open="isStopRoleModalOpen" title="Retirer l'attribution du rôle">
                 <template #body>
                     <div class="pl-4">
 
@@ -173,8 +173,8 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
 const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData(
     `roles-${props.user?.user_id}`,
     async () => {
-        if (!props.user?.user_id) return []
-        const { data, error } = await supabase.from('roles').select("id, code, nom, start_date, end_date").eq('user_id', props.user.user_id)
+        if (!props.user?.id) return []
+        const { data, error } = await supabase.from('user_roles').select("id, role:roles!inner(*), date_debut, date_fin").eq('user_id', props.user.user_id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -184,7 +184,7 @@ const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData
             throw error
         }
         console.log(data)
-        return data as Role[]
+        return data as UserRole[]
     },
     {
         watch: [() => props.user],
@@ -192,8 +192,12 @@ const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData
     }
 )
 
-const columnFilters = ref([{
-    id: 'id',
+const columnFiltersAffectations = ref([{
+    id: 'organisation_id',
+    value: ''
+}])
+const columnFiltersRoles = ref([{
+    id: 'nom',
     value: ''
 }])
 
@@ -209,6 +213,7 @@ const pagination = ref({
 })
 const openEdit = ref(false)
 const isStopModalOpen = ref(false)
+const isStopRoleModalOpen = ref(false)
 const columnVisibility = ref()
 const selectedRoleId = ref<string | null>(null)
 const selectedAffectationId = ref<string | null>(null)
@@ -241,8 +246,8 @@ async function stopRole() {
     if (!selectedRoleId.value) return
 
     const { error } = await supabase
-        .from('roles')
-        .update({ end_date: new Date().toISOString() } as never)
+        .from('user_roles')
+        .update({ date_fin: new Date().toISOString() } as never)
         .eq('id', selectedRoleId.value)
 
     if (error) {
@@ -254,11 +259,11 @@ async function stopRole() {
     } else {
         toast.add({
             title: 'Succès',
-            description: 'L\'affectation a été arrêtée avec succès.',
+            description: 'Le rôle a été arrêté avec succès.',
             color: 'success'
         })
-        refreshAffectations()
-        isStopModalOpen.value = false
+        refreshRoles()
+        isStopRoleModalOpen.value = false
     }
 }
 const columnsAffectations: TableColumn<Affectation>[] = [
@@ -363,25 +368,25 @@ const columnsRoles: TableColumn<UserRole>[] = [
         }
     },
     {
-        accessorKey: 'start_date',
+        accessorKey: 'date_debut',
         header: 'Date de début',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.start_date ? new Date(row.original.start_date).toLocaleDateString() : ''),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_debut ? new Date(row.original.date_debut).toLocaleDateString() : ''),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'end_date',
+        accessorKey: 'date_fin',
         header: 'Date de fin',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.end_date),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_fin),
                 ])
             ])
         }
@@ -471,18 +476,18 @@ function getRowItemsRoles(row: Row<UserRole>) {
         }
     ]
 
-    if (!row.original.end_date) {
+    if (!row.original.date_fin) {
         items.push({
             type: 'separator',
             label: ''
         });
 
         items.push({
-            label: "Stopper l'affectation",
+            label: "Stopper l'attribution de ce role",
             icon: 'i-lucide-trash',
             onSelect() {
                 selectedRoleId.value = row.original.id
-                isStopModalOpen.value = true
+                isStopRoleModalOpen.value = true
             }
         })
     }

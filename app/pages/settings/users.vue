@@ -126,7 +126,7 @@ const { copy } = useClipboard()
 const searchInput = ref('')
 
 const debouncedSearch = useDebounceFn((val: string) => {
-    table.value?.tableApi?.getColumn('email')?.setFilterValue(val)
+    table.value?.tableApi?.getColumn('nom')?.setFilterValue(val)
 }, 300)
 
 watch(searchInput, (val) => {

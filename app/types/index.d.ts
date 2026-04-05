@@ -116,7 +116,7 @@ export interface Article {
   created_at?: string
 }
 export interface ArticleAffectation {
-  id: number
+  id: string
   article_id: Article
   organisation_id: Organisation
   created_at?: string
@@ -130,7 +130,7 @@ export interface Tarifaire {
 }
 
 export interface TarifaireLine {
-  id: number
+  id: string
   tarifaire: Tarifaire
   article: Article
   prix: number
@@ -139,7 +139,7 @@ export interface TarifaireLine {
 }
 
 export interface Patient {
-  id: number
+  id: string
   nom: string
   code: string
   prenom: string
@@ -151,7 +151,7 @@ export interface Patient {
   avatar: string
 }
 export interface PatientOrg {
-  id: number
+  id: string
   patients: Patient
   organisation_id: string
   date_debut: string
@@ -219,9 +219,9 @@ export interface Role {
 
 export interface UserRole {
   id: string
-  user_id: string
+  user: Profil
   role: Role
   created_at: string
-  start_date: string
-  end_date: string
+  date_debut: string
+  date_fin: string
 }

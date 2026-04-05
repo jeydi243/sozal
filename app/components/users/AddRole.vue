@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
-import type { Lookup, Organisation } from '~/types'
+import type { Lookup, Organisation, Profil } from '~/types'
+import { CalendarDate, getLocalTimeZone } from '@internationalized/date'
 
 const props = defineProps<{
-    user_id: string | null
+    user: Profil | null
 }>()
 
 const emit = defineEmits(['role-added'])
@@ -12,54 +13,71 @@ const emit = defineEmits(['role-added'])
 const supabase = useSupabaseClient()
 const toast = useToast()
 const open = ref(false)
+const maxDate = new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())
 
+const toCalendarDate = (date: Date) => {
+    return new CalendarDate(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+    )
+}
 const schema = z.object({
-    lookup_id: z.string().min(1, 'Type requis'),
-    organisation_id: z.string().min(1, 'Organisation requise')
+    role_id: z.string().min(1, 'Role requis'),
+    user_id: z.string().min(1, 'Veuillez specifier l\'utilisateur'),
+    date_debut: z.date().max(new Date(), 'Date de debut doit etre inferieur à la date actuelle')
 })
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
-    lookup_id: undefined,
-    organisation_id: undefined,
+    role_id: undefined,
+    user_id: props.user?.id,
+    date_debut: undefined
 })
 
+const inputDateDebutRef = useTemplateRef('inputDateDebutRef')
+const dateDebutModel = computed({
+    get: () => state.date_debut ? toCalendarDate(state.date_debut) : undefined,
+    set: (value: CalendarDate | null) => {
+        state.date_debut = value ? value.toDate(getLocalTimeZone()) : undefined
+    }
+})
+
+
+
 // Fetch Lookups for role types
-const { data: lookups } = await useAsyncData('role-lookups', async () => {
+const { data: roles } = await useAsyncData('role-items', async () => {
     const { data, error } = await supabase
-        .from('lookups')
-        .select('id, nom, classes!inner(*)')
-        .eq('classes.table_name', 'TYPE_AFFECTATION')
+        .from('roles')
+        .select('id, nom, code')
     if (error) throw error
     return data
 })
 
 // Fetch Services (Organisations with "Service Médicale" description in lookup)
-const { data: services } = await useAsyncData('medical-services', async () => {
+const { data: profils } = await useAsyncData('profil-items', async () => {
     const { data, error } = await supabase
-        .from('organisations')
-        .select('id, nom, code, lookup:lookups!inner(*)')
-        .eq('lookup.description', 'Service Médicale')
+        .from('profils')
+        .select('id, nom, prenom, postnom')
     if (error) throw error
-    return data as unknown as Organisation[]
+    return data as Profil[]
 })
 
-const lookupItems = computed<SelectMenuItem[]>(() => lookups.value?.map((l: any) => ({
+const rolesItems = computed<SelectMenuItem[]>(() => roles.value?.map((l: any) => ({
     label: l.nom,
     id: l.id
 })) || [])
 
-const serviceItems = computed<SelectMenuItem[]>(() => services.value?.map((s: Organisation) => ({
-    label: `${s.nom} (${s.code || 'N/A'})`,
-    id: s.id
+const profilItems = computed<SelectMenuItem[]>(() => profils.value?.map((profil: Profil) => ({
+    label: `${profil.nom} ${profil.prenom}`,
+    id: profil.id
 })) || [])
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-    const { error } = await (supabase.from('roles') as any)
+    const { error } = await (supabase.from('user_roles') as any)
         .insert({
-            user_id: props.user_id,
             ...event.data
-        })
+        } as never)
 
     if (error) {
         toast.add({ title: 'Erreur', description: error.message, color: 'error' })
@@ -69,32 +87,44 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         emit('role-added')
 
         // Reset state
-        state.lookup_id = undefined
-        state.organisation_id = undefined
+        state.role_id = undefined
     }
 }
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Ajouter une role"
-        description="Affecter l'utilisateur à un service ou une organisation">
-        <UButton icon="i-lucide-plus" label="Affecter" color="primary" size="sm" />
+    <UModal v-model:open="open" title="Attribuer un role" description="Attribuer un role à l'utilisateur">
+        <UButton icon="i-lucide-plus" label="Attribuer un role" color="primary" size="sm" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-                <UFormField label="Type d'role" name="lookup_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.lookup_id" value-key="id" :items="lookupItems"
-                        placeholder="Sélectionner un type..." />
+                <UFormField label="Utilisateur" name="user_id" class="w-full">
+                    <USelectMenu class="w-full" v-model="state.user_id" value-key="id" :items="profilItems"
+                        placeholder="Choisir un service..." icon="i-lucide-building" disabled />
                 </UFormField>
+                <UFormField label="Role" name="role_id" class="w-full">
+                    <USelectMenu class="w-full" v-model="state.role_id" value-key="id" :items="rolesItems"
+                        placeholder="Sélectionner un role..." />
+                </UFormField>
+                <UFormField label="Date de debut" placeholder="08/12/2025" name="date_debut">
+                    <UInputDate v-model="dateDebutModel" class="w-full" :max-date="maxDate">
+                        <template #trailing>
+                            <UPopover :reference="inputDateDebutRef?.inputsRef[3]?.$el">
+                                <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
+                                    aria-label="Select a date" class="px-0" />
 
-                <UFormField label="Service / Organisation" name="organisation_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.organisation_id" value-key="id" :items="serviceItems"
-                        placeholder="Choisir un service..." icon="i-lucide-building" />
+                                <template #content>
+                                    <UCalendar v-model="dateDebutModel" class="p-2" :max-date="maxDate" />
+                                </template>
+                            </UPopover>
+                        </template>
+                    </UInputDate>
                 </UFormField>
 
                 <div class="flex justify-end gap-2 pt-2">
                     <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />
-                    <UButton label="Affecter" color="primary" variant="solid" type="submit" />
+                    <UButton label="Attribuer un role" color="primary" icon="material-symbols:add" variant="solid"
+                        type="submit" />
                 </div>
             </UForm>
         </template>
