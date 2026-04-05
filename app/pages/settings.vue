@@ -38,7 +38,13 @@ const links = [[{
   label: 'Articles',
   icon: 'icon-park-outline:ad-product',
   to: '/settings/articles'
-}, {
+}, 
+{
+  label: 'Fournisseurs',
+  icon: 'icon-park-outline:ad-product',
+  to: '/settings/fournisseurs'
+}, 
+{
   label: 'Security',
   icon: 'i-lucide-shield',
   to: '/settings/security'

@@ -6,181 +6,189 @@ const open = useLocalStorage('dashboard-sidebar-open', true)
 
 const links = [
   [{
-  label: 'Home',
-  icon: 'i-lucide-house',
-  to: '/',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  label: 'Inbox',
-  icon: 'i-lucide-inbox',
-  to: '/inbox',
-  badge: '4',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Patients',
-  icon: 'i-lucide-users',
-  to: '/patients',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Consultations',
-  icon: 'hugeicons:doctor-03',
-  to: '/consultations',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Salle d\'examen',
-  icon: 'i-lucide-users',
-  to: '/salle-examen',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Rendez-vous',
-  icon: 'solar:calendar-mark-bold-duotone',
-  to: '/rendez-vous',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Stock',
-  to: '/stock',
-  icon: 'i-lucide-settings',
-  defaultOpen: true,
-  children: [{
+    label: 'Home',
+    icon: 'i-lucide-house',
+    to: '/',
+    onSelect: () => {
+      open.value = false
+    }
+  }, {
+    label: 'Inbox',
+    icon: 'i-lucide-inbox',
+    to: '/inbox',
+    badge: '4',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Patients',
+    icon: 'i-lucide-users',
+    to: '/patients',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Consultations',
+    icon: 'hugeicons:doctor-03',
+    to: '/consultations',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Salle d\'examen',
+    icon: 'i-lucide-users',
+    to: '/salle-examen',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Rendez-vous',
+    icon: 'solar:calendar-mark-bold-duotone',
+    to: '/rendez-vous',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
     label: 'Stock',
-    icon: 'solar:settings-bold-duotone',
     to: '/stock',
-    exact: true,
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
-    label: 'Reception Externe',
-    to: '/stock/reception-externe',
-    icon: 'solar:card-transfer-bold-duotone',
+    icon: 'i-lucide-settings',
+    defaultOpen: true,
+    children: [{
+      label: 'Stock',
+      icon: 'solar:settings-bold-duotone',
+      to: '/stock',
+      exact: true,
+      onSelect: () => {
+        open.value = false
+      }
+    }, {
+      label: 'Reception Externe',
+      to: '/stock/reception-externe',
+      icon: 'solar:card-transfer-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Reception interne',
+      to: '/stock/reception-interne',
+      icon: 'octicon:organization-16',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Articles',
+      to: '/stock/articles',
+      icon: 'solar:layers-minimalistic-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    }]
+  },
+  {
+    label: 'Partenaires',
+    icon: 'solar:buildings-2-bold-duotone',
+    to: '/partenaires',
     onSelect: () => {
       open.value = false
     }
   },
   {
-    label: 'Reception interne',
-    to: '/stock/reception-interne',
-    icon: 'octicon:organization-16',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Articles',
-    to: '/stock/articles',
-    icon: 'solar:layers-minimalistic-bold-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  }]
-},
-{
-  label: 'Partenaires',
-  icon: 'solar:buildings-2-bold-duotone',
-  to: '/partenaires',
-  onSelect: () => {
-    open.value = false
-  }
-},
-{
-  label: 'Parametres',
-  to: '/settings',
-  icon: 'i-lucide-settings',
-  defaultOpen: true,
-  children: [{
     label: 'Parametres',
-    icon: 'solar:settings-bold-duotone',
     to: '/settings',
-    exact: true,
-    onSelect: () => {
-      open.value = false
-    }
+    icon: 'i-lucide-settings',
+    defaultOpen: true,
+    children: [{
+      label: 'Parametres',
+      icon: 'solar:settings-bold-duotone',
+      to: '/settings',
+      exact: true,
+      onSelect: () => {
+        open.value = false
+      }
+    }, {
+      label: 'Lookups',
+      to: '/settings/lookups',
+      icon: 'solar:card-transfer-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Organisations',
+      to: '/settings/organisations',
+      icon: 'octicon:organization-16',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Grille tarifaire',
+      to: '/settings/tarifaire',
+      icon: 'solar:tag-price-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Utilisateurs',
+      to: '/settings/users',
+      icon: 'solar:users-group-two-rounded-line-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Roles et Acces',
+      to: '/settings/access',
+      icon: 'solar:full-screen-circle-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Articles',
+      to: '/settings/articles',
+      icon: 'solar:layers-minimalistic-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Fournisseurs',
+      to: '/settings/fournisseurs',
+      icon: 'solar:users-group-two-rounded-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    },
+    {
+      label: 'Security',
+      to: '/settings/security',
+      icon: 'solar:folder-security-bold-duotone',
+      onSelect: () => {
+        open.value = false
+      }
+    }]
+  }
+  ],
+  [{
+    label: 'Feedback',
+    icon: 'i-lucide-message-circle',
+    to: 'https://github.com/nuxt-ui-pro/dashboard',
+    target: '_blank'
   }, {
-    label: 'Lookups',
-    to: '/settings/lookups',
-    icon: 'solar:card-transfer-bold-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Organisations',
-    to: '/settings/organisations',
-    icon: 'octicon:organization-16',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Grille tarifaire',
-    to: '/settings/tarifaire',
-    icon: 'solar:tag-price-bold-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Utilisateurs',
-    to: '/settings/users',
-    icon: 'solar:users-group-two-rounded-line-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Roles et Acces',
-    to: '/settings/access',
-    // icon: 'ion:ios-pricetags-outline',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Articles',
-    to: '/settings/articles',
-    icon: 'solar:layers-minimalistic-bold-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  },
-  {
-    label: 'Security',
-    to: '/settings/security',
-    icon: 'solar:folder-security-bold-duotone',
-    onSelect: () => {
-      open.value = false
-    }
-  }]
-}
-], 
-[{
-  label: 'Feedback',
-  icon: 'i-lucide-message-circle',
-  to: 'https://github.com/nuxt-ui-pro/dashboard',
-  target: '_blank'
-}, {
-  label: 'Help & Support',
-  icon: 'i-lucide-info',
-  to: 'https://github.com/nuxt/ui-pro',
-  target: '_blank'
-}]]
+    label: 'Help & Support',
+    icon: 'i-lucide-info',
+    to: 'https://github.com/nuxt/ui-pro',
+    target: '_blank'
+  }]]
 
 const groups = computed(() => [{
   id: 'links',

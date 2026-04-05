@@ -39,18 +39,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         .select()
 
     if (error) {
-        toast.add({ title: 'Error', description: `Can't add new article ${error.message}`, color: 'error' })
+        toast.add({ title: 'Error', description: `Can't add new fournisseur ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `New article ${event.data.nom} added`, color: 'success' })
+        toast.add({ title: 'Success', description: `New fournisseur ${event.data.nom} added`, color: 'success' })
         open.value = false
-        emit('article-added')
+        emit('fournisseur-added')
     }
 }
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Ajouter Article" description="Ajouter un article">
-        <UButton label="Add article" icon="i-lucide-plus" />
+    <UModal v-model:open="open" title="Ajouter un fournisseur" description="Ajouter un fournisseur">
+        <UButton label="Ajouter un fournisseur" icon="i-lucide-plus" />
 
         <template #body>
             <UForm :schema="ArticleSchema" :state="state" class="space-y-4" @submit="onSubmit">
