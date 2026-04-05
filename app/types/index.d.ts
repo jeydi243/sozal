@@ -61,7 +61,7 @@ export interface Classe {
   created_at: string,
   updated_at: string,
   update: Date,
-  start_date: Date,
+  date_debut: Date,
   end_date: Date
 }
 
@@ -224,4 +224,23 @@ export interface UserRole {
   created_at: string
   date_debut: string
   date_fin: string
+}
+
+export interface STKHeader{
+  in_organisation_id :string
+  out_organisation_id :string
+  date_trx:string
+  fournisseur_id:string
+  numero_commande:string
+  numero_livraison:string
+  numero_document:string
+  
+}
+
+export interface STKLine{
+  header:STKHeader
+  article:Article
+  quantite_trx:number
+  prix:number
+  
 }

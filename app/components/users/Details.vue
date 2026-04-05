@@ -1,6 +1,6 @@
 <template>
-    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`"
-        description="Description de l'utilisateur" :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
+    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`" description="Description de l'utilisateur"
+        :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
 
 
         <template #body>
@@ -26,7 +26,7 @@
                         @click="openEdit = true" class="rounded-full px-4" />
                 </div>
             </div>
-{{ props.user }}
+
             <UTabs :items="items" class="h-full flex flex-col" variant="link">
                 <template #affectations>
                     <div class="flex flex-row justify-between">
@@ -35,9 +35,9 @@
                         <UsersAddAffectation :user_id="props.user?.user_id || null"
                             @affectation-added="refreshAffectations" />
                     </div>
-                    <UTable ref="table_affectations" v-model:column-filters="columnFiltersAffectations"
-                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                        v-model:pagination="pagination" empty="Aucune affectation" :pagination-options="{
+                    <UTable ref="table_affectations" v-model:column-visibility="columnVisibility"
+                        v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune affectation"
+                        :pagination-options="{
                             getPaginationRowModel: getPaginationRowModel()
                         }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
                         :loading="affectationsStatus === 'pending'" :ui="{
@@ -53,9 +53,9 @@
                         <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshRoles" />
                         <UsersAddRole :user="props.user" @role-added="refreshRoles" />
                     </div>
-                    <UTable ref="table_roles" v-model:column-filters="columnFiltersRoles"
-                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                        v-model:pagination="pagination" empty="Aucun rôle ajouté" :pagination-options="{
+                    <UTable ref="table_roles" v-model:column-visibility="columnVisibility"
+                        v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun rôle ajouté"
+                        :pagination-options="{
                             getPaginationRowModel: getPaginationRowModel()
                         }" class="shrink-0 m-2" :data="roles || []" :columns="columnsRoles"
                         :loading="rolesStatus === 'pending'" :ui="{
@@ -153,7 +153,7 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
     `affectations-${props.user?.id}`,
     async () => {
         if (!props.user?.id) return []
-        const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookup:lookups!inner(*), organisation:organisations!inner(*)").eq('user_id', props.user.user_id)
+        const { data, error } = await supabase.from('affectations').select("id, date_debut, date_fin, lookup:lookups!inner(*), organisation:organisations!inner(*)").eq('user_id', props.user?.user_id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -174,7 +174,7 @@ const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData
     `roles-${props.user?.id}`,
     async () => {
         if (!props.user?.id) return []
-        const { data, error } = await supabase.from('user_roles').select("id, role:roles!inner(*), date_debut, date_fin").eq('user_id', props.user.user_id)
+        const { data, error } = await supabase.from('user_roles').select("id, role:roles!inner(*), date_debut, date_fin").eq('user_id', props.user?.user_id)
         if (error) {
             toast.add({
                 title: 'Error',
@@ -191,15 +191,6 @@ const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData
         immediate: true // Ensure it runs on mount if user is present
     }
 )
-
-const columnFiltersAffectations = ref([{
-    id: 'organisation_id',
-    value: ''
-}])
-const columnFiltersRoles = ref([{
-    id: 'nom',
-    value: ''
-}])
 
 const isOpenSlideOver = computed({
     get: () => props.open,
@@ -292,25 +283,25 @@ const columnsAffectations: TableColumn<Affectation>[] = [
         }
     },
     {
-        accessorKey: 'start_date',
+        accessorKey: 'date_debut',
         header: 'Date de début',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.start_date ? new Date(row.original.start_date).toLocaleDateString() : ''),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_debut ? new Date(row.original.date_debut).toLocaleDateString() : ''),
                 ])
             ])
         }
     },
     {
-        accessorKey: 'end_date',
+        accessorKey: 'date_fin',
         header: 'Date de fin',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
 
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.end_date),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.date_fin),
                 ])
             ])
         }
@@ -439,7 +430,7 @@ function getRowItemsAffectations(row: Row<Affectation>) {
         }
     ]
 
-    if (!row.original.end_date) {
+    if (!row.original.date_fin) {
         items.push({
             type: 'separator',
             label: ''

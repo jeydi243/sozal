@@ -4,7 +4,8 @@ const toast = useToast()
 
 const open = useLocalStorage('dashboard-sidebar-open', true)
 
-const links = [[{
+const links = [
+  [{
   label: 'Home',
   icon: 'i-lucide-house',
   to: '/',
@@ -53,6 +54,44 @@ const links = [[{
   }
 },
 {
+  label: 'Stock',
+  to: '/stock',
+  icon: 'i-lucide-settings',
+  defaultOpen: true,
+  children: [{
+    label: 'Stock',
+    icon: 'solar:settings-bold-duotone',
+    to: '/stock',
+    exact: true,
+    onSelect: () => {
+      open.value = false
+    }
+  }, {
+    label: 'Reception Externe',
+    to: '/stock/reception-externe',
+    icon: 'solar:card-transfer-bold-duotone',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Reception interne',
+    to: '/stock/reception-interne',
+    icon: 'octicon:organization-16',
+    onSelect: () => {
+      open.value = false
+    }
+  },
+  {
+    label: 'Articles',
+    to: '/stock/articles',
+    icon: 'solar:layers-minimalistic-bold-duotone',
+    onSelect: () => {
+      open.value = false
+    }
+  }]
+},
+{
   label: 'Partenaires',
   icon: 'solar:buildings-2-bold-duotone',
   to: '/partenaires',
@@ -67,7 +106,7 @@ const links = [[{
   defaultOpen: true,
   children: [{
     label: 'Parametres',
-    icon:'solar:settings-bold-duotone',
+    icon: 'solar:settings-bold-duotone',
     to: '/settings',
     exact: true,
     onSelect: () => {
@@ -129,7 +168,9 @@ const links = [[{
       open.value = false
     }
   }]
-}], [{
+}
+], 
+[{
   label: 'Feedback',
   icon: 'i-lucide-message-circle',
   to: 'https://github.com/nuxt-ui-pro/dashboard',
@@ -170,8 +211,8 @@ onMounted(async () => {
   <UDashboardGroup as="div">
     <UDashboardSearch :groups="groups" />
 
-    <UDashboardSidebar :min-size="20" v-model:open="open" mode="modal" collapsible resizable class="bg-(--ui-bg-elevated)/25"
-      :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
+    <UDashboardSidebar :min-size="20" v-model:open="open" mode="modal" collapsible resizable
+      class="bg-(--ui-bg-elevated)/25" :ui="{ footer: 'lg:border-t lg:border-(--ui-border)' }">
       <template #header="{ collapsed }">
         <TeamsMenu :collapsed="collapsed" />
       </template>

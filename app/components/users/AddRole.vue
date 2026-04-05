@@ -35,6 +35,12 @@ const state = reactive<Partial<Schema>>({
     date_debut: undefined
 })
 
+watch(() => props.user, (newVal) => {
+    if (newVal) {
+        state.user_id = newVal.id
+    }
+}, { immediate: true })
+
 const inputDateDebutRef = useTemplateRef('inputDateDebutRef')
 const dateDebutModel = computed({
     get: () => state.date_debut ? toCalendarDate(state.date_debut) : undefined,
@@ -109,7 +115,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 <UFormField label="Date de debut" placeholder="08/12/2025" name="date_debut">
                     <UInputDate v-model="dateDebutModel" class="w-full" :max-date="maxDate">
                         <template #trailing>
-                            <UPopover :reference="inputDateDebutRef?.inputsRef[3]?.$el">
+                            <UPopover>
                                 <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
                                     aria-label="Select a date" class="px-0" />
 
