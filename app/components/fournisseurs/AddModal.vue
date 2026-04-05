@@ -7,7 +7,7 @@ const ArticleSchema = z.object({
     code: z.string().min(6, 'Code must be at least 6 characters'),
     nom: z.string().min(6, 'Name must be at least 6 characters'),
     description: z.string().min(5, 'Description must be at least 5 characters'),
-    lookup_id: z.string()
+    type_id: z.string().optional()
 })
 const supabase = useSupabaseClient()
 const open = ref(false)
@@ -15,12 +15,22 @@ const toast = useToast()
 type Schema = z.output<typeof ArticleSchema>
 
 const state = reactive<Partial<Schema>>({
-    code: undefined,
+    code: generateRandomCode(),
     nom: undefined,
     description: undefined,
-    lookup_id: undefined,
+    type_id: undefined,
 })
-const { data: lookups } = await useAsyncData<Lookup[]>('lookups-articles', async () => {
+
+function generateRandomCode(length = 6) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    let result = ''
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length))
+    }
+    return result
+}
+
+const { data: lookups } = await useAsyncData<Lookup[]>('lookups-fournisseurs', async () => {
     const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'TYPE_ARTICLES')
     return (data || []) as unknown as Lookup[]
 })
@@ -30,11 +40,11 @@ const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
     id: String(lookup?.id)
 })) || [])
 
-const emit = defineEmits(['article-added'])
+const emit = defineEmits(['fournisseur-added'])
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
     const { data, error } = await supabase
-        .from('articles')
+        .from('fournisseurs')
         .insert(event?.data as any)
         .select()
 
@@ -44,6 +54,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         toast.add({ title: 'Success', description: `New fournisseur ${event.data.nom} added`, color: 'success' })
         open.value = false
         emit('fournisseur-added')
+        // Réinitialiser le code après soumission réussie
+        state.code = generateRandomCode()
     }
 }
 </script>
@@ -55,7 +67,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #body>
             <UForm :schema="ArticleSchema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Code" name="code">
-                    <UInput v-model="state.code" class="w-full" placeholder="Code de l'article" />
+                    <UInput v-model="state.code" class="w-full" placeholder="Code de l'article">
+                        <template #trailing>
+                            <UButton icon="i-lucide-refresh-cw" color="neutral" variant="ghost" size="xs"
+                                @click="state.code = generateRandomCode()" />
+                        </template>
+                    </UInput>
                 </UFormField>
                 <UFormField label="Nom" name="nom">
                     <UInput v-model="state.nom" class="w-full" placeholder="Nom de l'article" />
@@ -65,13 +82,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                     <UTextarea v-model="state.description" class="w-full" placeholder="Description de l'article" />
                 </UFormField>
 
-                <UFormField label="Type d'article" name="lookup_id">
-                    <USelectMenu v-model="state.lookup_id" value-key="id" :items="items" class="w-full" />
-                </UFormField>
-
                 <div class="flex justify-end gap-2">
                     <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />
-                    <UButton label="Ajouter un article" color="primary" variant="solid" type="submit" />
+                    <UButton label="Ajouter un fournisseur" color="primary" variant="solid" type="submit" />
                 </div>
             </UForm>
         </template>

@@ -146,7 +146,7 @@ const columns: TableColumn<Fournisseur>[] = [
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.type_id)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.type?.id)),
                 ])
             ])
         }
@@ -240,7 +240,7 @@ function getRowItems(row: Row<Fournisseur>) {
 }
 
 const { data: Fournisseurs, pending, refresh: refreshFournisseurs } = await useAsyncData('Fournisseurs', async () => {
-    const { data, error } = await supabase.from('Fournisseurs').select('*, lookup_id(*)')
+    const { data, error } = await supabase.from('fournisseurs').select('*')
     if (error) {
         throw error
     }

@@ -56,7 +56,7 @@ const links = [
   {
     label: 'Stock',
     to: '/stock',
-    icon: 'i-lucide-settings',
+    icon: 'solar:posts-carousel-vertical-broken',
     defaultOpen: true,
     children: [{
       label: 'Stock',

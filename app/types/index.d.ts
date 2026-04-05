@@ -251,7 +251,7 @@ export interface Fournisseur {
   nom: string
   code: string
   description: string
-  type_id: Lookup
+  type: Lookup
   created_at?: string
   updated_at?: string
 }

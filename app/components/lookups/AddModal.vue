@@ -67,7 +67,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </UFormField>
         <div class="flex justify-end gap-2">
           <UButton label="Cancel" color="neutral" variant="subtle" @click="open = false" />
-          <UButton label="Create" color="primary" variant="solid" type="submit" />
+          <UButton label="Créer" color="primary" variant="solid" type="submit" />
         </div>
       </UForm>
     </template>

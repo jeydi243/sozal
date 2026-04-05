@@ -30,7 +30,7 @@ const toCalendarDate = (date: Date) => {
     )
 }
 const { data: lookups } = await useAsyncData('lookups', async () => {
-    const { data } = await supabase.from('lookups').select('id, nom')
+    const { data } = await supabase.from('fournisseurs').select('id, nom')
     return data
 })
 const dateTrxModel = computed({
@@ -78,7 +78,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 <UFormField label="Fournisseur" placeholder="_" name="fournisseur_id">
                     <USelectMenu v-model="state.fournisseur_id" value-key="id" :items="items" class="w-full" />
                 </UFormField>
-                <UFormField label="Organisation" placeholder="" name="in_organisation_id">
+                <UFormField label="Organisation de reception" placeholder="" name="in_organisation_id">
                     <USelectMenu v-model="state.in_organisation_id" value-key="id" :items="items" class="w-full" />
                 </UFormField>
                 <UFormField label="Numero Commande" placeholder="" name="numero_commande">
