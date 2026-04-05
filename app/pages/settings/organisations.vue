@@ -8,8 +8,8 @@
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        <UInput v-model="searchInput"
-                            class="max-w-sm" icon="i-lucide-search" placeholder="Rechercher une organisation..." />
+                        <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
+                            placeholder="Rechercher une organisation..." />
 
                         <div class="flex flex-wrap items-center gap-1.5">
                             <USelect v-model="statusFilter" :items="[
@@ -36,10 +36,10 @@
                 v-model:row-selection="rowSelection" v-model:pagination="pagination"
                 :pagination-options="paginationOptions" class="shrink-0 m-2" :data="organisations || []"
                 :columns="columns" :loading="pending" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
+                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                     td: 'border-b border-(--ui-border) p-2'
                 }" />
 
@@ -127,7 +127,7 @@ const columns: TableColumn<Organisation>[] = [
                 'aria-label': 'Tout sélectionner'
             }),
         cell: ({ row }) =>
-            h('div', { class: 'flex items-center justify-center' }, h(UCheckbox as any, {
+            h('div', { class: 'flex items-center justify-left' }, h(UCheckbox as any, {
                 modelValue: row.getIsSelected(),
                 'onUpdate:modelValue': (value: any) => row.toggleSelected(!!value),
                 'aria-label': 'Sélectionner ligne'
@@ -135,8 +135,8 @@ const columns: TableColumn<Organisation>[] = [
     },
     {
         id: 'details',
-        header: 'Détails',
-        cell: ({ row }) => h(UButton, {
+        header: () => h('div', { class: 'flex items-center justify-center' }, 'Détails'),
+        cell: ({ row }) => h('div', { class: 'flex items-center justify-center' }, h(UButton, {
             color: 'neutral',
             variant: 'ghost',
             icon: 'i-lucide-maximize-2',
@@ -145,7 +145,7 @@ const columns: TableColumn<Organisation>[] = [
                 selectedOrganisation.value = row.original
                 openSlideOver.value = true
             }
-        }),
+        })),
     },
     {
         accessorKey: 'code',

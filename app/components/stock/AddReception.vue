@@ -55,7 +55,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             in_organisation_id: event.data.in_organisation_id,
             numero_commande: event.data.numero_commande,
             numero_livraison: event.data.numero_livraison
-        }])
+        }] as never)
         .select()
 
     if (error) {
