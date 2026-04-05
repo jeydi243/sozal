@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { SelectMenuItem, TableColumn } from '@nuxt/ui'
-import type { Article, Organisation, ArticleAffectation } from '~/types'
+import type { Fournisseur, Organisation, ArticleAffectation } from '~/types'
 
-const props = defineProps<{ article: Article | null }>()
+const props = defineProps<{ fournisseur: Fournisseur | null }>()
 const open = defineModel<boolean>('open', { default: false })
 
 const supabase = useSupabaseClient()
@@ -13,13 +13,13 @@ const isAddingRecord = ref(false)
 
 // Fetch affectations (organisations) for the current article
 const { data: affectations, refresh: refreshAffectations, pending: loadingAffectations } = await useAsyncData(
-    () => `article-affectations-${props.article?.id}`,
+    () => `article-affectations-${props.fournisseur?.id}`,
     async () => {
-        if (!props.article?.id) return []
+        if (!props.fournisseur?.id) return []
         const { data, error } = await supabase
             .from('article_organisations')
             .select('*, organisation:organisations(*)')
-            .eq('article_id', props.article.id)
+            .eq('article_id', props.fournisseur.id)
 
         if (error) {
             console.error('Error fetching affectations:', error)
@@ -27,19 +27,19 @@ const { data: affectations, refresh: refreshAffectations, pending: loadingAffect
         }
         return data || []
     },
-    { watch: [() => props.article?.id, () => open.value], immediate: true }
+    { watch: [() => props.fournisseur?.id, () => open.value], immediate: true }
 )
 
 // Fetch organisations for selection (excluding already assigned)
 const { data: organisations, refresh: refreshOrganisations } = await useAsyncData<Organisation[]>(
-    () => `organisations-available-${props.article?.id}`,
+    () => `organisations-available-${props.fournisseur?.id}`,
     async () => {
-        if (!props.article?.id) return []
+        if (!props.fournisseur?.id) return []
 
         const { data: assigned } = await supabase
             .from('article_organisations')
             .select('organisation_id')
-            .eq('article_id', props.article.id)
+            .eq('article_id', props.fournisseur.id)
 
         let query = supabase.from('organisations').select('id, nom')
 
@@ -51,7 +51,7 @@ const { data: organisations, refresh: refreshOrganisations } = await useAsyncDat
         const { data } = await query
         return (data || []) as unknown as Organisation[]
     },
-    { watch: [() => props.article?.id, () => open.value], immediate: true }
+    { watch: [() => props.fournisseur?.id, () => open.value], immediate: true }
 )
 
 const orgItems = computed<SelectMenuItem[]>(() => organisations.value?.map(org => ({
@@ -84,15 +84,15 @@ const columns: TableColumn<any>[] = [
 ]
 
 async function addAffectation() {
-    if (!selectedOrgId.value || !props.article?.id) return
+    if (!selectedOrgId.value || !props.fournisseur?.id) return
 
     isAddingRecord.value = true
     const { error } = await supabase
-        .from('article_organisations')
+        .from('fournisseur_organisations')
         .insert({
-            article_id: props.article.id,
+            fournisseur_id: props.fournisseur.id,
             organisation_id: selectedOrgId.value
-        })
+        } as never)
 
     isAddingRecord.value = false
     if (error) {
@@ -122,29 +122,29 @@ async function deleteAffectation(id: number) {
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Détails & Affectations" :description="props.article?.nom || 'Article'" :ui="{
+    <UModal v-model:open="open" title="Détails & Affectations" :description="props.fournisseur?.nom || 'Fournisseur'" :ui="{
         wrapper: 'w-[600px]'
     }">
         <template #body>
-            <div v-if="props.article" class="space-y-6">
+            <div v-if="props.fournisseur" class="space-y-6">
                 <!-- Détails de l'article -->
                 <div
                     class="grid grid-cols-2 gap-4 text-sm p-4 bg-(--ui-bg-elevated) rounded-lg border border-(--ui-border)">
                     <div>
                         <p class="text-(--ui-text-muted) mb-1">Nom</p>
-                        <p class="font-medium text-(--ui-text-highlighted)">{{ props.article.nom }}</p>
+                        <p class="font-medium text-(--ui-text-highlighted)">{{ props.fournisseur.nom }}</p>
                     </div>
                     <div>
                         <p class="text-(--ui-text-muted) mb-1">Code</p>
-                        <p class="font-mono text-(--ui-text-highlighted)">{{ props.article.code }}</p>
+                        <p class="font-mono text-(--ui-text-highlighted)">{{ props.fournisseur.code }}</p>
                     </div>
                     <div class="col-span-2">
                         <p class="text-(--ui-text-muted) mb-1">Description</p>
-                        <p>{{ props.article.description }}</p>
+                        <p>{{ props.fournisseur.description }}</p>
                     </div>
-                    <div v-if="props.article.lookup_id" class="col-span-2">
-                        <p class="text-(--ui-text-muted) mb-1">Type d'article</p>
-                        <p class="font-medium text-(--ui-text-highlighted)">{{ (props.article.lookup_id as any)?.nom }}
+                    <div v-if="props.fournisseur.type_id" class="col-span-2">
+                        <p class="text-(--ui-text-muted) mb-1">Type de fournisseur</p>
+                        <p class="font-medium text-(--ui-text-highlighted)">{{ (props.fournisseur.type_id as any)?.nom }}
                         </p>
                     </div>
                 </div>

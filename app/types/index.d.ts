@@ -244,3 +244,14 @@ export interface STKLine{
   prix:number
   
 }
+
+
+export interface Fournisseur {
+  id: string
+  nom: string
+  code: string
+  description: string
+  type_id: Lookup
+  created_at?: string
+  updated_at?: string
+}

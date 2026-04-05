@@ -40,15 +40,14 @@
                 </div>
             </template>
         </UDashboardPanel>
-        <FournisseursDetails :article="selectedArticle" v-model:open="openDetailsAffectation" />
-        <FournisseursAffectations :article="selectedArticle" v-model:open="openDetailsAffectation" />
+        <FournisseursDetails :fournisseur="selectedFournisseur" v-model:open="openDetailsFournisseur" />
+        <FournisseursAffectations :fournisseur="selectedFournisseur" v-model:open="openDetailsAffectation" />
     </div>
 </template>
 <script setup lang="ts">
-import { upperFirst } from 'scule'
 import { type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
-import type { Article } from '~/types'
+import type { Fournisseur } from '~/types'
 
 useHead({
     title: 'Fournisseurs',
@@ -79,9 +78,9 @@ const {
     setPage
 } = useDataTable({ filterColumnId: 'nom', pageSize: 10 })
 
-const openDetailsArticle = ref(false)
+const openDetailsFournisseur = ref(false)
 const openDetailsAffectation = ref(false)
-const selectedArticle = ref<Article | null>(null)
+const selectedFournisseur = ref<Fournisseur | null>(null)
 
 const { copy } = useClipboard()
 const searchInput = ref('')
@@ -94,7 +93,7 @@ watch(searchInput, (val) => {
     debouncedSearch(val)
 })
 
-const columns: TableColumn<Article>[] = [
+const columns: TableColumn<Fournisseur>[] = [
     {
         id: 'details',
         header: 'Détails',
@@ -103,8 +102,8 @@ const columns: TableColumn<Article>[] = [
             variant: 'ghost',
             icon: 'i-lucide-eye',
             onClick: () => {
-                selectedArticle.value = row.original
-                openDetailsArticle.value = !openDetailsArticle.value
+                selectedFournisseur.value = row.original
+                openDetailsFournisseur.value = !openDetailsFournisseur.value
             }
         }),
     },
@@ -142,12 +141,12 @@ const columns: TableColumn<Article>[] = [
         }
     },
     {
-        accessorKey: 'lookup_id',
+        accessorKey: 'type_id',
         header: 'Type',
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.lookup_id.nom)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.type_id)),
                 ])
             ])
         }
@@ -177,7 +176,7 @@ const columns: TableColumn<Article>[] = [
     }
 ]
 
-function getRowItems(row: Row<Article>) {
+function getRowItems(row: Row<Fournisseur>) {
     return [
         {
             type: 'label',
@@ -201,8 +200,8 @@ function getRowItems(row: Row<Article>) {
             label: 'Voir les détails',
             icon: 'material-symbols:open-in-full-rounded',
             onSelect() {
-                selectedArticle.value = row.original
-                openDetailsArticle.value = true
+                selectedFournisseur.value = row.original
+                openDetailsFournisseur.value = true
             }
         },
         {
