@@ -26,7 +26,7 @@
                         @click="openEdit = true" class="rounded-full px-4" />
                 </div>
             </div>
-
+{{ props.user }}
             <UTabs :items="items" class="h-full flex flex-col" variant="link">
                 <template #affectations>
                     <div class="flex flex-row justify-between">
@@ -150,9 +150,9 @@ const items = [
     },
 ]
 const { data: affectations, refresh: refreshAffectations, status: affectationsStatus } = useAsyncData(
-    `affectations-${props.user?.user_id}`,
+    `affectations-${props.user?.id}`,
     async () => {
-        if (!props.user?.user_id) return []
+        if (!props.user?.id) return []
         const { data, error } = await supabase.from('affectations').select("id, start_date, end_date, lookup:lookups!inner(*), organisation:organisations!inner(*)").eq('user_id', props.user.user_id)
         if (error) {
             toast.add({
@@ -171,7 +171,7 @@ const { data: affectations, refresh: refreshAffectations, status: affectationsSt
     }
 )
 const { data: roles, refresh: refreshRoles, status: rolesStatus } = useAsyncData(
-    `roles-${props.user?.user_id}`,
+    `roles-${props.user?.id}`,
     async () => {
         if (!props.user?.id) return []
         const { data, error } = await supabase.from('user_roles').select("id, role:roles!inner(*), date_debut, date_fin").eq('user_id', props.user.user_id)
