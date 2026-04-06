@@ -39,7 +39,7 @@ const { data: services } = await useAsyncData('medical-services', async () => {
     const { data, error } = await supabase
         .from('organisations')
         .select('id, nom, code, lookup:lookups!inner(*)')
-        .eq('lookup.description', 'Service Médicale')
+        .in('lookup.description', ['Service Médicale', 'Magasin'])
     if (error) throw error
     return data as unknown as Organisation[]
 })

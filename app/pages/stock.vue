@@ -11,7 +11,7 @@ const links = [[{
   to: '/stock',
   exact: true
 }, {
-  label: 'Reception Externe',
+  label: 'Reception externe',
   icon: 'i-lucide-users',
   to: '/stock/reception-externe'
 }, {
@@ -20,9 +20,9 @@ const links = [[{
   to: '/stock/reception-interne'
 },
 {
-  label: 'Articles',
-  icon: 'i-lucide-shield',
-  to: '/stock/articles'
+  label: 'Commandes',
+  icon: 'solar:clipboard-list-linear',
+  to: '/stock/commandes'
 }
 
 ]]

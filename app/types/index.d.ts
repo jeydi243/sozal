@@ -226,23 +226,26 @@ export interface UserRole {
   date_fin: string
 }
 
-export interface STKHeader{
-  in_organisation_id :string
-  out_organisation_id :string
-  date_trx:string
-  fournisseur_id:string
-  numero_commande:string
-  numero_livraison:string
-  numero_document:string
-  
+export interface STKHeader {
+  id: string
+  in_organisation: Organisation
+  out_organisation: Organisation
+  date_trx: string
+  fournisseur: Fournisseur
+  numero_commande: string
+  numero_livraison: string
+  numero_document: string
+  statut: string
+  type: string
+
 }
 
-export interface STKLine{
-  header:STKHeader
-  article:Article
-  quantite_trx:number
-  prix:number
-  
+export interface STKLine {
+  header: STKHeader
+  article: Article
+  quantite_trx: number
+  prix: number
+
 }
 
 

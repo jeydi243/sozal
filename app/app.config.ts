@@ -12,7 +12,7 @@ export default defineAppConfig({
         },
         dashboardPanel: {
             slots: {
-                body: "flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto p-8 sm:p-1",
+                body: "flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto p-8 sm:p-0",
                 handle: "",
             },
             variants: {

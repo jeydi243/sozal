@@ -1,25 +1,28 @@
 <template>
-    <UDashboardPanel id="reception-externe">
+    <UDashboardPanel id="commandes" :ui-pro="{ body: 'p-0' }">
         <template #header>
-            <UDashboardNavbar title="Reception Externe">
+            <UDashboardNavbar title="Commandes">
                 <template #leading>
                     <!-- <UDashboardSidebarCollapse /> -->
                 </template>
 
                 <template #right>
                     <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <UDropdownMenu :items="itemsOrganisationUser">
+                            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
+                        </UDropdownMenu>
                         <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
-                            placeholder="Rechercher un document..." />
+                            placeholder="Rechercher une organisation..." />
 
                         <div class="flex flex-wrap items-center gap-1.5">
                             <USelect v-model="statusFilter" :items="[
                                 { label: 'Toutes', value: 'all' },
-                                { label: 'En cours', value: 'en_cours' },
-                                { label: 'Validé', value: 'valide' },
-                                { label: 'Annulé', value: 'annule' }
+                                { label: 'Subscribed', value: 'subscribed' },
+                                { label: 'Actif', value: 'actif' },
+                                { label: 'Bounced', value: 'bounced' }
                             ]" :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
-                                placeholder="Statut" class="min-w-28"
-                                @update:model-value="setStatusFilter('statut', $event)" />
+                                placeholder="Filtrer par statut" class="min-w-28"
+                                @update:model-value="setStatusFilter('status', $event)" />
 
                             <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                                 <UButton label="Affichage" color="neutral" variant="outline"
@@ -34,9 +37,9 @@
         <template #body>
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune reception disponible"
-                :pagination-options="paginationOptions" class="shrink-0" :data="stk_trx_headers || []"
+                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="stk_trx_headers || []"
                 :columns="columns" :loading="pending" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
+                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
@@ -55,40 +58,43 @@
             </div>
         </template>
     </UDashboardPanel>
+
+    <STKHeadersDetails v-model:open="openSlideOver" :organisation="selectedSTKHeader" />
 </template>
 
 <script setup lang="ts">
 import { type Row } from '@tanstack/table-core'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
 import type { STKHeader } from '~/types'
+import { storeToRefs } from 'pinia'
 
-// 1. SEO
 useHead({
-    title: 'Reception externe',
+    title: 'Commandes',
     meta: [
-        { name: 'description', content: 'Gérer les réceptions externes.' }
+        { name: 'description', content: 'Gérer les commandes.' }
     ]
 })
-
-// 2. Services et composables
+const itemsOrganisationUser = [[{
+  label: 'New mail',
+  icon: 'i-lucide-send',
+  to: '/inbox'
+}, {
+  label: 'Nouveau partenaire',
+  icon: 'i-lucide-user-plus',
+  to: '/partenaires'
+}]]
 const supabase = useSupabaseClient()
 const toast = useToast()
-const { copy } = useClipboard()
+const parametresStore = useParametresStore()
+const { lookups } = storeToRefs(parametresStore)
 
-// 3. resolveComponent() — obligatoire avant tout usage dans h()
-const UButton = resolveComponent('UButton')
-const UBadge = resolveComponent('UBadge')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UCheckbox = resolveComponent('UCheckbox')
-
-// 4. Refs d'état UI
-const openSlideOver = ref(false)
-const selectedSTKHeader = ref<STKHeader | null>(null)
-const searchInput = ref('')
-
-// 5. useDataTable
+// Utilisation du composable centralisé
 const {
     table,
+    UButton,
+    UBadge,
+    UDropdownMenu,
+    UCheckbox,
     columnFilters,
     columnVisibility,
     rowSelection,
@@ -102,21 +108,25 @@ const {
     currentPageSize,
     setPage,
     setStatusFilter
-} = useDataTable({ filterColumnId: 'numero_document', pageSize: 10 })
+} = useDataTable({ filterColumnId: 'description', pageSize: 10 })
 
-// IDs des colonnes cachables
-const columnDisplayItems = buildColumnDisplayItems(['select', 'details', 'numero_document', 'numero_commande', 'in_organisation', 'date_trx', 'statut', 'actions'])
+// IDs des colonnes cachables — liste STATIQUE, sans jamais toucher à tableApi
+const columnDisplayItems = buildColumnDisplayItems(['select', 'details', 'code', 'nom', 'description', 'type', 'status', 'actions'])
 
-// logic de recherche
+const openSlideOver = ref(false)
+const selectedSTKHeader = ref<STKHeader | null>(null)
+
+const { copy } = useClipboard()
+const searchInput = ref('')
+
 const debouncedSearch = useDebounceFn((val: string) => {
-    table.value?.tableApi?.getColumn('numero_document')?.setFilterValue(val)
+    table.value?.tableApi?.getColumn('description')?.setFilterValue(val)
 }, 300)
 
 watch(searchInput, (val) => {
     debouncedSearch(val)
 })
 
-// 6. Définition des colonnes
 const columns: TableColumn<STKHeader>[] = [
     {
         id: 'select',
@@ -140,63 +150,82 @@ const columns: TableColumn<STKHeader>[] = [
         cell: ({ row }) => h(UButton, {
             color: 'neutral',
             variant: 'ghost',
-            icon: 'solar:pen-line-duotone',
-            // class: '-mx-2.5',
+            icon: 'i-lucide-maximize-2',
+            class: '-mx-2.5',
             onClick: () => {
                 selectedSTKHeader.value = row.original
                 openSlideOver.value = true
             }
         }),
-    }, 
+    },
     {
         accessorKey: 'in_organisation',
-        header: 'Magasin de reception',
-        cell: ({ row }) => {
-            const org = row.original.in_organisation
-            const orgNom = Array.isArray(org) ? (org as any)[0]?.nom : (org as any)?.nom
-            return h('p', undefined, orgNom ?? 'N/A')
-        }
-    },{
-        accessorKey: 'fournisseur_id',
-        header: 'Fournisseur',
-        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.fournisseur?.nom)
+        header: 'Organisation de reception',
+        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.in_organisation.nom)
     },
     {
-        accessorKey: 'numero_document',
-        header: 'N° Document',
-        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.numero_document)
+        accessorKey: 'out_organisation',
+        header: 'Organisation de provenance',
+        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.out_organisation.nom)
     },
-    
-    {
-        accessorKey: 'numero_commande',
-        header: 'N° Commande',
-        cell: ({ row }) => h('p', { class: 'text-(--ui-text-muted)' }, row.original.numero_commande)
-    },
-    {
-        accessorKey: 'numero_livraison',
-        header: 'N° Livraison',
-        cell: ({ row }) => h('p', { class: 'text-(--ui-text-muted)' }, row.original.numero_livraison)
-    },
-
     {
         accessorKey: 'date_trx',
-        header: 'Date',
-        cell: ({ row }) => {
-            const date = row.original.date_trx ? new Date(row.original.date_trx) : null
-            return h('p', undefined, date ? date.toLocaleDateString() : 'N/A')
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted()
+            return h(UButton, {
+                color: 'neutral',
+                variant: 'ghost',
+                label: 'Date de transaction',
+                icon: isSorted
+                    ? isSorted === 'asc'
+                        ? 'i-lucide-arrow-up-narrow-wide'
+                        : 'i-lucide-arrow-down-wide-narrow'
+                    : 'i-lucide-arrow-up-down',
+                class: '-mx-2.5',
+                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+            })
         }
     },
     {
-        accessorKey: 'statut',
+        accessorKey: 'description',
+        header: ({ column }) => {
+            const isSorted = column.getIsSorted()
+            return h(UButton, {
+                color: 'neutral',
+                variant: 'ghost',
+                label: 'Description',
+                icon: isSorted
+                    ? isSorted === 'asc'
+                        ? 'i-lucide-arrow-up-narrow-wide'
+                        : 'i-lucide-arrow-down-wide-narrow'
+                    : 'i-lucide-arrow-up-down',
+                class: '-mx-2.5',
+                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+            })
+        }
+    },
+    {
+        id: 'type',
+        header: 'Type',
+        cell: ({ row }) => {
+            const lookup = (row.original as any).lookup
+            const lookupNom = Array.isArray(lookup) ? lookup[0]?.nom : lookup?.nom
+            return lookupNom || lookups.value.find(l => l.id === (row.original as any).lookup_id)?.nom || 'N/A'
+        }
+    },
+    {
+        accessorKey: 'status',
         header: 'Statut',
         filterFn: 'equals',
         cell: ({ row }) => {
             const statusStr = row.original.statut || 'actif'
             const color = {
-                valide: 'warning' as const,
+                subscribed: 'success' as const,
                 actif: 'success' as const,
-                annule: 'error' as const
+                unsubscribed: 'error' as const,
+                bounced: 'warning' as const
             }[statusStr] || 'neutral'
+
             return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => statusStr)
         }
     },
@@ -226,7 +255,6 @@ const columns: TableColumn<STKHeader>[] = [
     }
 ]
 
-// 7. Fonctions utilitaires
 function getRowItems(row: Row<STKHeader>): DropdownMenuItem[][] {
     return [[
         {
@@ -268,15 +296,11 @@ function getRowItems(row: Row<STKHeader>): DropdownMenuItem[][] {
     ]]
 }
 
-// 8. Chargement des données — SEMPRE EN DERNIER
-const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await useAsyncData('stk_trx_headers_list',
-    async () => {
-        const { data, error } = await supabase
-            .from('stk_trx_headers')
-            .select('*, in_organisation:in_organisation_id(*), out_organisation:out_organisation_id(*), fournisseur:fournisseurs(*)')
-        if (error) {
-            throw error
-        }
-        return data as STKHeader[]
-    })
+const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await useAsyncData('stk_trx_headers-list', async () => {
+    const { data, error } = await supabase.from('stk_trx_headers').select('*')
+    if (error) {
+        throw error
+    }
+    return data
+})
 </script>

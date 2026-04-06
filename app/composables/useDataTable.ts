@@ -11,9 +11,7 @@ import { upperFirst } from 'scule'
 export function useDataTable(options?: { pageSize?: number; filterColumnId?: string }) {
     const table = useTemplateRef<any>('table')
     const columnFilters = ref<{ id: string; value: string }[]>(
-        options?.filterColumnId
-            ? [{ id: options.filterColumnId, value: '' }]
-            : []
+        []
     )
     const columnVisibility = ref<Record<string, boolean>>({})
     const rowSelection = ref<Record<string, boolean>>({})

@@ -67,7 +67,7 @@ const links = [
         open.value = false
       }
     }, {
-      label: 'Reception Externe',
+      label: 'Reception externe',
       to: '/stock/reception-externe',
       icon: 'solar:card-transfer-bold-duotone',
       onSelect: () => {
@@ -83,9 +83,9 @@ const links = [
       }
     },
     {
-      label: 'Articles',
-      to: '/stock/articles',
-      icon: 'solar:layers-minimalistic-bold-duotone',
+      label: 'Commandes',
+      to: '/stock/commandes',
+      icon: 'solar:clipboard-list-linear',
       onSelect: () => {
         open.value = false
       }
