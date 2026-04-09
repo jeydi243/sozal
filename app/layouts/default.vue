@@ -177,18 +177,8 @@ const links = [
       }
     }]
   }
-  ],
-  [{
-    label: 'Feedback',
-    icon: 'i-lucide-message-circle',
-    to: 'https://github.com/nuxt-ui-pro/dashboard',
-    target: '_blank'
-  }, {
-    label: 'Help & Support',
-    icon: 'i-lucide-info',
-    to: 'https://github.com/nuxt/ui-pro',
-    target: '_blank'
-  }]]
+  ]
+]
 
 const groups = computed(() => [{
   id: 'links',

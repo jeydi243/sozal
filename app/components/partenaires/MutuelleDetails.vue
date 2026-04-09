@@ -1,7 +1,7 @@
 <template>
     <USlideover side="right" inset title="Details de la mutuelle"
         :description="`${props.mutuelle?.nom} ${props.mutuelle?.postnom} ${props.mutuelle?.prenom}`"
-        v-model:open="openDetailsPatient" :ui="{ content: 'max-w-3xl' }">
+        v-model:open="openDetailsPatient" :ui="{ content: 'max-w-[70vw]' }">
         <template #body>
             <pre>{{ mutuelle }}</pre>
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">

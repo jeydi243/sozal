@@ -41,7 +41,9 @@
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                     td: 'border-b border-(--ui-border) p-2'
-                }" />
+                }"     
+            />
+            <StockDetailsReception v-model:open="openSlideOver" :stk_trx_header="selectedSTKHeader" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
                 <div class="text-sm text-(--ui-text-muted)">

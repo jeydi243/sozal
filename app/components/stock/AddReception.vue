@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
-import type { Lookup } from '~/types'
+import type { Lookup, STKHeader } from '~/types'
 import { CalendarDate, getLocalTimeZone } from '@internationalized/date'
 
 const open = ref(false)
@@ -15,17 +15,21 @@ const schema = z.object({
     in_organisation_id: z.string({ message: 'Veuillez selectionner l\'organisation de reception' }),
     numero_commande: z.string({ message: 'Numero commande requis' }),
     numero_livraison: z.string({ message: 'Numero livraison requis' }),
+    numero_document: z.string({ message: 'Numero document requis' }).optional(),
     date_trx: z.date({ message: 'Date de reception requis' }),
     user_id: z.string({ message: 'Utilisateur requis' }),
+    type: z.enum(['IN', 'OUT'], { message: 'Type doit être IN ou OUT' }),
 })
 
 const state = reactive<Partial<Schema>>({
     fournisseur_id: undefined,
     in_organisation_id: undefined,
     numero_commande: undefined,
+    numero_document: undefined,
     numero_livraison: undefined,
     date_trx: undefined,
     user_id: user.value?.id || '',
+    type: 'IN',
 })
 const toCalendarDate = (date: Date) => {
     return new CalendarDate(
@@ -84,7 +88,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (error) {
         toast.add({ title: 'Error', description: `Impossible d'ajouter la reception ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Reception Crée', description: `Nouvelle reception externe créée ${data.numero_document}`, color: 'success' })
+        toast.add({ title: 'Reception Crée', description: `Nouvelle reception externe créée`, color: 'success' })
         emit('reception-added')
         open.value = false
     }
@@ -107,6 +111,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 </UFormField>
                 <UFormField label="Numero Commande" placeholder="" name="numero_commande">
                     <UInput v-model="state.numero_commande" class="w-full" />
+                </UFormField>
+                <UFormField label="Type" name="type">
+                    <URadioGroup v-model="state.type"
+                        :items="[{ label: 'Entrée (IN)', value: 'IN' }, { label: 'Sortie (OUT)', value: 'OUT' }]"
+                        orientation="horizontal" />
                 </UFormField>
                 <UFormField label="Numero Livraison" placeholder="" name="numero_livraison">
                     <UInput v-model="state.numero_livraison" class="w-full" />

@@ -229,11 +229,11 @@ export interface UserRole {
 export interface STKHeader {
   id: string
   in_organisation: Organisation
-  out_organisation: Organisation
+  out_organisation?: Organisation
   date_trx: string
-  fournisseur: Fournisseur
-  numero_commande: string
-  numero_livraison: string
+  fournisseur?: Fournisseur
+  numero_commande?: string
+  numero_livraison?: string
   numero_document: string
   statut: string
   type: string
