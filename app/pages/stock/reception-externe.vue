@@ -121,22 +121,6 @@ watch(searchInput, (val) => {
 // 6. Définition des colonnes
 const columns: TableColumn<STKHeader>[] = [
     {
-        id: 'select',
-        header: ({ table }) =>
-            h(UCheckbox as any, {
-                modelValue: table.getIsAllPageRowsSelected(),
-                indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: any) => table.toggleAllPageRowsSelected(!!value),
-                'aria-label': 'Tout sélectionner'
-            }),
-        cell: ({ row }) =>
-            h('div', { class: 'flex items-center justify-left' }, h(UCheckbox as any, {
-                modelValue: row.getIsSelected(),
-                'onUpdate:modelValue': (value: any) => row.toggleSelected(!!value),
-                'aria-label': 'Sélectionner ligne'
-            }))
-    },
-    {
         id: 'details',
         header: 'Détails',
         cell: ({ row }) => h(UButton, {
