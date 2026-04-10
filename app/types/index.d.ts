@@ -112,8 +112,10 @@ export interface Article {
   nom: string
   code: string
   description: string
-  lookup_id: Lookup
+  lookup: Lookup
   created_at?: string
+  unite_conso: Lookup
+  unite_stock: Lookup
 }
 export interface ArticleAffectation {
   id: string

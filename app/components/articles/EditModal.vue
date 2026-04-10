@@ -3,6 +3,12 @@ import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Article, Lookup } from '~/types'
 
+const props = defineProps<{
+    article: Article | null
+}>()
+
+const open = defineModel<boolean>('open', { default: false })
+
 const ArticleSchema = z.object({
     code: z.string().min(6, 'Code must be at least 6 characters'),
     nom: z.string().min(6, 'Name must be at least 6 characters'),
@@ -11,8 +17,8 @@ const ArticleSchema = z.object({
     unite_conso_id: z.string(),
     unite_stock_id: z.string()
 })
+
 const supabase = useSupabaseClient()
-const open = ref(false)
 const toast = useToast()
 type Schema = z.output<typeof ArticleSchema>
 
@@ -21,8 +27,23 @@ const state = reactive<Partial<Schema>>({
     nom: undefined,
     description: undefined,
     lookup_id: undefined,
+    unite_conso_id: undefined,
+    unite_stock_id: undefined
 })
-const { data: lookups } = await useAsyncData<Lookup[]>('lookups-articles', async () => {
+
+// Update state when article changes
+watch(() => props.article, (newArticle) => {
+    if (newArticle) {
+        state.code = newArticle.code
+        state.nom = newArticle.nom
+        state.description = newArticle.description
+        state.lookup_id = (newArticle.lookup as any)?.id // Usually joined as lookup object
+        state.unite_conso_id = (newArticle.unite_conso as any)?.id
+        state.unite_stock_id = (newArticle.unite_stock as any)?.id
+    }
+}, { immediate: true })
+
+const { data: lookups } = await useAsyncData<Lookup[]>('lookups-articles-edit', async () => {
     const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'TYPE_ARTICLES')
     return (data || []) as unknown as Lookup[]
 })
@@ -37,28 +58,29 @@ const itemsUOM = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => (
     id: String(lookup?.id)
 })) || [])
 
-const emit = defineEmits(['article-added'])
+const emit = defineEmits(['article-updated'])
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
+    if (!props.article?.id) return
+
     const { data, error } = await supabase
         .from('articles')
-        .insert(event?.data as any)
+        .update(event?.data as never)
+        .eq('id', props.article.id)
         .select()
 
     if (error) {
-        toast.add({ title: 'Error', description: `Can't add new article ${error.message}`, color: 'error' })
+        toast.add({ title: 'Error', description: `Can't update article: ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `New article ${event.data.nom} added`, color: 'success' })
+        toast.add({ title: 'Success', description: `Article ${event.data.nom} updated`, color: 'success' })
         open.value = false
-        emit('article-added')
+        emit('article-updated')
     }
 }
 </script>
 
 <template>
-    <UModal v-model:open="open" title="Ajouter Article" description="Ajouter un article">
-        <UButton label="Add article" icon="i-lucide-plus" />
-
+    <UModal v-model:open="open" title="Modifier Article" description="Modifier les informations de l'article">
         <template #body>
             <UForm :schema="ArticleSchema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Code" name="code">
@@ -84,7 +106,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
                 <div class="flex justify-end gap-2">
                     <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />
-                    <UButton label="Ajouter un article" color="primary" variant="solid" type="submit" />
+                    <UButton label="Enregistrer" color="primary" variant="solid" type="submit" />
                 </div>
             </UForm>
         </template>

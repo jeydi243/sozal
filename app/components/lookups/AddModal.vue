@@ -11,7 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['lookup_added'])
 const schema = z.object({
   nom: z.string().min(3, 'Too short'),
-  code: z.string().min(3, 'Too short'),
+  code: z.string().min(2, 'Too short'),
   classe_id: z.string().min(3, 'Too short'),
   description: z.string()
 })
@@ -35,9 +35,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     .select()
 
   if (error) {
-    toast.add({ title: 'Error', description: `Can't add new lookup ${error.message}`, color: 'error' })
+    toast.add({ title: 'Erreur', description: `Impossible d'ajouter le lookup ${error.message}`, color: 'error' })
   } else {
-    toast.add({ title: 'Success', description: `New lookup ${event.data.nom} added`, color: 'success' })
+    toast.add({ title: 'Succès', description: `Nouveau lookup ${event.data.nom} ajouté`, color: 'success' })
     open.value = false
     emit('lookup_added')
   }
@@ -48,8 +48,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UModal v-model:open="open" title="Lookup" description="Add a new lookup to the database">
-    <UButton label="New lookup" icon="i-lucide-plus" />
+  <UModal v-model:open="open" title="Lookup" description="Ajouter un nouveau lookup">
+    <UButton label="Ajouter un lookup" icon="i-lucide-plus" />
 
     <template #body>
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">

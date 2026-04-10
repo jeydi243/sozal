@@ -21,10 +21,10 @@
                     v-model:row-selection="rowSelection" v-model:pagination="pagination"
                     :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Articles || []"
                     :columns="columns" :loading="pending" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
+                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                         tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                         td: 'border-b border-(--ui-border) p-2'
                     }" />
 
@@ -40,8 +40,8 @@
                 </div>
             </template>
         </UDashboardPanel>
-        <ArticlesDetails :article="selectedArticle" v-model:open="openDetailsAffectation" />
-        <ArticlesAffectations :article="selectedArticle" v-model:open="openDetailsAffectation" />
+        <ArticlesDetails :article="selectedArticle" v-model:open="openDetailsArticle" />
+        <!-- <ArticlesAffectations :article="selectedArticle" v-model:open="openDetailsAffectation" /> -->
     </div>
 </template>
 <script setup lang="ts">
@@ -147,7 +147,31 @@ const columns: TableColumn<Article>[] = [
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
-                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, getLookupsById(row.original.lookup_id.nom)),
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookup.nom),
+                ])
+            ])
+        }
+    },
+    //unite de conso
+    {
+        accessorKey: 'unite_conso_id',
+        header: 'Unité de conso',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.unite_conso?.nom),
+                ])
+            ])
+        }
+    },
+    //unite de stock
+    {
+        accessorKey: 'unite_stock_id',
+        header: 'Unité de stock',
+        cell: ({ row }) => {
+            return h('div', { class: 'flex items-center gap-3' }, [
+                h('div', undefined, [
+                    h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.unite_stock?.nom),
                 ])
             ])
         }
@@ -241,10 +265,11 @@ function getRowItems(row: Row<Article>) {
 }
 
 const { data: Articles, pending, refresh: refreshArticles } = await useAsyncData('articles', async () => {
-    const { data, error } = await supabase.from('articles').select('*, lookup_id(*)')
+    const { data, error } = await supabase.from('articles').select('*, lookup:lookup_id(*), unite_conso:unite_conso_id(*), unite_stock:unite_stock_id(*)')
     if (error) {
         throw error
     }
+    console.log('Data', data);
     return data
 })
 </script>
