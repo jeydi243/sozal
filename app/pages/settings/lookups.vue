@@ -13,9 +13,7 @@
               <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search" placeholder="Filter classes..." />
 
               <div class="flex flex-wrap items-center gap-1.5">
-                <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
-                  <UButton label="Display" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
-                </UDropdownMenu>
+
               </div>
             </div>
             <ClassesAddModal />
@@ -26,10 +24,10 @@
         <UTable ref="tableClasses" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
           v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions"
           class="shrink-0 m-2" :data="classes || []" :columns="columns" :ui="{
-            base: 'table-fixed border-separate border-spacing-0',
+            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
             tbody: '[&>tr]:last:[&>td]:border-b-0',
-            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
             td: 'border-b border-(--ui-border) p-2'
           }" />
 
@@ -70,10 +68,10 @@
             v-model:column-visibility="columnVisibilityLookups" v-model:row-selection="rowSelectionLookups"
             v-model:pagination="paginationLookups" :pagination-options="paginationOptionsLookups" class="shrink-0 m-2"
             :data="lookups" :columns="columnsLookups" :loading="loadingLookups" :ui="{
-              base: 'table-fixed border-separate border-spacing-0',
+              base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-lg',
               thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
               tbody: '[&>tr]:last:[&>td]:border-b-0',
-              th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+              th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
               td: 'border-b border-(--ui-border) p-2'
             }" />
         </div>
@@ -83,13 +81,12 @@
 </template>
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
-import { upperFirst } from 'scule'
 import * as z from 'zod'
-import { getPaginationRowModel, type Row } from '@tanstack/table-core'
-import type { Classe } from '~/types'
+import { type Row } from '@tanstack/table-core'
+import type { Classe, Lookup } from '~/types'
 
 useHead({
-  title: 'Lookups - Settings',
+  title: 'Lookups',
   meta: [
     { name: 'description', content: 'Manage lookups settings.' }
   ]
@@ -172,7 +169,7 @@ const columns: TableColumn<Classe>[] = [
     accessorKey: 'code',
     header: 'Code',
     cell: ({ row }) => {
-      return h('div', { class: 'flex items-center gap-3' }, [
+      return h('div', { class: 'flex items-center gap-3 ' }, [
 
         h('div', undefined, [
           h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.code),
@@ -246,7 +243,7 @@ const columns: TableColumn<Classe>[] = [
             content: {
               align: 'end'
             },
-            items: getRowItems(row)
+            children: getRowItemsClasse(row)
           },
           () =>
             h(UButton, {
@@ -260,22 +257,22 @@ const columns: TableColumn<Classe>[] = [
     }
   }
 ]
-const columnsLookups: TableColumn<Classe>[] = [
+const columnsLookups: TableColumn<any>[] = [
   {
     id: 'select',
-    header: ({ table }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox, {
-      'modelValue': table.getIsSomePageRowsSelected()
+    header: ({ table }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox as any, {
+      modelValue: table.getIsSomePageRowsSelected()
         ? 'indeterminate'
         : table.getIsAllPageRowsSelected(),
-      'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+      'onUpdate:modelValue': (value: any) =>
         table.toggleAllPageRowsSelected(!!value),
-      'ariaLabel': 'Select all'
+      ariaLabel: 'Select all'
     }))
     ,
-    cell: ({ row }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox, {
-      'modelValue': row.getIsSelected(),
-      'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
-      'ariaLabel': 'Select row'
+    cell: ({ row }) => h('div', { class: 'text-center align-middle' }, h(UCheckbox as any, {
+      modelValue: row.getIsSelected(),
+      'onUpdate:modelValue': (value: any) => row.toggleSelected(!!value),
+      ariaLabel: 'Select row'
     }))
 
   },
@@ -283,7 +280,7 @@ const columnsLookups: TableColumn<Classe>[] = [
     id: 'details',
     header: 'Details',
     // icon: 'material-symbols:open-in-full-rounded',
-    cell: ({ row }) => h('div', { class: 'text-center' }, [
+    cell: ({ row }) => h('div', { class: 'text-center align-middle' }, [
       h(UButton, {
         color: 'neutral',
         variant: 'ghost',
@@ -340,7 +337,7 @@ const columnsLookups: TableColumn<Classe>[] = [
             content: {
               align: 'end'
             },
-            items: getRowItems(row)
+            items: getRowItemsLookups(row)
           },
           () =>
             h(UButton, {
@@ -354,7 +351,7 @@ const columnsLookups: TableColumn<Classe>[] = [
     }
   }
 ]
-function getRowItems(row: Row<Classe>) {
+function getRowItemsClasse(row: Row<Classe>) {
   return [
     {
       type: 'label',
@@ -368,6 +365,53 @@ function getRowItems(row: Row<Classe>) {
         toast.add({
           title: 'Copied to clipboard',
           description: 'Classe ID copied to clipboard'
+        })
+      }
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: 'Details',
+      icon: 'material-symbols:open-in-full-rounded',
+      onSelect() {
+        openDetailsClasse.value = !openDetailsClasse.value
+      }
+    },
+    {
+      label: 'View customer payments',
+      icon: 'i-lucide-wallet'
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: 'Delete classe',
+      icon: 'i-lucide-trash',
+      color: 'error',
+      onSelect() {
+        toast.add({
+          title: 'Customer deleted',
+          description: 'The customer has been deleted.'
+        })
+      }
+    }
+  ]
+}
+function getRowItemsLookups(row: Row<Lookup>) {
+  return [
+    {
+      type: 'label',
+      label: 'Actions'
+    },
+    {
+      label: 'Copier l\'ID',
+      icon: 'i-lucide-copy',
+      onSelect() {
+        copy(row.original.id.toString())
+        toast.add({
+          title: 'Copied to clipboard',
+          description: 'ID copié dans le presse-papiers'
         })
       }
     },

@@ -284,7 +284,7 @@ const columns: TableColumn<PatientMutuelle>[] = [
                         content: {
                             align: 'end'
                         },
-                        items: getRowItems(row.original.patients)
+                        items: getRowItems(row.original.patient)
                     },
                     () =>
                         h(UButton, {

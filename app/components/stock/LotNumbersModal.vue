@@ -5,13 +5,13 @@ import type { Article } from '~/types'
 
 const props = defineProps<{
     open: boolean
-    headerId?: string
+    lineId?: string | null
+    article?: Article | null
 }>()
 const emit = defineEmits(['update:open', 'line-added'])
 
 const supabase = useSupabaseClient()
 const toast = useToast()
-const isOpenAddLotNumbers = ref(false)
 
 const isOpen = computed({
     get: () => props.open,
@@ -45,9 +45,9 @@ const articleItems = computed<SelectMenuItem[]>(() =>
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
     const { data, error } = await supabase
-        .from('stk_trx_lines')
+        .from('stk_trx_lines_details')
         .insert({
-            header_id: props.headerId,
+            line_id: props.lineId,
             ...event.data
         } as never)
         .select()
@@ -63,7 +63,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-    <UModal v-model:open="isOpen" title="Ajouter une ligne" description="Sélectionner l'article et définir la quantité">
+    <UModal v-model:open="isOpen" title="Ajouter des numeros de lot" description="Indiquer les numeros de lot">
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Article" name="article_id">

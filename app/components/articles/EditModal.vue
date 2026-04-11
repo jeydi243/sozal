@@ -47,13 +47,17 @@ const { data: lookups } = await useAsyncData<Lookup[]>('lookups-articles-edit', 
     const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'TYPE_ARTICLES')
     return (data || []) as unknown as Lookup[]
 })
+const { data: lookupsUOM } = await useAsyncData<Lookup[]>('lookups-articles-uom', async () => {
+    const { data } = await supabase.from('lookups').select('id, nom, classes!inner(*)').eq('classes.table_name', 'CATEGORIE_UOM')
+    return (data || []) as unknown as Lookup[]
+})
 
 const items = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
     label: lookup?.nom,
     id: String(lookup?.id)
 })) || [])
 
-const itemsUOM = computed<SelectMenuItem[]>(() => lookups.value?.map(lookup => ({
+const itemsUOM = computed<SelectMenuItem[]>(() => lookupsUOM.value?.map(lookup => ({
     label: lookup?.nom,
     id: String(lookup?.id)
 })) || [])
@@ -70,9 +74,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         .select()
 
     if (error) {
-        toast.add({ title: 'Error', description: `Can't update article: ${error.message}`, color: 'error' })
+        toast.add({ title: 'Error', description: `Impossible de modifier l'article: ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Success', description: `Article ${event.data.nom} updated`, color: 'success' })
+        toast.add({ title: 'Success', description: `Article ${event.data.nom} modifié`, color: 'success' })
         open.value = false
         emit('article-updated')
     }

@@ -115,7 +115,8 @@ export interface Article {
   lookup: Lookup
   created_at?: string
   unite_conso: Lookup
-  unite_stock: Lookup
+  unite_stock: Lookup,
+  gestion_num_lot: boolean
 }
 export interface ArticleAffectation {
   id: string

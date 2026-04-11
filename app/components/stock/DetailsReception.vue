@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Row } from '@tanstack/table-core'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
-import type { STKHeader, STKLine } from '~/types'
+import type { Article, STKHeader, STKLine } from '~/types'
 
 const props = defineProps({
     open: { type: Boolean, required: true },
@@ -29,6 +29,9 @@ const UCheckbox = resolveComponent('UCheckbox')
 
 // 4. Refs d'état UI
 const openAddModal = ref(false)
+const isOpenAddLotNumbers = ref(false)
+const currentArticle = ref<Article | null>(null)
+const currentLineID = ref<string | null>(null)
 
 // 5. useDataTable
 const {
@@ -76,7 +79,7 @@ const columns: TableColumn<STKLine>[] = [
     {
         id: 'actions',
         header: () => h('div', { class: 'text-center' }, 'Actions'),
-        cell: ({ row }) => h('div', { class: 'text-center' }, 
+        cell: ({ row }) => h('div', { class: 'text-center' },
             h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
                 () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
             )
@@ -129,7 +132,8 @@ const { data: lines, pending, refresh } = await useAsyncData(
         <template #body>
             <div v-if="stk_trx_header" class="space-y-6">
                 <!-- Région Info Header -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border border-(--ui-border) rounded-xl bg-(--ui-bg-elevated)/50">
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border border-(--ui-border) rounded-xl bg-(--ui-bg-elevated)/50">
                     <div class="space-y-1">
                         <p class="text-xs text-(--ui-text-muted) uppercase font-semibold">Numéro Document</p>
                         <p class="font-bold text-(--ui-text-highlighted)">{{ stk_trx_header.numero_document }}</p>
@@ -140,7 +144,9 @@ const { data: lines, pending, refresh } = await useAsyncData(
                     </div>
                     <div class="space-y-1">
                         <p class="text-xs text-(--ui-text-muted) uppercase font-semibold">Statut</p>
-                        <UBadge :color="stk_trx_header.statut === 'valide' ? 'success' : stk_trx_header.statut === 'actif' ? 'warning' : 'neutral'" variant="subtle" class="capitalize">
+                        <UBadge
+                            :color="stk_trx_header.statut === 'valide' ? 'success' : stk_trx_header.statut === 'actif' ? 'warning' : 'neutral'"
+                            variant="subtle" class="capitalize">
                             {{ stk_trx_header.statut }}
                         </UBadge>
                     </div>
@@ -158,12 +164,14 @@ const { data: lines, pending, refresh } = await useAsyncData(
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold">Articles reçus</h3>
-                        <UButton label="Ajouter une ligne" icon="i-lucide-plus" color="primary" @click="openAddModal = true" />
+                        <UButton label="Ajouter une ligne" icon="i-lucide-plus" color="primary"
+                            @click="openAddModal = true" />
                     </div>
 
-                    <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                        v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions"
-                        :data="lines || []" :columns="columns" :loading="pending" :ui="{
+                    <UTable ref="table" v-model:column-filters="columnFilters"
+                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                        v-model:pagination="pagination" :pagination-options="paginationOptions" :data="lines || []"
+                        :columns="columns" :loading="pending" :ui="{
                             base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
                             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                             tbody: '[&>tr]:last:[&>td]:border-b-0',
@@ -186,6 +194,8 @@ const { data: lines, pending, refresh } = await useAsyncData(
 
             <!-- Modal Ajout Ligne -->
             <StockAddLineModal v-model:open="openAddModal" :header-id="stk_trx_header?.id" @line-added="refresh" />
+            <StockLotNumbersModal v-model:open="isOpenAddLotNumbers" :line-id="currentLineID"
+                :article="currentArticle" />
         </template>
     </USlideover>
 </template>
