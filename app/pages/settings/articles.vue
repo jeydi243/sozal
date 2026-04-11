@@ -45,10 +45,9 @@
     </div>
 </template>
 <script setup lang="ts">
-import { upperFirst } from 'scule'
 import { type Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
-import type { Article } from '~/types'
+import type { Article, Lookup } from '~/types'
 
 useHead({
     title: 'Articles',
@@ -92,6 +91,49 @@ const debouncedSearch = useDebounceFn((val: string) => {
 
 watch(searchInput, (val) => {
     debouncedSearch(val)
+})
+
+const uniqueLookups = computed(() => {
+    const lookupsMap = new Map()
+    Articles.value?.forEach((art: any) => {
+        if (art.lookup) {
+            lookupsMap.set(art.lookup.id, art.lookup.nom)
+        }
+    })
+    return Array.from(lookupsMap.entries()).map(([id, nom]) => ({ id: id as string, nom: nom as string }))
+})
+
+const lookupFilterItems = computed(() => {
+    const filter = columnFilters.value.find(f => f.id === 'lookup_id')
+    const filterValue = (filter?.value as string[]) || []
+
+    return uniqueLookups.value.map(lookup => ({
+        label: lookup.nom,
+        type: 'checkbox' as const,
+        checked: filterValue.includes(lookup.id),
+        onUpdateChecked(checked: boolean) {
+            let next = [...filterValue]
+            if (checked) {
+                if (!next.includes(lookup.id)) next.push(lookup.id)
+            } else {
+                next = next.filter(id => id !== lookup.id)
+            }
+
+            const idx = columnFilters.value.findIndex(f => f.id === 'lookup_id')
+            if (next.length) {
+                if (idx > -1) {
+                    columnFilters.value[idx] = { id: 'lookup_id', value: next }
+                } else {
+                    columnFilters.value.push({ id: 'lookup_id', value: next })
+                }
+            } else if (idx > -1) {
+                columnFilters.value.splice(idx, 1)
+            }
+        },
+        onSelect(e: Event) {
+            e.preventDefault()
+        }
+    }))
 })
 
 const columns: TableColumn<Article>[] = [
@@ -143,13 +185,35 @@ const columns: TableColumn<Article>[] = [
     },
     {
         accessorKey: 'lookup_id',
-        header: 'Type',
+        header: ({ column }) => {
+            const filterValue = column.getFilterValue() as string[]
+            const isFiltered = filterValue?.length > 0
+            return h('div', { class: 'flex items-center gap-1' }, [
+                h('span', 'Type'),
+                h(UDropdownMenu, {
+                    items: lookupFilterItems.value,
+                    content: { align: 'start' },
+                    ui: { content: 'min-w-40' }
+                }, () => h(UButton, {
+                    icon: 'i-lucide-filter',
+                    variant: 'ghost',
+                    color: isFiltered ? 'primary' : 'neutral',
+                    size: 'xs',
+                    square: true,
+                    class: '-my-1'
+                }))
+            ])
+        },
         cell: ({ row }) => {
             return h('div', { class: 'flex items-center gap-3' }, [
                 h('div', undefined, [
                     h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.lookup.nom),
                 ])
             ])
+        },
+        filterFn: (row, columnId, filterValue: string[]) => {
+            if (!filterValue || filterValue.length === 0) return true
+            return filterValue.includes(row.getValue(columnId))
         }
     },
     //unite de conso

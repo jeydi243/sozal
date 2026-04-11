@@ -32,7 +32,9 @@ const state = reactive<Partial<Schema>>({
 })
 
 const { data: articles } = await useAsyncData('articles-select', async () => {
-    const { data } = await supabase.from('articles').select('id, nom')
+    const { data } = await supabase.from('articles')
+    .select('id, nom, lookup:lookup_id(*)')
+    .eq('lookup.code', 'ART-PRES')
     return data || []
 })
 
