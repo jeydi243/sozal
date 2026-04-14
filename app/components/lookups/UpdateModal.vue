@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { Lookup } from '~/types'
 
 const props = defineProps({
   lookup: {
-    type: Object,
+    type: Object as PropType<Lookup | null>,
     required: true
   },
   open: {
@@ -41,13 +42,13 @@ const paramStore = useParametresStore()
 const classes = computed(() => paramStore.getClasseItems)
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  console.log('date to update: %o with ID ', event.data, props.lookup.id)
+  console.log('date to update: %o with ID ', event.data, props.lookup?.id)
   const { data, error } = await supabase
     .from('lookups')
     .update(event?.data)
-    .eq('id', props.lookup.id)
+    .eq('id', props.lookup?.id ||'')
     .select()
-console.log('data updated: %o', data)
+  console.log('data updated: %o', data)
   if (error) {
     toast.add({ title: 'Error', description: `Can't update lookup ${error.message}`, color: 'error' })
   } else {

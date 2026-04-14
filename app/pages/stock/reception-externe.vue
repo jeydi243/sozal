@@ -103,7 +103,7 @@ const {
     currentPageSize,
     setPage,
     setStatusFilter
-} = useDataTable({ filterColumnId: 'numero_document', pageSize: 10 })
+} = useDataTable({ filterColumnId: 'numero_document', pageSize: 100 })
 
 // IDs des colonnes cachables
 const columnDisplayItems = buildColumnDisplayItems(['select', 'details', 'numero_document', 'numero_commande', 'in_organisation', 'date_trx', 'statut', 'actions'])
