@@ -36,7 +36,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (error) {
         toast.add({ title: 'Erreur', description: error.message, color: 'error' })
     } else {
-        toast.add({ title: 'Succès', description: 'Délicat ajouté', color: 'success' })
+        toast.add({ title: 'Succès', description: 'Details ajouté', color: 'success' })
         emit('added')
         isOpen.value = false
     }
