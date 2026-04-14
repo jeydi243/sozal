@@ -21,20 +21,20 @@ const isOpen = computed({
 const schema = z.object({
     article_id: z.string({ message: 'Veuillez sélectionner un article' }),
     quantite_trx: z.number().min(1, 'Quantité invalide'),
-    prix: z.number().min(0, 'Prix invalide'),
+    prix_unitaire: z.number().min(0, 'Prix invalide'),
 })
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
     article_id: undefined,
     quantite_trx: 1,
-    prix: 0,
+    prix_unitaire: 0,
 })
 
 const { data: articles } = await useAsyncData('articles-select', async () => {
     const { data } = await supabase.from('articles')
     .select('id, nom, lookup:lookup_id(*)')
-    .eq('lookup.code', 'ART-PRES')
+    .eq('lookup.code', 'ART-PTP')
     return data || []
 })
 
@@ -78,8 +78,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                         <UInput v-model="state.quantite_trx" type="number" class="w-full" />
                     </UFormField>
 
-                    <UFormField label="Prix Unitaire" name="prix">
-                        <UInput v-model="state.prix" type="number" step="0.01" class="w-full" />
+                    <UFormField label="Prix Unitaire" name="prix_unitaire">
+                        <UInput v-model="state.prix_unitaire" type="number" step="0.01" class="w-full" />
                     </UFormField>
                 </div>
 

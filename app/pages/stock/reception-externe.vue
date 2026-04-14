@@ -1,5 +1,5 @@
 <template>
-    <UDashboardPanel id="reception-externe">
+    <UDashboardPanel id="reception-externe" :ui-pro="{ body: 'p-5' }">
         <template #header>
             <UDashboardNavbar title="Reception Externe">
                 <template #leading>
@@ -41,8 +41,7 @@
                     tbody: '[&>tr]:last:[&>td]:border-b-0',
                     th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                     td: 'border-b border-(--ui-border) p-2'
-                }"     
-            />
+                }" />
             <StockDetailsReception v-model:open="openSlideOver" :stk_trx_header="selectedSTKHeader" />
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
@@ -133,7 +132,7 @@ const columns: TableColumn<STKHeader>[] = [
                 openSlideOver.value = true
             }
         }),
-    }, 
+    },
     {
         accessorKey: 'in_organisation',
         header: 'Magasin de reception',
@@ -142,7 +141,7 @@ const columns: TableColumn<STKHeader>[] = [
             const orgNom = Array.isArray(org) ? (org as any)[0]?.nom : (org as any)?.nom
             return h('p', undefined, orgNom ?? 'N/A')
         }
-    },{
+    }, {
         accessorKey: 'fournisseur_id',
         header: 'Fournisseur',
         cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.fournisseur?.nom)
@@ -152,7 +151,7 @@ const columns: TableColumn<STKHeader>[] = [
         header: 'N° Document',
         cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.numero_document)
     },
-    
+
     {
         accessorKey: 'numero_commande',
         header: 'N° Commande',
@@ -255,7 +254,7 @@ function getRowItems(row: Row<STKHeader>): DropdownMenuItem[][] {
 }
 
 // 8. Chargement des données — SEMPRE EN DERNIER
-const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await useAsyncData('stk_trx_headers_list',
+const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await useLazyAsyncData('stk_trx_headers_list',
     async () => {
         const { data, error } = await supabase
             .from('stk_trx_headers')

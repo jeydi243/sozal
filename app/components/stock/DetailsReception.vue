@@ -29,6 +29,8 @@ const UCheckbox = resolveComponent('UCheckbox')
 
 // 4. Refs d'état UI
 const openAddModal = ref(false)
+const openLineDetails = ref(false)
+const selectedLine = ref<STKLine | null>(null)
 const isOpenAddLotNumbers = ref(false)
 const currentArticle = ref<Article | null>(null)
 const currentLineID = ref<string | null>(null)
@@ -51,34 +53,50 @@ const {
 // 6. Définition des colonnes
 const columns: TableColumn<STKLine>[] = [
     {
-        accessorKey: 'article.nom',
-        header: 'Article',
-        cell: ({ row }) => h('div', { class: 'flex flex-col' }, [
-            h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.article?.nom || 'N/A'),
-            h('p', { class: 'text-xs text-(--ui-text-muted)' }, row.original.article?.code || '')
+        accessorKey: 'article_nom',
+        header: () => h('div', { class: 'w-[250px]' }, 'Article'),
+        cell: ({ row }) => h('div', { class: 'flex flex-col min-w-0' }, [
+            h('p', { class: 'font-medium text-(--ui-text-highlighted) truncate' }, row.original.article?.nom || 'N/A'),
+            h('p', { class: 'text-xs text-(--ui-text-muted) truncate' }, row.original.article?.code || '')
         ])
     },
     {
+        accessorKey: 'prix_unitaire',
+        header: () => h('div', { class: 'w-[120px]' }, 'Prix Unitaire'),
+        cell: ({ row }) => h('p', { class: 'text-left truncate' }, `${row.original.prix_unitaire?.toLocaleString() || 0}`)
+    },
+    {
         accessorKey: 'quantite_trx',
-        header: 'Quantité',
+        header: () => h('div', { class: 'w-[70px] text-center' }, 'Quantité'),
         cell: ({ row }) => h('p', { class: 'text-center' }, row.original.quantite_trx)
     },
-    {
-        accessorKey: 'prix',
-        header: 'Prix Unit.',
-        cell: ({ row }) => h('p', { class: 'text-right' }, `${row.original.prix.toLocaleString()} FCFA`)
-    },
+
     {
         id: 'total',
-        header: 'Total',
+        header: () => h('div', { class: 'w-[140px]' }, 'Total'),
         cell: ({ row }) => {
-            const total = (row.original.quantite_trx || 0) * (row.original.prix || 0)
-            return h('p', { class: 'text-right font-bold' }, `${total.toLocaleString()} FCFA`)
+            const total = (row.original.quantite_trx || 0) * (row.original.prix_unitaire || 0)
+            return h('p', { class: 'text-left font-bold truncate' }, `${total.toLocaleString()}`)
         }
     },
     {
+        id: 'details',
+        header: () => h('div', { class: 'text-center w-[80px]' }, 'Détails'),
+        cell: ({ row }) => h('div', { class: 'text-center' },
+            h(UButton, {
+                icon: 'i-lucide-eye',
+                color: 'neutral',
+                variant: 'ghost',
+                onClick: () => {
+                    selectedLine.value = row.original
+                    openLineDetails.value = true
+                }
+            })
+        )
+    },
+    {
         id: 'actions',
-        header: () => h('div', { class: 'text-center' }, 'Actions'),
+        header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
         cell: ({ row }) => h('div', { class: 'text-center' },
             h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
                 () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
@@ -112,7 +130,7 @@ function getRowItems(row: Row<STKLine>): DropdownMenuItem[][] {
 }
 
 // 8. Chargement des données — SEMPRE EN DERNIER
-const { data: lines, pending, refresh } = await useAsyncData(
+const { data: lines, pending, refresh } = await useLazyAsyncData(
     `stk_trx_lines-${props.stk_trx_header?.id}`,
     async () => {
         if (!props.stk_trx_header?.id) return []
@@ -121,6 +139,7 @@ const { data: lines, pending, refresh } = await useAsyncData(
             .select('*, article:article_id(*)')
             .eq('header_id', props.stk_trx_header.id)
         if (error) throw error
+        console.log(data)
         return data as STKLine[]
     },
     { watch: [() => props.stk_trx_header?.id], immediate: true }
@@ -194,6 +213,7 @@ const { data: lines, pending, refresh } = await useAsyncData(
 
             <!-- Modal Ajout Ligne -->
             <StockAddLineModal v-model:open="openAddModal" :header-id="stk_trx_header?.id" @line-added="refresh" />
+            <StockLineDetails v-model:open="openLineDetails" :line="selectedLine" @refresh="refresh" />
             <StockLotNumbersModal v-model:open="isOpenAddLotNumbers" :line-id="currentLineID"
                 :article="currentArticle" />
         </template>

@@ -15,7 +15,7 @@ function formatCurrency(value: number): string {
 }
 
 const baseStats = [{
-  title: 'Customers',
+  title: 'Patient',
   icon: 'i-lucide-users',
   minValue: 400,
   maxValue: 1000,

@@ -22,11 +22,11 @@ const period = ref<Period>('daily')
 </script>
 
 <template>
-  <UDashboardPanel id="home" as="div" :ui="{ body: 'p-5'}">
+  <UDashboardPanel id="home" as="div" :ui-pro="{ body: 'py-5' }">
     <template #header>
-      <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
+      <UDashboardNavbar title="Home" :ui-pro="{ right: 'gap-3' }">
         <template #leading>
-          
+
           <UDashboardSidebarCollapse />
         </template>
 
@@ -53,8 +53,10 @@ const period = ref<Period>('daily')
     </template>
 
     <template #body>
-      <HomeStats :period="period" :range="range" />
-      <HomeSales :period="period" :range="range" />
+      <div class="p-3">
+        <HomeStats :period="period" :range="range" />
+        <!-- <HomeSales :period="period" :range="range" /> -->
+      </div>
     </template>
   </UDashboardPanel>
 </template>

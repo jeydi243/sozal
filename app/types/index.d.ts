@@ -94,6 +94,15 @@ export interface Profil {
   postnom: string
   user_name: string
   user_id: string
+  client_id: Client
+}
+
+export interface Client {
+  id: string
+  nom: string
+  code: string
+  description: string
+  created_at?: string
 }
 
 export interface Affectation {
@@ -244,11 +253,21 @@ export interface STKHeader {
 }
 
 export interface STKLine {
+  id: string
   header: STKHeader
   article: Article
   quantite_trx: number
-  prix: number
+  prix_unitaire: number
+  details?: STKLineDetail[]
+}
 
+export interface STKLineDetail {
+  id: string
+  line_id: string
+  numero_serie: string
+  date_trx: string
+  statut: string
+  created_at?: string
 }
 
 
