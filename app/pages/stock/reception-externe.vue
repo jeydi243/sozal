@@ -1,5 +1,5 @@
 <template>
-    <UDashboardPanel id="reception-externe" :ui-pro="{ body: 'p-5' }">
+    <UDashboardPanel id="reception-externe" :ui-pro="{ body: 'p-5', header: 'p-0' }">
         <template #header>
             <UDashboardNavbar title="Reception Externe">
                 <template #leading>
@@ -34,7 +34,7 @@
         <template #body>
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
                 v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune reception disponible"
-                :pagination-options="paginationOptions" class="shrink-0" :data="stk_trx_headers || []"
+                :pagination-options="paginationOptions" class="shrink-0 m-2" :data="stk_trx_headers || []"
                 :columns="columns" :loading="pending" :ui="{
                     base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
@@ -42,7 +42,18 @@
                     th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
                     td: 'border-b border-(--ui-border) p-2'
                 }" />
-            <StockDetailsReception v-model:open="openSlideOver" :stk_trx_header="selectedSTKHeader" />
+            <StockDetailsReception v-model:open="openSlideOver" :stk_trx_header="selectedSTKHeader"
+                @reception-finished="refreshSTKHeaders" />
+
+            <UModal v-model:open="openConfirmDelete" title="Confirmation de suppression"
+                description="Êtes-vous sûr de vouloir supprimer cette réception ? Cette action est irréversible.">
+                <template #footer>
+                    <div class="flex justify-end gap-3">
+                        <UButton label="Annuler" color="neutral" variant="ghost" @click="openConfirmDelete = false" />
+                        <UButton label="Supprimer" color="error" @click="confirmDelete" />
+                    </div>
+                </template>
+            </UModal>
 
             <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
                 <div class="text-sm text-(--ui-text-muted)">
@@ -84,7 +95,9 @@ const UCheckbox = resolveComponent('UCheckbox')
 
 // 4. Refs d'état UI
 const openSlideOver = ref(false)
+const openConfirmDelete = ref(false)
 const selectedSTKHeader = ref<STKHeader | null>(null)
+const receptionToDelete = ref<STKHeader | null>(null)
 const searchInput = ref('')
 
 // 5. useDataTable
@@ -243,14 +256,39 @@ function getRowItems(row: Row<STKHeader>): DropdownMenuItem[][] {
             label: 'Supprimer',
             icon: 'i-lucide-trash',
             color: 'error' as const,
+            disabled: row.original.statut === 'Terminé',
             onSelect() {
-                toast.add({
-                    title: 'Action non disponible',
-                    description: 'La suppression sera implémentée prochainement...'
-                })
+                receptionToDelete.value = row.original
+                openConfirmDelete.value = true
             }
         }
     ]]
+}
+
+async function confirmDelete() {
+    if (!receptionToDelete.value) return
+
+    const { error } = await supabase
+        .from('stk_trx_headers')
+        .delete()
+        .eq('id', receptionToDelete.value.id)
+
+    if (error) {
+        toast.add({
+            title: 'Erreur',
+            description: error.message,
+            color: 'error'
+        })
+    } else {
+        toast.add({
+            title: 'Succès',
+            description: 'Réception supprimée avec succès',
+            color: 'success'
+        })
+        await refreshSTKHeaders()
+    }
+    openConfirmDelete.value = false
+    receptionToDelete.value = null
 }
 
 // 8. Chargement des données — SEMPRE EN DERNIER
@@ -259,9 +297,23 @@ const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await use
         const { data, error } = await supabase
             .from('stk_trx_headers')
             .select('*, in_organisation:in_organisation_id(*), out_organisation:out_organisation_id(*), fournisseur:fournisseurs(*)')
-        if (error) {
+        console.log('Données retournés ', { data })
+            if (error) {
             throw error
         }
         return data as STKHeader[]
     })
+
+// Écouter les changements en temps réel
+onMounted(() => {
+    const channel = supabase.channel('stk_trx_headers_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'stk_trx_headers' }, () => {
+            refreshSTKHeaders()
+        })
+        .subscribe()
+
+    onUnmounted(() => {
+        supabase.removeChannel(channel)
+    })
+})
 </script>

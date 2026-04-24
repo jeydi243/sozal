@@ -7,7 +7,7 @@ const props = defineProps({
     open: { type: Boolean, required: true },
     stk_trx_header: { type: Object as PropType<STKHeader | null>, required: true }
 })
-const emit = defineEmits(['update:open'])
+const emit = defineEmits(['update:open', 'reception-finished'])
 
 // 1. SEO
 // (Skip SEO as it's a slideover component)
@@ -32,6 +32,8 @@ const openAddModal = ref(false)
 const openLineDetails = ref(false)
 const selectedLine = ref<STKLine | null>(null)
 const isOpenAddLotNumbers = ref(false)
+const openConfirmFinish = ref(false)
+const finishing = ref(false)
 const currentArticle = ref<Article | null>(null)
 const currentLineID = ref<string | null>(null)
 
@@ -70,6 +72,11 @@ const columns: TableColumn<STKLine>[] = [
         header: () => h('div', { class: 'w-[70px] text-center' }, 'Quantité'),
         cell: ({ row }) => h('p', { class: 'text-center' }, row.original.quantite_trx)
     },
+    {
+        accessorKey: 'numero_lot',
+        header: () => h('div', { class: 'w-[120px]' }, 'N° Lot'),
+        cell: ({ row }) => h('p', { class: 'text-left truncate' }, row.original.numero_lot || '-')
+    },
 
     {
         id: 'total',
@@ -94,15 +101,15 @@ const columns: TableColumn<STKLine>[] = [
             })
         )
     },
-    {
+    ...((props.stk_trx_header?.statut === 'Terminé') ? [] : [{
         id: 'actions',
         header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
-        cell: ({ row }) => h('div', { class: 'text-center' },
+        cell: ({ row }: { row: Row<STKLine> }) => h('div', { class: 'text-center' },
             h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
                 () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
             )
         )
-    }
+    }])
 ]
 
 // 7. Fonctions utilitaires
@@ -129,6 +136,36 @@ function getRowItems(row: Row<STKLine>): DropdownMenuItem[][] {
     ]]
 }
 
+async function finishReception() {
+    if (!props.stk_trx_header?.id) return
+
+    finishing.value = true
+    const { data: dataRPC, error: errorRPC } = await supabase.rpc('stock_update', { p_stk_header_id: props.stk_trx_header.id })
+    console.log('Données retournés par la fonction stock_update ', { dataRPC })
+
+    if (errorRPC || dataRPC?.includes('ERREUR')) {
+        toast.add({ title: 'Erreur', description: errorRPC?.message + dataRPC, color: 'error' })
+    } else {
+        const { data: dataInsert, error: errorInsert } = await supabase
+            .from('stk_trx_headers')
+            .update({ statut: 'Terminé' } as never)
+            .eq('id', props.stk_trx_header.id)
+        if (errorInsert) {
+            toast.add({ title: 'Erreur', description: errorInsert?.message, color: 'error' })
+        } else {
+            toast.add({ title: 'Succès', description: 'Réception terminée', color: 'success' })
+            emit('reception-finished')
+            openConfirmFinish.value = false
+            isOpen.value = false
+        }
+    }
+
+
+
+
+    finishing.value = false
+}
+
 // 8. Chargement des données — SEMPRE EN DERNIER
 const { data: lines, pending, refresh } = await useLazyAsyncData(
     `stk_trx_lines-${props.stk_trx_header?.id}`,
@@ -147,7 +184,8 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
 </script>
 
 <template>
-    <USlideover v-model:open="isOpen" title="Détails de la Réception" :ui="{ content: 'max-w-4xl' }" inset>
+    <USlideover v-model:open="isOpen" title="Détails de la Réception"
+        :ui="{ content: 'max-w-4xl', footer: 'flex flex-row justify-end' }" inset>
         <template #body>
             <div v-if="stk_trx_header" class="space-y-6">
                 <!-- Région Info Header -->
@@ -177,14 +215,18 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
                         <p class="text-xs text-(--ui-text-muted) uppercase font-semibold">Fournisseur</p>
                         <p>{{ (stk_trx_header.fournisseur as any)?.nom || 'N/A' }}</p>
                     </div>
+                    <div v-if="stk_trx_header.type" class="space-y-1">
+                        <p class="text-xs text-(--ui-text-muted) uppercase font-semibold">Type</p>
+                        <p>{{ stk_trx_header.type }}</p>
+                    </div>
                 </div>
 
                 <!-- Section Lignes -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold">Articles reçus</h3>
-                        <UButton label="Ajouter une ligne" icon="i-lucide-plus" color="primary"
-                            @click="openAddModal = true" />
+                        <UButton v-if="stk_trx_header.statut !== 'Terminé'" label="Ajouter une ligne"
+                            icon="i-lucide-plus" color="primary" @click="openAddModal = true" />
                     </div>
 
                     <UTable ref="table" v-model:column-filters="columnFilters"
@@ -194,7 +236,7 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
                             base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
                             thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
                             tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r p-2',
                             td: 'border-b border-(--ui-border) p-2'
                         }" />
 
@@ -213,9 +255,22 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
 
             <!-- Modal Ajout Ligne -->
             <StockAddLineModal v-model:open="openAddModal" :header-id="stk_trx_header?.id" @line-added="refresh" />
-            <StockLineDetails v-model:open="openLineDetails" :line="selectedLine" @refresh="refresh" />
+            <StockLineDetails v-model:open="openLineDetails" :line="selectedLine"
+                :readonly="stk_trx_header?.statut === 'Terminé'" @refresh="refresh" />
             <StockLotNumbersModal v-model:open="isOpenAddLotNumbers" :line-id="currentLineID"
                 :article="currentArticle" />
         </template>
+        <template #footer>
+            <UButton v-if="stk_trx_header?.statut !== 'Terminé'" label="Terminer la réception" color="primary"
+                variant="subtle" @click="openConfirmFinish = true" />
+        </template>
     </USlideover>
+
+    <UModal v-model:open="openConfirmFinish" title="Terminer la réception"
+        description="Êtes-vous sûr de vouloir terminer cette réception ? Cette action changera le statut en 'Terminé'.">
+        <template #footer>
+            <UButton label="Annuler" color="neutral" variant="ghost" @click="openConfirmFinish = false" />
+            <UButton label="Terminer" color="primary" :loading="finishing" @click="finishReception" />
+        </template>
+    </UModal>
 </template>

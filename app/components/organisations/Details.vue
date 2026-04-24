@@ -19,6 +19,11 @@ const items = [
         label: 'Services',
         icon: 'i-lucide-building',
         slot: 'services'
+    },
+    {
+        label: 'Emplacements',
+        icon: 'i-lucide-building',
+        slot: 'emplacements'
     }
 ]
 
@@ -33,6 +38,23 @@ const { data: services, pending, refresh } = await useAsyncData<Organisation[]>(
             .from('organisations')
             .select('*')
             .eq('organisation_parent_id', props.organisation.id)
+        if (error) {
+            toast.add({ title: 'Erreur', description: error.message, color: 'error' })
+            return []
+        }
+        return data as Organisation[]
+    },
+    { watch: [() => props.organisation?.id, () => isOpen.value], immediate: true }
+)
+const { data: emplacements, pending: pendingEmplacements, refresh: refreshEmplacements } = await useAsyncData<Organisation[]>(
+    () => `emplacements-${props.organisation?.id}`,
+    async () => {
+        if (!props.organisation?.id) return []
+        const { data, error } = await supabase
+            .from('organisations')
+            .select('*, lookup:lookup_id!inner(*)')
+            .eq('organisation_parent_id', props.organisation.id)
+            .eq('lookup.description', 'Emplacement')
         if (error) {
             toast.add({ title: 'Erreur', description: error.message, color: 'error' })
             return []
@@ -121,6 +143,28 @@ const columns: TableColumn<Organisation>[] = [
                                     <OrganisationsAddServiceModal :parent="props.organisation" @service-added="refresh" />
                                 </div>
                                 <UTable :data="services || []" :columns="columns" :loading="pending"
+                                    class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
+                                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
+                                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                        tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                        td: 'border-b border-(--ui-border) p-2'
+                                    }">
+                                    <template #empty-state>
+                                        <div
+                                            class="flex flex-col items-center justify-center py-6 text-(--ui-text-muted) text-sm">
+                                            <p>Aucun service trouvé pour cette organisation.</p>
+                                        </div>
+                                    </template>
+                                </UTable>
+                            </div>
+                        </template>
+                        <template #emplacements>
+                            <div class="pt-4 h-full space-y-4 flex flex-col">
+                                <div class="flex justify-end">
+                                    <OrganisationsAddEmplacementModal :parent="props.organisation" @emplacement-added="refresh" />
+                                </div>
+                                <UTable :data="emplacements || []" :columns="columns" :loading="pending"
                                     class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
                                         base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
                                         thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',

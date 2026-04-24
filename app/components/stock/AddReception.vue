@@ -88,7 +88,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (error) {
         toast.add({ title: 'Error', description: `Impossible d'ajouter la reception ${error.message}`, color: 'error' })
     } else {
-        toast.add({ title: 'Reception Crée', description: `Nouvelle reception externe créée`, color: 'success' })
+        toast.add({ title: 'Reception Crée', description: `Nouvelle reception externe créée ${event.data.numero_document}`, color: 'success' })
         emit('reception-added')
         open.value = false
     }
@@ -113,7 +113,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                     <UInput v-model="state.numero_commande" class="w-full" />
                 </UFormField>
                 <UFormField label="Type" name="type">
-                    <URadioGroup v-model="state.type"
+                    <URadioGroup v-model="state.type" disabled
                         :items="[{ label: 'Entrée (IN)', value: 'IN' }, { label: 'Sortie (OUT)', value: 'OUT' }]"
                         orientation="horizontal" />
                 </UFormField>

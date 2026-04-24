@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
-import type { Article } from '~/types'
+import type { Article, Organisation } from '~/types'
 
 const props = defineProps<{
     open: boolean
     headerId?: string
 }>()
 const emit = defineEmits(['update:open', 'line-added'])
-
+const form = useTemplateRef('form')
 const supabase = useSupabaseClient()
 const toast = useToast()
 const isOpenAddLotNumbers = ref(false)
@@ -21,20 +21,38 @@ const isOpen = computed({
 const schema = z.object({
     article_id: z.string({ message: 'Veuillez sélectionner un article' }),
     quantite_trx: z.number().min(1, 'Quantité invalide'),
-    prix_unitaire: z.number().min(0, 'Prix invalide'),
+    prix_unitaire: z.number().min(1, 'Prix invalide'),
+    numero_lot: z.string().optional(),
+    in_location_id: z.string({ message: 'Veuillez sélectionner un emplacement de réception' }).optional(),
+    out_location_id: z.string({ message: 'Veuillez sélectionner un emplacement de sortie' }).optional(),
+    
 })
 type Schema = z.output<typeof schema>
 
-const state = reactive<Partial<Schema>>({
+const defaultState = {
     article_id: undefined,
     quantite_trx: 1,
-    prix_unitaire: 0,
+    prix_unitaire: 1,
+    numero_lot: '',
+    in_location_id: undefined,
+    out_location_id: undefined,
+}
+
+const state = reactive<Partial<Schema>>({ ...defaultState })
+
+const { data: articles } = await useLazyAsyncData('articles-select', async () => {
+    const { data } = await supabase.from('articles')
+    .select('*, lookup:lookup_id!inner(*)')
+    .eq('lookup.code', 'ART-PTP')
+    console.log(data)
+    return data || []
 })
 
-const { data: articles } = await useAsyncData('articles-select', async () => {
-    const { data } = await supabase.from('articles')
-    .select('id, nom, lookup:lookup_id(*)')
-    .eq('lookup.code', 'ART-PTP')
+const { data: emplacements } = await useLazyAsyncData('emplacements-select', async () => {
+    const { data } = await supabase.from('organisations')
+    .select('*, lookup:lookup_id!inner(*)')
+    .eq('lookup.code', 'STK-EMP')
+    console.log(data)
     return data || []
 })
 
@@ -42,6 +60,12 @@ const articleItems = computed<SelectMenuItem[]>(() =>
     articles.value?.map((art: Article) => ({
         label: art.nom,
         id: art.id
+    })) || []
+)
+const itemsEmplacements = computed<SelectMenuItem[]>(() =>
+    emplacements.value?.map((org: Organisation) => ({
+        label: org.nom,
+        id: org.id
     })) || []
 )
 
@@ -60,6 +84,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         toast.add({ title: 'Succès', description: 'Ligne ajoutée', color: 'success' })
         emit('line-added')
         isOpen.value = false
+        Object.assign(state, defaultState)
     }
 }
 </script>
@@ -67,11 +92,25 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 <template>
     <UModal v-model:open="isOpen" title="Ajouter une ligne" description="Sélectionner l'article et définir la quantité">
         <template #body>
-            <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+            <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Article" name="article_id">
                     <USelectMenu v-model="state.article_id" value-key="id" :items="articleItems" class="w-full"
                         placeholder="Rechercher un article..." searchable />
                 </UFormField>
+
+                <UFormField label="Numéro de lot" name="numero_lot">
+                    <UInput v-model="state.numero_lot" class="w-full" placeholder="Entrez le numéro de lot" />
+                </UFormField>
+
+                <UFormField label="Emplacement de réception" name="in_location_id">
+                    <USelectMenu v-model="state.in_location_id" value-key="id" :items="itemsEmplacements" class="w-full"
+                        placeholder="Rechercher un emplacement de réception..." searchable />
+                </UFormField>
+
+                <!-- <UFormField label="Emplacement de sortie" name="out_location_id">
+                    <USelectMenu v-model="state.out_location_id" value-key="id" :items="articleItems" class="w-full"
+                        placeholder="Rechercher un emplacement de sortie..." searchable />
+                </UFormField> -->
 
                 <div class="grid grid-cols-2 gap-4">
                     <UFormField label="Quantité" name="quantite_trx">

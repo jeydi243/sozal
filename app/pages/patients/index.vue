@@ -294,7 +294,7 @@ const columns: TableColumn<Patient>[] = [
 </script>
 
 <template>
-    <UDashboardPanel id="patients" as="div" :ui="{ body: 'p-5', root: 'p-5' }">
+    <UDashboardPanel id="patients" as="div" :ui-pro="{ body: 'p-5', root: 'p-5' }">
         <template #header>
             <UDashboardNavbar>
                 <template #leading>
@@ -342,7 +342,8 @@ const columns: TableColumn<Patient>[] = [
             </div>
 
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0" :data="patients || []" :columns="columns" :ui="{
+                v-model:row-selection="rowSelection" v-model:pagination="pagination"
+                :pagination-options="paginationOptions" class="shrink-0" :data="patients || []" :columns="columns" :ui="{
                     base: 'table-fixed border-separate border-spacing-0 w-full',
                     thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none hidden lg:table-header-group',
                     tbody: '[&>tr]:last:[&>td]:border-b-0',

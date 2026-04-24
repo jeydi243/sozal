@@ -5,7 +5,8 @@ import type { TableColumn } from '@nuxt/ui'
 
 const props = defineProps({
     open: { type: Boolean, required: true },
-    line: { type: Object as PropType<STKLine | null>, required: true }
+    line: { type: Object as PropType<STKLine | null>, required: true },
+    readonly: { type: Boolean, default: false }
 })
 const emit = defineEmits(['update:open', 'refresh'])
 
@@ -41,7 +42,7 @@ const {
 const columns: TableColumn<STKLineDetail>[] = [
     {
         accessorKey: 'numero_serie',
-        header: () => h('div', { class: 'w-[150px]' }, 'N° Lot'),
+        header: () => h('div', { class: 'w-[150px]' }, 'Numéro de série'),
         cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.numero_serie || 'N/A')
     },
     {
@@ -49,10 +50,10 @@ const columns: TableColumn<STKLineDetail>[] = [
         header: () => h('div', { class: 'w-[120px]' }, 'Statut'),
         cell: ({ row }) => h('p', { class: 'text-(--ui-text-muted)' }, row.original.statut)
     },
-    {
+    ...((props.readonly) ? [] : [{
         id: 'actions',
         header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
-        cell: ({ row }) => h('div', { class: 'text-left' },
+        cell: ({ row }: { row: Row<STKLineDetail> }) => h('div', { class: 'text-left' },
             h(UButton, {
                 icon: 'i-lucide-trash',
                 color: 'error',
@@ -69,7 +70,7 @@ const columns: TableColumn<STKLineDetail>[] = [
                 }
             })
         )
-    }
+    }])
 ]
 
 // 8. Chargement des données
@@ -93,7 +94,7 @@ const { data: details, pending, refresh } = await useAsyncData(
         description="Liste des numeros de serie" :ui="{ content: 'max-w-3xl' }">
         <template #body>
             <div class="space-y-4">
-                <div class="flex items-center justify-end">
+                <div v-if="!readonly" class="flex items-center justify-end">
                     <UButton label="Ajouter une serie" icon="i-lucide-plus" size="sm" color="primary"
                         @click="openAddModal = true" />
                 </div>

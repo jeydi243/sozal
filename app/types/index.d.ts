@@ -84,6 +84,7 @@ export interface Organisation {
   code?: string
   lookup?: Lookup
   status?: string
+  prefixe?: string
 }
 
 export interface Profil {
@@ -258,6 +259,7 @@ export interface STKLine {
   article: Article
   quantite_trx: number
   prix_unitaire: number
+  numero_lot: string
   details?: STKLineDetail[]
 }
 
@@ -279,4 +281,16 @@ export interface Fournisseur {
   type: Lookup
   created_at?: string
   updated_at?: string
+}
+
+export interface Stock {
+  id: string
+  organisation: Organisation
+  location: Organisation
+  article: Article
+  quantite: number
+  numero_lot: string
+  statut: string
+  date_trx: string
+  created_at?: string
 }
