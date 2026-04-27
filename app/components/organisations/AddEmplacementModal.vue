@@ -5,7 +5,7 @@ import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Lookup, Organisation } from '~/types'
 
 const props = defineProps<{
-  parent: Organisation | null
+  parent: Organisation | null | string
 }>()
 
 const emit = defineEmits(['emplacement-added'])
@@ -69,7 +69,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <UModal v-model:open="open" title="Ajouter un emplacement" :dismissible="false"
-    description="Ajouter un emplacement à ce magasin">
+    description="Ajouter un emplacement dans cette organisation">
     <UButton label="Nouvel Emplacement" icon="i-lucide-plus" size="sm" variant="subtle" />
 
     <template #body>
@@ -79,8 +79,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           Organisation Parente
         </p>
         <p class="font-medium text-(--ui-text-highlighted)">
-          {{ props.parent.nom }}
-          <span class="text-xs font-mono opacity-60 ml-1">({{ props.parent.code || 'N/A' }})</span>
+          {{ props.parent?.nom || "Toutes les organisations" }}
+          <span class="text-xs font-mono opacity-60 ml-1">({{ props.parent?.code || 'N/A' }})</span>
         </p>
       </div>
 

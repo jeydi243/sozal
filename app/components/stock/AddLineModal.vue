@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
-import type { Article, Organisation } from '~/types'
+import type { Article, Organisation, STKHeader } from '~/types'
 
 const props = defineProps<{
     open: boolean
-    headerId?: string
+    header: STKHeader | null
 }>()
 const emit = defineEmits(['update:open', 'line-added'])
 const form = useTemplateRef('form')
@@ -19,17 +19,19 @@ const isOpen = computed({
 })
 
 const schema = z.object({
+    header_id: z.string({ message: 'Veuillez sélectionner un header' }),
     article_id: z.string({ message: 'Veuillez sélectionner un article' }),
-    quantite_trx: z.number().min(1, 'Quantité invalide'),
-    prix_unitaire: z.number().min(1, 'Prix invalide'),
     numero_lot: z.string().optional(),
+    quantite_trx: z.number({ message: 'Quantité invalide' }).min(1, 'Quantité invalide'),
+    prix_unitaire: z.number({ message: 'Prix invalide' }).min(1, 'Prix invalide'),
     in_location_id: z.string({ message: 'Veuillez sélectionner un emplacement de réception' }).optional(),
     out_location_id: z.string({ message: 'Veuillez sélectionner un emplacement de sortie' }).optional(),
-    
+
 })
 type Schema = z.output<typeof schema>
 
 const defaultState = {
+    header_id: props.header?.id,
     article_id: undefined,
     quantite_trx: 1,
     prix_unitaire: 1,
@@ -42,16 +44,17 @@ const state = reactive<Partial<Schema>>({ ...defaultState })
 
 const { data: articles } = await useLazyAsyncData('articles-select', async () => {
     const { data } = await supabase.from('articles')
-    .select('*, lookup:lookup_id!inner(*)')
-    .eq('lookup.code', 'ART-PTP')
+        .select('*, lookup:lookup_id!inner(*)')
+        .eq('lookup.code', 'ART-PTP')
     console.log(data)
     return data || []
 })
 
 const { data: emplacements } = await useLazyAsyncData('emplacements-select', async () => {
     const { data } = await supabase.from('organisations')
-    .select('*, lookup:lookup_id!inner(*)')
-    .eq('lookup.code', 'STK-EMP')
+        .select('id, nom, lookup:lookup_id!inner(*)')
+        .eq('lookup.description', 'Emplacement')
+        .eq('organisation_parent_id', props.header?.in_organisation?.id!)
     console.log(data)
     return data || []
 })
@@ -73,7 +76,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     const { data, error } = await supabase
         .from('stk_trx_lines')
         .insert({
-            header_id: props.headerId,
+            // header_id: props.header?.id,
             ...event.data
         } as never)
         .select()
@@ -94,7 +97,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #body>
             <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Article" name="article_id">
-                    <USelectMenu v-model="state.article_id" value-key="id" :items="articleItems" class="w-full"
+                    <USelectMenu virtualize v-model="state.article_id" value-key="id" :items="articleItems" class="w-full"
                         placeholder="Rechercher un article..." searchable />
                 </UFormField>
 

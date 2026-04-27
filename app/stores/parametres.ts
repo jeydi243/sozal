@@ -4,6 +4,10 @@ import type { Lookup, Classe, Organisation, Affectation } from '~/types'
 export const useParametresStore = defineStore('parametres', () => {
   const supabase = useSupabaseClient()
   const user = useSupabaseUser()
+  const lookups = ref<Lookup[]>([])
+  const classes = ref<Classe[]>([])
+  const organisations = ref<Organisation[]>([])
+  const affectations = ref<Affectation[]>([])
 
   const getClasseById = computed(() => (id: string) => {
     return classes.value.find(classe => classe.id === id)?.nom
@@ -19,10 +23,6 @@ export const useParametresStore = defineStore('parametres', () => {
     }))
   })
 
-  const lookups = ref<Lookup[]>([])
-  const classes = ref<Classe[]>([])
-  const organisations = ref<Organisation[]>([])
-  const affectations = ref<Affectation[]>([])
 
   const getAffectations = computed(() => affectations.value)
 
@@ -37,7 +37,7 @@ export const useParametresStore = defineStore('parametres', () => {
 
     const { data: affectationsData, error: affectationsError } = await supabase
       .from('affectations')
-      .select('*')
+      .select('id,date_debut,date_fin,client_id, user_id, organisation:organisation_id(*, lookup:lookup_id(*))')
       .eq('user_id', user.value.id)
 
     if (affectationsData) affectations.value = affectationsData as unknown as Affectation[]

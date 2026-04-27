@@ -11,7 +11,7 @@ const props = defineProps({
 const emit = defineEmits(['lookup_added'])
 const schema = z.object({
   nom: z.string().min(3, 'Too short'),
-  code: z.string().min(2, 'Too short'),
+  code: z.string().min(1, 'Too short'),
   classe_id: z.string().min(3, 'Too short'),
   description: z.string()
 })
@@ -39,6 +39,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   } else {
     toast.add({ title: 'Succès', description: `Nouveau lookup ${event.data.nom} ajouté`, color: 'success' })
     open.value = false
+    state.code = undefined
+    state.nom = undefined
+    state.description = undefined
     emit('lookup_added')
   }
 }

@@ -3,6 +3,18 @@ import { UButton, UDropdownMenu, UBadge, UCheckbox } from '#components'
 import { getPaginationRowModel } from '@tanstack/table-core'
 import { upperFirst } from 'scule'
 /**
+ * Configuration UI commune pour tous les tableaux du projet.
+ * Respecte la charte graphique définie dans GEMINI.md.
+ */
+export const tableUI = {
+    base: 'table-auto border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
+    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+    tbody: '[&>tr]:last:[&>td]:border-b-0',
+    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
+    td: 'border-b border-(--ui-border) p-2'
+}
+
+/**
  * Composable réutilisable pour la gestion des tables avec pagination,
  * filtres et visibilité des colonnes.
  *
@@ -102,6 +114,8 @@ export function useDataTable(options?: { pageSize?: number; filterColumnId?: str
         currentPageSize,
         // Fonctions utilitaires
         setPage,
-        setStatusFilter
+        setStatusFilter,
+        // UI
+        tableUI
     }
 }

@@ -144,7 +144,7 @@ async function finishReception() {
     console.log('Données retournés par la fonction stock_update ', { dataRPC })
 
     if (errorRPC || dataRPC?.includes('ERREUR')) {
-        toast.add({ title: 'Erreur', description: errorRPC?.message + dataRPC, color: 'error' })
+        toast.add({ title: 'Erreur', description: errorRPC?.message || '' + dataRPC, color: 'error' })
     } else {
         const { data: dataInsert, error: errorInsert } = await supabase
             .from('stk_trx_headers')
@@ -254,7 +254,7 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
             </div>
 
             <!-- Modal Ajout Ligne -->
-            <StockAddLineModal v-model:open="openAddModal" :header-id="stk_trx_header?.id" @line-added="refresh" />
+            <StockAddLineModal v-model:open="openAddModal" :header="stk_trx_header" @line-added="refresh" />
             <StockLineDetails v-model:open="openLineDetails" :line="selectedLine"
                 :readonly="stk_trx_header?.statut === 'Terminé'" @refresh="refresh" />
             <StockLotNumbersModal v-model:open="isOpenAddLotNumbers" :line-id="currentLineID"

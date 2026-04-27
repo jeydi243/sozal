@@ -109,13 +109,11 @@ export interface Client {
 export interface Affectation {
   id: string
   user_id: string
-  lookup_id: string
-  organisation_id?: string
+  lookup: Lookup
+  organisation?: Organisation
   created_at?: string
   date_debut?: string
   date_fin?: string
-  lookup?: Lookup
-  organisation?: Organisation
 }
 export interface Article {
   id: string
