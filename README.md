@@ -11,12 +11,15 @@
 
 ## ✨ Fonctionnalités Clés
 
-- **🩺 Espace Consultation** : Interface optimisée pour les médecins, permettant un suivi précis des patients en temps réel.
-- **👥 Gestion des Patients** : Centralisation des dossiers médicaux, historiques de santé et fiches d'admission.
-- **📩 Inbox Intégrée** : Système de messagerie interne pour une communication fluide entre les membres du personnel.
-- **🤝 Partenaires & Réseaux** : Gestion simplifiée des relations avec les laboratoires et autres prestataires externes.
-- **⚙️ Paramètres Avancés** : Configuration granulaire du système et des préférences utilisateurs.
-- **🌓 Mode Sombre/Clair** : Interface adaptative pour un confort visuel optimal à toute heure.
+- **🩺 Espace Consultation** : Interface optimisée pour les médecins, permettant un suivi précis des patients en temps réel, la prise de notes cliniques et la prescription.
+- **👥 Gestion des Patients** : Centralisation complète des dossiers médicaux (DPI), historiques de santé, allergies, antécédents et fiches d'admission détaillées.
+- **📅 Gestion des Rendez-vous** : Système de planification intelligent pour organiser les consultations, minimiser les temps d'attente et gérer les annulations.
+- **📦 Gestion des Stocks & Pharmacie** : Contrôle rigoureux des stocks de médicaments et matériels médicaux, gestion des réceptions, des alertes de péremption et des inventaires.
+- **📩 Inbox Intégrée** : Centre de messagerie interne sécurisé pour faciliter la communication entre les différents services (médecins, infirmiers, administration).
+- **🤝 Partenaires & Réseaux** : Gestion des conventions et relations avec les laboratoires partenaires, centres d'imagerie et autres prestataires externes.
+- **🏥 Salle d'Examen** : Suivi opérationnel des salles de soins, monitorage du flux des patients et optimisation de l'occupation des locaux.
+- **⚙️ Paramètres Avancés** : Configuration granulaire du système (unités de soin, types d'actes, rôles) et personnalisation des préférences utilisateurs.
+- **🌓 Mode Sombre/Clair & UX Premium** : Interface moderne basée sur Nuxt UI v4, offrant un confort visuel optimal et une réactivité exceptionnelle.
 
 ---
 

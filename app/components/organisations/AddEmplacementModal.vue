@@ -2,7 +2,7 @@
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 
-import type { Lookup, Organisation } from '~/types'
+import type { Affectation, Lookup, Organisation } from '~/types'
 
 const props = defineProps<{
   parent: Organisation | null | string
@@ -14,34 +14,42 @@ const schema = z.object({
   nom: z.string().min(3, 'Too short'),
   description: z.string().optional(),
   code: z.string().min(1, 'Required'),
-  lookup_id: z.string().optional()
+  lookup_id: z.string().optional(),
+  organisation_parent_id: z.string().optional()
 })
 
 const open = ref(false)
 const toast = useToast()
 const supabase = useSupabaseClient()
-
+const { getAffectationsMagasin } = useParametresStore()
 type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
   nom: undefined,
   description: undefined,
   code: undefined,
-  lookup_id: undefined
+  lookup_id: undefined,
+  organisation_parent_id: undefined
 })
 const { data: lookups } = await useAsyncData(`lookups-emplacement-${props.parent?.id}`, async () => {
   const { data } = await supabase.from('lookups').select('id, nom, description').eq('description', 'Emplacement')
   return data
 })
 
+
 const itemsEmplacement = computed<SelectMenuItem[]>(() => lookups.value?.map((lookup: Lookup) => ({
   label: lookup.nom,
   id: lookup.id
 })) || [])
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  if (!props.parent?.id) return
+const itemsMagasin = computed<SelectMenuItem[]>(() => getAffectationsMagasin.map((a: Affectation) => ({
+  label: a.organisation?.nom || '',
+  id: a.organisation?.id || ''
+})) || [])
 
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+  console.log(props.parent)
+  if (!props.parent) return
   const { error } = await supabase.from('organisations')
     .insert({
       nom: event.data.nom,
@@ -73,18 +81,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <UButton label="Nouvel Emplacement" icon="i-lucide-plus" size="sm" variant="subtle" />
 
     <template #body>
-      <div v-if="props.parent" class="mb-4 p-3 bg-(--ui-bg-elevated) rounded-lg border border-(--ui-border) text-sm">
-        <p class="text-(--ui-text-muted) flex items-center gap-2 mb-1">
-          <UIcon name="i-lucide-building" />
-          Organisation Parente
-        </p>
-        <p class="font-medium text-(--ui-text-highlighted)">
-          {{ props.parent?.nom || "Toutes les organisations" }}
-          <span class="text-xs font-mono opacity-60 ml-1">({{ props.parent?.code || 'N/A' }})</span>
-        </p>
-      </div>
-
       <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+        <UFormField label="Magasin" name="organisation_parent_id">
+          <USelectMenu v-model="state.organisation_parent_id" value-key="id" :items="itemsMagasin" class="w-full" :default-value="props.parent?.id" />
+        </UFormField>
         <UFormField label="Type d'organisation" name="type">
           <USelectMenu v-model="state.lookup_id" value-key="id" :items="itemsEmplacement" class="w-full" />
         </UFormField>

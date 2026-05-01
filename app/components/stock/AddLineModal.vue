@@ -50,14 +50,17 @@ const { data: articles } = await useLazyAsyncData('articles-select', async () =>
     return data || []
 })
 
-const { data: emplacements } = await useLazyAsyncData('emplacements-select', async () => {
-    const { data } = await supabase.from('organisations')
-        .select('id, nom, lookup:lookup_id!inner(*)')
-        .eq('lookup.description', 'Emplacement')
-        .eq('organisation_parent_id', props.header?.in_organisation?.id!)
-    console.log(data)
-    return data || []
-})
+// const { data: emplacements } = await useLazyAsyncData('emplacements-select', async () => {
+//     const { data } = await supabase.from('organisations')
+//         .select('id, nom, lookup:lookup_id!inner(*)')
+//         .eq('lookup.description', 'Emplacement')
+//         .eq('organisation_parent_id', props.header?.in_organisation?.id!)
+//     console.log(data)
+//     return data || []
+// })
+
+const parametres = useParametresStore()
+const emplacements = parametres.getEmplacements(props.header?.in_organisation?.id || '')
 
 const articleItems = computed<SelectMenuItem[]>(() =>
     articles.value?.map((art: Article) => ({
@@ -66,7 +69,7 @@ const articleItems = computed<SelectMenuItem[]>(() =>
     })) || []
 )
 const itemsEmplacements = computed<SelectMenuItem[]>(() =>
-    emplacements.value?.map((org: Organisation) => ({
+    emplacements?.map((org: Organisation) => ({
         label: org.nom,
         id: org.id
     })) || []

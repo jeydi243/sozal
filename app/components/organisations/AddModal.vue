@@ -23,8 +23,8 @@ const { data: lookups } = await useAsyncData('lookups', async () => {
   const { data } = await supabase.from('lookups').select('id, nom')
   return data
 })
-
-const items = computed<SelectMenuItem[]>(() => lookups.value?.map((lookup: Lookup) => ({
+const typeOrganisation = useParametresStore().getTypeOrganisation
+const items = computed<SelectMenuItem[]>(() => typeOrganisation?.map((lookup: Lookup) => ({
   label: lookup.nom,
   id: lookup.id
 })) || [])
@@ -34,12 +34,12 @@ const emit = defineEmits(['organisation-added'])
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const { data, error } = await supabase
     .from('organisations')
-    .insert({
+    .insert([{
       nom: event.data.nom,
       description: event.data.description,
       code: event.data.code,
       lookup_id: event.data.lookup_id
-    })
+    }] as never)
     .select()
 
   if (error) {

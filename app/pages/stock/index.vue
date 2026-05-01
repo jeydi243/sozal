@@ -5,7 +5,7 @@
         <template #left>
           <!-- <UDashboardSidebarCollapse /> -->
           <USelectMenu v-model="organisation_id" value-key="id" :items="itemsOrganisationsAffectes" class="w-64"
-            placeholder="Selectionner une organisation" searchable />
+            placeholder="Selectionner une organisation" searchable  />
         </template>
 
         <template #right>
@@ -200,12 +200,11 @@ watch(searchInput, (val) => {
 //   const { data } = await supabase.from('affectations')
 //     .select('*, organisation:organisation_id(*, lookup:lookup_id(*))')
 //     .eq('lookup.code', '')
-
 //     console.log(data)
 //   return data || []
 // })
 
-const { getAffectations: organisations } = useParametresStore()
+const { getAffectationsMagasin: organisations } = useParametresStore()
 
 const itemsOrganisationsAffectes = computed<SelectMenuItem[]>(() =>
   organisations?.map((org: Affectation) => ({
@@ -213,6 +212,7 @@ const itemsOrganisationsAffectes = computed<SelectMenuItem[]>(() =>
     id: org.id
   })) || []
 )
+
 // 6. Définition des colonnes
 const columns: TableColumn<Stock>[] = [
   // {
@@ -300,7 +300,7 @@ const columns: TableColumn<Stock>[] = [
     header: 'Statut',
     filterFn: 'equals',
     meta: {
-      class: { td: 'min-w-48' }
+      class: { td: 'w-[1%] justify-center text-center m-auto', th: 'w-[1%]' }
     },
     cell: ({ row }) => {
       const statusStr = row.original.statut || 'actif'
@@ -316,7 +316,7 @@ const columns: TableColumn<Stock>[] = [
     header: () => h('div', { class: 'text-center' }, 'Actions'),
     id: 'actions',
     meta: {
-      class: { td: 'min-w-48' }
+      class: { td: 'w-[1%]', th: 'w-[1%]' }
     },
     cell: ({ row }) => {
       return h(

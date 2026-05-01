@@ -41,26 +41,15 @@ const items = computed(() => {
 </script>
 
 <template>
-  <UDropdownMenu
-    :items="items"
-    :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{ content: collapsed ? 'w-40' : 'w-(--reka-dropdown-menu-trigger-width)' }"
-  >
-    <UButton
-      v-bind="{
-        ...selectedTeam,
-        label: collapsed ? undefined : selectedTeam?.label,
-        trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
-      }"
-      color="neutral"
-      variant="ghost"
-      block
-      :square="collapsed"
-      class="data-[state=open]:bg-(--ui-bg-elevated)"
-      :class="[!collapsed && 'py-2']"
-      :ui="{
+  <UDropdownMenu :items="items" :content="{ align: 'center', collisionPadding: 12 }"
+    :ui="{ content: collapsed ? 'w-40' : 'w-(--reka-dropdown-menu-trigger-width)' }">
+    <UButton v-bind="{
+      ...selectedTeam,
+      label: collapsed ? undefined : selectedTeam?.label,
+      trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
+    }" color="neutral" variant="ghost" block :square="collapsed" class="data-[state=open]:bg-(--ui-bg-elevated)"
+      :class="[!collapsed && 'py-2']" :ui="{
         trailingIcon: 'text-(--ui-text-dimmed)'
-      }"
-    />
+      }" />
   </UDropdownMenu>
 </template>

@@ -74,7 +74,10 @@ export interface Range {
 
 export interface Lookup {
   id: string
-  nom: string
+  nom: string,
+  classe: Classe,
+  code: string,
+  description: string,
 }
 
 export interface Organisation {
@@ -84,7 +87,8 @@ export interface Organisation {
   code?: string
   lookup?: Lookup
   status?: string
-  prefixe?: string
+  prefixe?: string,
+  organisation_parent?: Organisation
 }
 
 export interface Profil {

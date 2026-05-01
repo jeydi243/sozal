@@ -25,6 +25,9 @@ export const useParametresStore = defineStore('parametres', () => {
 
 
   const getAffectations = computed(() => affectations.value)
+  const getAffectationsMagasin = computed(() => affectations.value.filter(a => a.organisation?.lookup?.code === 'MAG'))
+  const getEmplacements = computed(() => (organisation_parent_id: string) => organisations.value.filter(o => o.lookup?.code === 'EMP' && o.organisation_parent?.id === organisation_parent_id))
+  const getTypeOrganisation = computed(() => lookups.value.filter(lookup => lookup.classe.code === 'T-ORG'))
 
   async function init_user() {
     if (!user.value) {
@@ -37,7 +40,7 @@ export const useParametresStore = defineStore('parametres', () => {
 
     const { data: affectationsData, error: affectationsError } = await supabase
       .from('affectations')
-      .select('id,date_debut,date_fin,client_id, user_id, organisation:organisation_id(*, lookup:lookup_id(*))')
+      .select('id,date_debut,date_fin,client_id, user_id, organisation:organisation_id(id, nom, code, description, lookup:lookup_id(id, code, description, classe:classe_id(*,code,description)))')
       .eq('user_id', user.value.id)
 
     if (affectationsData) affectations.value = affectationsData as unknown as Affectation[]
@@ -52,13 +55,13 @@ export const useParametresStore = defineStore('parametres', () => {
   }
 
   async function init() {
-    const { data: lookupsData, error: lookupsError } = await supabase.from('lookups').select('*')
+    const { data: lookupsData, error: lookupsError } = await supabase.from('lookups').select('*, classe:classe_id(id, code,description)')
     if (lookupsData) lookups.value = lookupsData as unknown as Lookup[]
 
     const { data: classesData, error: classesError } = await supabase.from('classes').select('*')
     if (classesData) classes.value = classesData as unknown as Classe[]
 
-    const { data: organisationsData, error: organisationsError } = await supabase.from('organisations').select('*')
+    const { data: organisationsData, error: organisationsError } = await supabase.from('organisations').select('*, lookup:lookup_id(id, code, description, classe:classe_id(id, code,description))')
     if (organisationsData) organisations.value = organisationsData as unknown as Organisation[]
 
     return {
@@ -82,6 +85,9 @@ export const useParametresStore = defineStore('parametres', () => {
     getLookupsById,
     init,
     init_user,
-    getAffectations
+    getAffectations,
+    getAffectationsMagasin,
+    getTypeOrganisation,
+    getEmplacements
   }
 })

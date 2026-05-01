@@ -193,7 +193,7 @@ const columns: TableColumn<STKHeader>[] = [
             const color = {
                 valide: 'warning' as const,
                 actif: 'success' as const,
-                annule: 'error' as const
+                Terminé: 'success' as const
             }[statusStr] || 'neutral'
             return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => statusStr)
         }
@@ -291,7 +291,7 @@ async function confirmDelete() {
     receptionToDelete.value = null
 }
 
-// 8. Chargement des données — SEMPRE EN DERNIER
+// 8. Chargement des données
 const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await useLazyAsyncData('stk_trx_headers_list',
     async () => {
         const { data, error } = await supabase

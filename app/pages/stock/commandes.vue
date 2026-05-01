@@ -75,13 +75,13 @@ useHead({
     ]
 })
 const itemsOrganisationUser = [[{
-  label: 'New mail',
-  icon: 'i-lucide-send',
-  to: '/inbox'
+    label: 'New mail',
+    icon: 'i-lucide-send',
+    to: '/inbox'
 }, {
-  label: 'Nouveau partenaire',
-  icon: 'i-lucide-user-plus',
-  to: '/partenaires'
+    label: 'Nouveau partenaire',
+    icon: 'i-lucide-user-plus',
+    to: '/partenaires'
 }]]
 const supabase = useSupabaseClient()
 const toast = useToast()
