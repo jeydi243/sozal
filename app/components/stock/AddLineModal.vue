@@ -19,9 +19,9 @@ const isOpen = computed({
 })
 
 const schema = z.object({
+    numero_lot: z.string().optional(),
     header_id: z.string({ message: 'Veuillez sélectionner un header' }),
     article_id: z.string({ message: 'Veuillez sélectionner un article' }),
-    numero_lot: z.string().optional(),
     quantite_trx: z.number({ message: 'Quantité invalide' }).min(1, 'Quantité invalide'),
     prix_unitaire: z.number({ message: 'Prix invalide' }).min(1, 'Prix invalide'),
     in_location_id: z.string({ message: 'Veuillez sélectionner un emplacement de réception' }).optional(),
@@ -60,8 +60,8 @@ const { data: articles } = await useLazyAsyncData('articles-select', async () =>
 // })
 
 const parametres = useParametresStore()
-const emplacements = parametres.getEmplacements(props.header?.in_organisation?.id || '')
-
+const emplacements = computed(() => parametres.getEmplacements(props.header?.in_organisation?.id!))
+console.log("there is emplacements : ", emplacements, " for Organisation  ", props.header?.in_organisation?.nom, ' with ID : ', props.header?.in_organisation?.id)
 const articleItems = computed<SelectMenuItem[]>(() =>
     articles.value?.map((art: Article) => ({
         label: art.nom,
@@ -69,7 +69,7 @@ const articleItems = computed<SelectMenuItem[]>(() =>
     })) || []
 )
 const itemsEmplacements = computed<SelectMenuItem[]>(() =>
-    emplacements?.map((org: Organisation) => ({
+    emplacements.value?.map((org: Organisation) => ({
         label: org.nom,
         id: org.id
     })) || []
@@ -100,8 +100,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #body>
             <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Article" name="article_id">
-                    <USelectMenu virtualize v-model="state.article_id" value-key="id" :items="articleItems" class="w-full"
-                        placeholder="Rechercher un article..." searchable />
+                    <USelectMenu v-model="state.article_id" virtualize value-key="id" :items="articleItems"
+                        class="w-full" placeholder="Rechercher un article..." searchable />
                 </UFormField>
 
                 <UFormField label="Numéro de lot" name="numero_lot">

@@ -4,28 +4,27 @@
             <div class="flex align-center">
                 <UInput v-model="searchPatient" placeholder="Rechercher" />
                 <UButton icon="i-lucide-search" class="mr-1 ml-2" />
-
             </div>
             <div>
-                <UButton icon="iconamoon:synchronize-light" @click="refreshPatients()" class="mr-1" />
+                <UButton icon="iconamoon:synchronize-light" class="mr-1" @click="refreshPatients()" />
                 <KeepAlive max="10">
-                    <PartenairesAttachPatientOrg @patient-added="refreshPatients()" class="mr-1"
-                        :organisationId="props.organisationId" />
+                    <PartenairesAttachPatientOrg class="mr-1" :organisation-id="props.organisationId"
+                                                 @patient-added="refreshPatients()" />
                 </KeepAlive>
                 <PatientsAddModal />
             </div>
         </div>
 
         <UTable ref="table-partenaires-patients" v-model:column-filters="columnFilters"
-            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-            v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-            :data="Patients" :columns="columns" empty="Aucun patients attachés à cette organisation !" :ui="{
-                base: 'table-fixed border-separate border-spacing-0',
-                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                td: 'border-b border-(--ui-border) py-0 m-1'
-            }" />
+                v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
+                :data="Patients" :columns="columns" empty="Aucun patients attachés à cette organisation !" :ui="{
+                    base: 'table-fixed border-separate border-spacing-0',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    td: 'border-b border-(--ui-border) py-0 m-1'
+                }" />
         <PartenairesPatientDetails :patient="selectedPatient" :open="openDetailsPatient" @update:open="openDetailsPatient = $event" />
     </div>
 </template>

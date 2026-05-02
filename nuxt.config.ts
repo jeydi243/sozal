@@ -3,7 +3,7 @@ export default defineNuxtConfig({
     app: {
         rootAttrs: {
             "data-vaul-drawer-wrapper": "",
-            class: "bg-(--ui-bg)",
+            "class": "bg-(--ui-bg)",
         },
         // pageTransition: { name: 'page', mode: 'out-in' },
         // layoutTransition: { name: 'layout', mode: 'out-in' }

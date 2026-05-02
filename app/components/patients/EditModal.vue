@@ -109,7 +109,7 @@ function onError(error: FormErrorEvent) {
                         <template #trailing>
                             <UPopover>
                                 <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    class="px-0" />
+                                         class="px-0" />
                                 <template #content>
                                     <UCalendar v-model="dateNaissanceModel" class="p-2" :max-date="maxDate" />
                                 </template>

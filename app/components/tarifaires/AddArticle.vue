@@ -5,8 +5,8 @@
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Tarifaire" name="tarifaire_id">
-                    <USelectMenu disabled v-model="state.tarifaire_id" value-key="id" :items="itemsTarifaires"
-                        class="w-full" />
+                    <USelectMenu v-model="state.tarifaire_id" disabled value-key="id" :items="itemsTarifaires"
+                                 class="w-full" />
                 </UFormField>
 
                 <UFormField label="Article" name="article_id">
@@ -29,6 +29,7 @@
 import * as z from 'zod'
 import type { FormSubmitEvent, SelectMenuItem } from '@nuxt/ui'
 import type { Tarifaire, Article, Organisation } from '~/types'
+
 const supabase = useSupabaseClient()
 const schema = z.object({
     tarifaire_id: z.string(),

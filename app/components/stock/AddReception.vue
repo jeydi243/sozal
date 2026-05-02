@@ -107,15 +107,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 </UFormField>
                 <UFormField label="Organisation de reception" placeholder="" name="in_organisation_id">
                     <USelectMenu v-model="state.in_organisation_id" value-key="id" :items="itemsMagasin"
-                        empty="Aucun magasin disponible" class="w-full" />
+                                 empty="Aucun magasin disponible" class="w-full" />
                 </UFormField>
                 <UFormField label="Numero Commande" placeholder="" name="numero_commande">
                     <UInput v-model="state.numero_commande" class="w-full" />
                 </UFormField>
                 <UFormField label="Type" name="type">
                     <URadioGroup v-model="state.type" disabled
-                        :items="[{ label: 'Entrée (IN)', value: 'IN' }, { label: 'Sortie (OUT)', value: 'OUT' }]"
-                        orientation="horizontal" />
+                                 :items="[{ label: 'Entrée (IN)', value: 'IN' }, { label: 'Sortie (OUT)', value: 'OUT' }]"
+                                 orientation="horizontal" />
                 </UFormField>
                 <UFormField label="Numero Livraison" placeholder="" name="numero_livraison">
                     <UInput v-model="state.numero_livraison" class="w-full" />
@@ -125,7 +125,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                         <template #trailing>
                             <UPopover>
                                 <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    aria-label="Select a date" class="px-0" />
+                                         aria-label="Select a date" class="px-0" />
 
                                 <template #content>
                                     <UCalendar v-model="dateTrxModel" class="p-2" :max-date="maxDate" />

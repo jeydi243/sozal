@@ -75,7 +75,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         toast.add({ title: 'Success', description: `L'utilisateur ${event.data.email} a été mis à jour pour le Profil ${props.user.user_id}`, color: 'success' })
         isOpen.value = false
         emit('user-updated')
-
     } catch (error: any) {
         toast.add({ title: 'Error', description: error.statusMessage || error.message || 'Failed to update user', color: 'error' })
     }
@@ -84,7 +83,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
     <UModal v-model:open="isOpen" title="Modifier l'utilisateur" description="Mettre à jour les informations du compte utilisateur">
-    
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Prenom" name="prenom">

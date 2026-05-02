@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Row } from '@tanstack/table-core'
+import type { Row } from '@tanstack/table-core'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
 import type { STKHeader } from '~/types'
 
@@ -135,16 +135,15 @@ const columns: TableColumn<STKHeader>[] = [
     {
         id: 'details',
         header: 'Détails',
-        cell: ({ row }) => h(UButton, {
+        cell: ({ row }) => h('p', { class: 'whitespace-nowrap' }, h(UButton, {
             color: 'neutral',
             variant: 'ghost',
             icon: 'solar:pen-line-duotone',
-            // class: '-mx-2.5',
             onClick: () => {
                 selectedSTKHeader.value = row.original
                 openSlideOver.value = true
             }
-        }),
+        })),
     },
     {
         accessorKey: 'in_organisation',
@@ -157,12 +156,12 @@ const columns: TableColumn<STKHeader>[] = [
     }, {
         accessorKey: 'fournisseur_id',
         header: 'Fournisseur',
-        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.fournisseur?.nom)
+        cell: ({ row }) => h('p', { class: 'font-medium' }, row.original.fournisseur?.nom)
     },
     {
         accessorKey: 'numero_document',
         header: 'N° Document',
-        cell: ({ row }) => h('p', { class: 'font-medium text-(--ui-text-highlighted)' }, row.original.numero_document)
+        cell: ({ row }) => h('p', { class: 'font-medium' }, row.original.numero_document)
     },
 
     {
@@ -298,7 +297,7 @@ const { data: stk_trx_headers, pending, refresh: refreshSTKHeaders } = await use
             .from('stk_trx_headers')
             .select('*, in_organisation:in_organisation_id(*), out_organisation:out_organisation_id(*), fournisseur:fournisseurs(*)')
         console.log('Données retournés ', { data })
-            if (error) {
+        if (error) {
             throw error
         }
         return data as STKHeader[]

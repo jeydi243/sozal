@@ -1,19 +1,17 @@
 <template>
-    <USlideover inset :title="`${props.user?.prenom} ${props.user?.nom}`" description="Description de l'utilisateur"
-        :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
-
-
+    <USlideover v-model:open="isOpenSlideOver" inset :title="`${props.user?.prenom} ${props.user?.nom}`"
+                description="Description de l'utilisateur" :ui="{ content: 'max-w-3xl' }">
         <template #body>
             <!-- Design Information Utilisateur -->
             <div
                 class="p-4 mx-4 mb-4 rounded-lg border border-(--ui-border) bg-(--ui-bg-elevated)/20 flex items-center justify-between transition-all hover:bg-(--ui-bg-elevated)/30">
                 <div class="flex items-center gap-4">
                     <UAvatar :alt="props.user?.prenom?.[0]" size="xl"
-                        class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
+                             class="bg-(--ui-primary)/10 text-(--ui-primary) font-bold ring-2 ring-(--ui-primary)/20" />
                     <div class="space-y-0.5">
                         <h2 class="text-xl font-bold text-(--ui-text-highlighted) tracking-tight">
                             {{ props.user?.prenom }} {{ props.user?.nom }} <span v-if="props.user?.postnom"
-                                class="uppercase text-sm font-medium opacity-70">{{ props.user?.postnom }}</span>
+                                                                                 class="uppercase text-sm font-medium opacity-70">{{ props.user?.postnom }}</span>
                         </h2>
                         <div class="flex items-center gap-2 text-sm text-(--ui-text-muted)">
                             <UIcon name="i-lucide-mail" class="w-4 h-4" />
@@ -23,7 +21,7 @@
                 </div>
                 <div class="flex gap-2">
                     <UButton color="neutral" variant="subtle" label="Modifier" icon="i-lucide-pencil"
-                        @click="openEdit = true" class="rounded-full px-4" />
+                             class="rounded-full px-4" @click="openEdit = true" />
                 </div>
             </div>
 
@@ -31,22 +29,22 @@
                 <template #affectations>
                     <div class="flex flex-row justify-between">
                         <UButton icon="iconoir:refresh-double" color="primary" variant="ghost"
-                            @click="refreshAffectations" />
+                                 @click="refreshAffectations" />
                         <UsersAddAffectation :user_id="props.user?.user_id || null"
-                            @affectation-added="refreshAffectations" />
+                                             @affectation-added="refreshAffectations" />
                     </div>
                     <UTable ref="table_affectations" v-model:column-visibility="columnVisibility"
-                        v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune affectation"
-                        :pagination-options="{
-                            getPaginationRowModel: getPaginationRowModel()
-                        }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
-                        :loading="affectationsStatus === 'pending'" :ui="{
-                            base: 'table-fixed border-separate border-spacing-0',
-                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                            tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                            td: 'border-b border-(--ui-border) p-2'
-                        }" />
+                            v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune affectation"
+                            :pagination-options="{
+                                getPaginationRowModel: getPaginationRowModel()
+                            }" class="shrink-0 m-2" :data="affectations || []" :columns="columnsAffectations"
+                            :loading="affectationsStatus === 'pending'" :ui="{
+                                base: 'table-fixed border-separate border-spacing-0',
+                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                td: 'border-b border-(--ui-border) p-2'
+                            }" />
                 </template>
                 <template #roles>
                     <div class="flex flex-row justify-between">
@@ -54,30 +52,27 @@
                         <UsersAddRole :user="props.user" @role-added="refreshRoles" />
                     </div>
                     <UTable ref="table_roles" v-model:column-visibility="columnVisibility"
-                        v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun rôle ajouté"
-                        :pagination-options="{
-                            getPaginationRowModel: getPaginationRowModel()
-                        }" class="shrink-0 m-2" :data="roles || []" :columns="columnsRoles"
-                        :loading="rolesStatus === 'pending'" :ui="{
-                            base: 'table-fixed border-separate border-spacing-0',
-                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                            tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
-                            td: 'border-b border-(--ui-border) p-2'
-                        }" />
+                            v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucun rôle ajouté"
+                            :pagination-options="{
+                                getPaginationRowModel: getPaginationRowModel()
+                            }" class="shrink-0 m-2" :data="roles || []" :columns="columnsRoles"
+                            :loading="rolesStatus === 'pending'" :ui="{
+                                base: 'table-fixed border-separate border-spacing-0',
+                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
+                                td: 'border-b border-(--ui-border) p-2'
+                            }" />
                 </template>
             </UTabs>
             <UModal v-model:open="isStopModalOpen" title="Confirmer l'arrêt de l'affectation">
                 <template #body>
                     <div class="pl-4">
-
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Êtes-vous sûr de vouloir arrêter cette affectation ? La date de fin sera définie à
                             aujourd'hui.
                         </p>
                     </div>
-
-
                 </template>
                 <template #footer="{ close }">
                     <UButton color="neutral" variant="ghost" @click="close">
@@ -91,14 +86,11 @@
             <UModal v-model:open="isStopRoleModalOpen" title="Retirer l'attribution du rôle">
                 <template #body>
                     <div class="pl-4">
-
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Êtes-vous sûr de vouloir arrêter d'attribuer ce rôle ? La date de fin sera définie à
                             aujourd'hui.
                         </p>
                     </div>
-
-
                 </template>
                 <template #footer="{ close }">
                     <UButton color="neutral" variant="ghost" @click="close">
@@ -110,7 +102,7 @@
                 </template>
             </UModal>
 
-            <UsersEditModal :user="props.user" v-model:open="openEdit" />
+            <UsersEditModal v-model:open="openEdit" :user="props.user" />
         </template>
     </USlideover>
 </template>

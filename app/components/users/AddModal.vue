@@ -49,7 +49,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         state.nom = undefined
         state.prenom = undefined
         state.postnom = undefined
-
     } catch (error: any) {
         toast.add({ title: 'Error', description: error.statusMessage || error.message || 'Failed to add user', color: 'error' })
     }

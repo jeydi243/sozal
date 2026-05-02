@@ -133,8 +133,8 @@ async function deleteAffectation(id: number) {
                 <!-- Détails de l'article -->
                 <div class="relative group">
                     <UButton icon="i-lucide-pencil" color="neutral" variant="ghost" size="xs"
-                        class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        @click="openEditModal = true" />
+                             class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                             @click="openEditModal = true" />
                     <div
                         class="grid grid-cols-2 gap-4 text-sm p-4 bg-(--ui-bg-elevated) rounded-lg border border-(--ui-border)">
                         <div>
@@ -151,18 +151,21 @@ async function deleteAffectation(id: number) {
                         </div>
                         <div v-if="props.article.lookup">
                             <p class="text-(--ui-text-muted) mb-1">Type d'article</p>
-                            <p class="font-medium text-(--ui-text-highlighted)">{{ (props.article.lookup as any)?.nom }}
+                            <p class="font-medium text-(--ui-text-highlighted)">
+                                {{ (props.article.lookup as any)?.nom }}
                             </p>
                         </div>
                         <div v-if="props.article.unite_conso">
                             <p class="text-(--ui-text-muted) mb-1">Unite de consommation</p>
-                            <p class="font-medium text-(--ui-text-highlighted)">{{ (props.article.unite_conso as any)?.nom
+                            <p class="font-medium text-(--ui-text-highlighted)">
+                                {{ (props.article.unite_conso as any)?.nom
                                 }}
                             </p>
                         </div>
                         <div v-if="props.article.unite_stock">
                             <p class="text-(--ui-text-muted) mb-1">Unite de stock</p>
-                            <p class="font-medium text-(--ui-text-highlighted)">{{ (props.article.unite_stock as any)?.nom
+                            <p class="font-medium text-(--ui-text-highlighted)">
+                                {{ (props.article.unite_stock as any)?.nom
                                 }}
                             </p>
                         </div>
@@ -182,23 +185,23 @@ async function deleteAffectation(id: number) {
                         <div class="flex-1">
                             <UFormField label="Affecter à une organisation" name="organisation">
                                 <USelectMenu v-model="selectedOrgId" value-key="id" :items="orgItems"
-                                    placeholder="Choisir une organisation..." class="w-full" />
+                                             placeholder="Choisir une organisation..." class="w-full" />
                             </UFormField>
                         </div>
                         <UButton label="Ajouter" icon="i-lucide-link" :loading="isAddingRecord"
-                            :disabled="!selectedOrgId" @click="addAffectation" />
+                                 :disabled="!selectedOrgId" @click="addAffectation" />
                     </div>
 
                     <!-- Liste des affectations -->
                     <UTable :data="affectations || []" :columns="columns" :loading="loadingAffectations"
-                        class="border border-(--ui-border) rounded-md overflow-hidden border border-(--ui-border) rounded-lg"
-                        :ui="{
-                            base: 'table-fixed border-separate border-spacing-0',
-                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                            tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-2 px-3 border-y border-(--ui-border) first:border-l last:border-r',
-                            td: 'py-2 px-3 border-b border-(--ui-border)'
-                        }">
+                            class="border border-(--ui-border) rounded-md overflow-hidden border border-(--ui-border) rounded-lg"
+                            :ui="{
+                                base: 'table-fixed border-separate border-spacing-0',
+                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                th: 'py-2 px-3 border-y border-(--ui-border) first:border-l last:border-r',
+                                td: 'py-2 px-3 border-b border-(--ui-border)'
+                            }">
                         <template #empty-state>
                             <div class="flex flex-col items-center justify-center py-6 text-(--ui-text-muted) text-sm">
                                 <p>Aucune affectation trouvée pour cet article.</p>
@@ -211,7 +214,7 @@ async function deleteAffectation(id: number) {
                 <UIcon name="i-lucide-loader-2" class="animate-spin h-8 w-8 text-(--ui-primary)" />
             </div>
             <ArticlesEditModal v-model:open="openEditModal" :article="props.article"
-                @article-updated="emit('article-updated')" />
+                               @article-updated="emit('article-updated')" />
         </template>
     </UModal>
 </template>

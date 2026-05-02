@@ -70,7 +70,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                     <UInput v-model="state.code" class="w-full" placeholder="Code de l'article">
                         <template #trailing>
                             <UButton icon="i-lucide-refresh-cw" color="neutral" variant="ghost" size="xs"
-                                @click="state.code = generateRandomCode()" />
+                                     @click="state.code = generateRandomCode()" />
                         </template>
                     </UInput>
                 </UFormField>

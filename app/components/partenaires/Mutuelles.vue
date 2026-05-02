@@ -3,27 +3,26 @@
         <div class="flex flex-row justify-between mb-2">
             <div class="flex align-center">
                 <UInput v-model="searchMutuelle" placeholder="Rechercher" />
-                <UButton icon="i-lucide-search" @click="refreshMutuelles()" class="mr-1 ml-2" />
-
+                <UButton icon="i-lucide-search" class="mr-1 ml-2" @click="refreshMutuelles()" />
             </div>
             <div>
-                <UButton icon="iconamoon:synchronize-light" @click="refreshMutuelles()" class="mr-1" />
+                <UButton icon="iconamoon:synchronize-light" class="mr-1" @click="refreshMutuelles()" />
                 <PartenairesAddMutuelleModal />
             </div>
         </div>
 
         <UTable ref="table-partenaires-mutuelles" v-model:column-filters="columnFilters"
-            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-            v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-            :data="Mutuelles" :columns="columns" empty="Aucune mutuelles attachés à cette organisation !" :ui="{
-                base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
-                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                td: 'border-b border-(--ui-border) '
-            }" />
+                v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
+                :data="Mutuelles" :columns="columns" empty="Aucune mutuelles attachés à cette organisation !" :ui="{
+                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
+                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                    td: 'border-b border-(--ui-border) '
+                }" />
         <PartenairesMutuelleDetails :mutuelle="selectedMutuelle" :open="openDetailsMutuelle"
-            @update:open="openDetailsMutuelle = $event" />
+                                    @update:open="openDetailsMutuelle = $event" />
     </div>
 </template>
 <script setup lang="ts">

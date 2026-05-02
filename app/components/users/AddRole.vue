@@ -105,19 +105,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Utilisateur" name="user_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.user_id" value-key="id" :items="profilItems"
-                        placeholder="Choisir un service..." icon="i-lucide-building" disabled />
+                    <USelectMenu v-model="state.user_id" class="w-full" value-key="id" :items="profilItems"
+                                 placeholder="Choisir un service..." icon="i-lucide-building" disabled />
                 </UFormField>
                 <UFormField label="Role" name="role_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.role_id" value-key="id" :items="rolesItems"
-                        placeholder="Sélectionner un role..." />
+                    <USelectMenu v-model="state.role_id" class="w-full" value-key="id" :items="rolesItems"
+                                 placeholder="Sélectionner un role..." />
                 </UFormField>
                 <UFormField label="Date de debut" placeholder="08/12/2025" name="date_debut">
                     <UInputDate v-model="dateDebutModel" class="w-full" :max-date="maxDate">
                         <template #trailing>
                             <UPopover>
                                 <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    aria-label="Select a date" class="px-0" />
+                                         aria-label="Select a date" class="px-0" />
 
                                 <template #content>
                                     <UCalendar v-model="dateDebutModel" class="p-2" :max-date="maxDate" />
@@ -130,7 +130,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
                 <div class="flex justify-end gap-2 pt-2">
                     <UButton label="Annuler" color="neutral" variant="subtle" @click="open = false" />
                     <UButton label="Attribuer un role" color="primary" icon="material-symbols:add" variant="solid"
-                        type="submit" />
+                             type="submit" />
                 </div>
             </UForm>
         </template>

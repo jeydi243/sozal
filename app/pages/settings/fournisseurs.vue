@@ -10,7 +10,7 @@
                     <template #right>
                         <div class="flex flex-wrap items-center justify-between gap-1.5">
                             <UInput v-model="searchInput" class="max-w-sm" icon="i-lucide-search"
-                                placeholder="Rechercher un article..." />
+                                    placeholder="Rechercher un article..." />
                         </div>
                         <FournisseursAddModal @article-added="refreshFournisseurs" />
                     </template>
@@ -18,15 +18,15 @@
             </template>
             <template #body>
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                    v-model:row-selection="rowSelection" v-model:pagination="pagination"
-                    :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Fournisseurs || []"
-                    :columns="columns" :loading="pending" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-xl',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
+                        v-model:row-selection="rowSelection" v-model:pagination="pagination"
+                        :pagination-options="paginationOptions" class="shrink-0 m-2" :data="Fournisseurs || []"
+                        :columns="columns" :loading="pending" :ui="{
+                            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-xl',
+                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r pl-2',
+                            td: 'border-b border-(--ui-border) p-2'
+                        }" />
 
                 <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
                     <div class="text-sm text-(--ui-text-muted)">
@@ -35,17 +35,17 @@
 
                     <div class="flex items-center gap-1.5">
                         <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
-                            :total="totalFilteredRows" @update:page="setPage" />
+                                     :total="totalFilteredRows" @update:page="setPage" />
                     </div>
                 </div>
             </template>
         </UDashboardPanel>
-        <FournisseursDetails :fournisseur="selectedFournisseur" v-model:open="openDetailsFournisseur" />
-        <FournisseursAffectations :fournisseur="selectedFournisseur" v-model:open="openDetailsAffectation" />
+        <FournisseursDetails v-model:open="openDetailsFournisseur" :fournisseur="selectedFournisseur" />
+        <FournisseursAffectations v-model:open="openDetailsAffectation" :fournisseur="selectedFournisseur" />
     </div>
 </template>
 <script setup lang="ts">
-import { type Row } from '@tanstack/table-core'
+import type { Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
 import type { Fournisseur } from '~/types'
 

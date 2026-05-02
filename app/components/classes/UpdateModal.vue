@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-    classe_updated: []
+    "classe_updated": []
     'update:open': [value: boolean]
 }>()
 

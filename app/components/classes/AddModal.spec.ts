@@ -4,26 +4,26 @@ import AddModal from './AddModal.vue'
 
 // Mock useToast
 mockNuxtImport('useToast', () => {
-  return () => ({
-    add: vi.fn()
-  })
+    return () => ({
+        add: vi.fn()
+    })
 })
 
 // Mock useSupabaseClient
 mockNuxtImport('useSupabaseClient', () => {
-  const mockSupabase = {
-    from: vi.fn().mockImplementation(() => ({
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockResolvedValue({ data: [{ id: '1', nom: 'New Class' }], error: null })
-    }))
-  }
-  return () => mockSupabase
+    const mockSupabase = {
+        from: vi.fn().mockImplementation(() => ({
+            insert: vi.fn().mockReturnThis(),
+            select: vi.fn().mockResolvedValue({ data: [{ id: '1', nom: 'New Class' }], error: null })
+        }))
+    }
+    return () => mockSupabase
 })
 
 describe('ClassesAddModal', () => {
-  it('renders correctly', async () => {
-    const component = await mountSuspended(AddModal)
+    it('renders correctly', async () => {
+        const component = await mountSuspended(AddModal)
 
-    expect(component.text()).toContain('New classe')
-  })
+        expect(component.text()).toContain('New classe')
+    })
 })

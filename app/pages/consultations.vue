@@ -2,6 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import { getPaginationRowModel, type Row } from '@tanstack/table-core'
 import type { PatientListeAttente } from '~/types'
+
 useHead({
     title: 'Consultations'
 })
@@ -208,7 +209,7 @@ const selectedOrganisation = ref(organisations[0])
 
             <UDashboardToolbar>
                 <template #left>
-                    <USelectMenu :items="organisations" v-model="selectedOrganisation" />
+                    <USelectMenu v-model="selectedOrganisation" :items="organisations" />
                 </template>
                 <template #right>
                     <UButton label="Ajouter une consultation" icon="i-lucide-plus" color="primary" variant="solid" />
@@ -272,15 +273,15 @@ const selectedOrganisation = ref(organisations[0])
             </div>
 
             <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
-                v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
-                    getPaginationRowModel: getPaginationRowModel()
-                }" class="shrink-0" :data="listePatientsAttente || []" :columns="columns" :ui="{
-                    base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
-                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                    tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                    td: 'border-b border-(--ui-border) py-2 m-1'
-                }" />
+                    v-model:row-selection="rowSelection" v-model:pagination="pagination" :pagination-options="{
+                        getPaginationRowModel: getPaginationRowModel()
+                    }" class="shrink-0" :data="listePatientsAttente || []" :columns="columns" :ui="{
+                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
+                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                        tbody: '[&>tr]:last:[&>td]:border-b-0',
+                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                        td: 'border-b border-(--ui-border) py-2 m-1'
+                    }" />
         </template>
     </UDashboardPanel>
 </template>

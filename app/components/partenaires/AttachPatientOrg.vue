@@ -90,7 +90,7 @@ function onError(error: FormErrorEvent) {
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
                 <UFormField label="Organisation" name="organisation_id">
                     <USelectMenu v-model="state.organisation_id" value-key="id" :items="items" class="w-full"
-                        disabled />
+                                 disabled />
                 </UFormField>
                 <UFormField label="Patient" name="patient_id">
                     <USelectMenu v-model="state.patient_id" value-key="id" :items="itemsPatients" class="w-full" />
@@ -100,7 +100,7 @@ function onError(error: FormErrorEvent) {
                         <template #trailing>
                             <UPopover :reference="inputDateDebutRef?.inputsRef[3]?.$el">
                                 <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                    aria-label="Select a date" class="px-0" />
+                                         aria-label="Select a date" class="px-0" />
 
                                 <template #content>
                                     <UCalendar v-model="dateDebutModel" class="p-2" :max-date="maxDate" />

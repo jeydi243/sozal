@@ -88,8 +88,8 @@ watch(() => props.open, (val) => {
             <div class="flex flex-col items-center gap-6 py-4">
                 <div class="relative group">
                     <UAvatar :src="previewUrl || patient?.avatar || undefined" size="3xl"
-                        :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg cursor-pointer transition-opacity group-hover:opacity-75' }"
-                        @click="fileInput?.click()" />
+                             :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg cursor-pointer transition-opacity group-hover:opacity-75' }"
+                             @click="fileInput?.click()" />
                     <div
                         class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
                         <UIcon name="i-lucide-camera" class="size-8 text-primary font-bold shadow-sm" />
@@ -97,9 +97,9 @@ watch(() => props.open, (val) => {
                 </div>
 
                 <div class="text-center">
-                    <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="onFileSelect" />
+                    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileSelect" />
                     <UButton label="Choisir une image" icon="i-lucide-image" color="neutral" variant="outline"
-                        @click="fileInput?.click()" />
+                             @click="fileInput?.click()" />
                     <p class="text-xs text-(--ui-text-muted) mt-2">JPG, PNG. Max 5 MB.</p>
                 </div>
             </div>
@@ -107,7 +107,7 @@ watch(() => props.open, (val) => {
             <div class="flex justify-end gap-2 mt-4">
                 <UButton label="Annuler" color="neutral" variant="subtle" @click="isOpen = false" />
                 <UButton label="Enregistrer" icon="i-lucide-save" color="primary" variant="solid" :loading="loading"
-                    :disabled="!selectedFile" @click="uploadAvatar" />
+                         :disabled="!selectedFile" @click="uploadAvatar" />
             </div>
         </template>
     </UModal>

@@ -77,19 +77,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
     <UModal v-model:open="open" title="Ajouter une affectation"
-        description="Affecter l'utilisateur à un service ou une organisation">
+            description="Affecter l'utilisateur à un service ou une organisation">
         <UButton icon="i-lucide-plus" label="Affecter" color="primary" size="sm" />
 
         <template #body>
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Type d'affectation" name="lookup_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.lookup_id" value-key="id" :items="lookupItems"
-                        placeholder="Sélectionner un type..." />
+                    <USelectMenu v-model="state.lookup_id" class="w-full" value-key="id" :items="lookupItems"
+                                 placeholder="Sélectionner un type..." />
                 </UFormField>
 
                 <UFormField label="Service / Organisation" name="organisation_id" class="w-full">
-                    <USelectMenu class="w-full" v-model="state.organisation_id" value-key="id" :items="serviceItems"
-                        placeholder="Choisir un service..." icon="i-lucide-building" />
+                    <USelectMenu v-model="state.organisation_id" class="w-full" value-key="id" :items="serviceItems"
+                                 placeholder="Choisir un service..." icon="i-lucide-building" />
                 </UFormField>
 
                 <div class="flex justify-end gap-2 pt-2">

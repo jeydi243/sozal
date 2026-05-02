@@ -146,7 +146,8 @@ async function deleteAffectation(id: number) {
                     </div>
                     <div v-if="props.role.entite" class="col-span-2">
                         <p class="text-(--ui-text-muted) mb-1">Entité</p>
-                        <p class="font-medium text-(--ui-text-highlighted)">{{ (props.role.entite as any)?.nom }}
+                        <p class="font-medium text-(--ui-text-highlighted)">
+                            {{ (props.role.entite as any)?.nom }}
                         </p>
                     </div>
                 </div>
@@ -164,22 +165,22 @@ async function deleteAffectation(id: number) {
                         <div class="flex-1">
                             <UFormField label="Affecter à une organisation" name="organisation">
                                 <USelectMenu v-model="selectedOrgId" value-key="id" :items="orgItems"
-                                    placeholder="Choisir une organisation..." class="w-full" />
+                                             placeholder="Choisir une organisation..." class="w-full" />
                             </UFormField>
                         </div>
                         <UButton label="Ajouter" icon="i-lucide-link" :loading="isAddingRecord"
-                            :disabled="!selectedOrgId" @click="addAffectation" />
+                                 :disabled="!selectedOrgId" @click="addAffectation" />
                     </div>
 
                     <!-- Liste des affectations -->
                     <UTable :data="affectations || []" :columns="columns" :loading="loadingAffectations"
-                        class="border border-(--ui-border) rounded-md overflow-hidden" :ui="{
-                            base: 'table-fixed border-separate border-spacing-0',
-                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                            tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-2 px-3 border-y border-(--ui-border) first:border-l last:border-r',
-                            td: 'py-2 px-3 border-b border-(--ui-border)'
-                        }">
+                            class="border border-(--ui-border) rounded-md overflow-hidden" :ui="{
+                                base: 'table-fixed border-separate border-spacing-0',
+                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                th: 'py-2 px-3 border-y border-(--ui-border) first:border-l last:border-r',
+                                td: 'py-2 px-3 border-b border-(--ui-border)'
+                            }">
                         <template #empty-state>
                             <div class="flex flex-col items-center justify-center py-6 text-(--ui-text-muted) text-sm">
                                 <p>Aucune affectation trouvée pour cet article.</p>

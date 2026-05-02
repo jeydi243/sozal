@@ -1,6 +1,16 @@
 @import "tailwindcss" theme(static);
 @import "@nuxt/ui";
 
+@layer base {
+  :root {
+    --ui-bg: #f8fafc; /* Un blanc cassé/gris très léger pour réduire l'éblouissement */
+  }
+
+  .dark {
+    --ui-bg: #020617; /* On s'assure que le mode sombre reste profond */
+  }
+}
+
 @theme static {
   --font-sans: 'Public Sans', sans-serif;
 

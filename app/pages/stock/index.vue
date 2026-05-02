@@ -5,7 +5,7 @@
         <template #left>
           <!-- <UDashboardSidebarCollapse /> -->
           <USelectMenu v-model="organisation_id" value-key="id" :items="itemsOrganisationsAffectes" class="w-64"
-            placeholder="Selectionner une organisation" searchable  />
+            placeholder="Selectionner une organisation" searchable />
         </template>
 
         <template #right>
@@ -24,12 +24,13 @@
 
               <UDropdownMenu :items="columnDisplayItems" :content="{ align: 'end' }">
                 <UButton label="Affichage" color="neutral" variant="outline" trailing-icon="i-lucide-settings-2" />
-                <UButton label="Exporter" icon="i-lucide-download" color="neutral" variant="subtle" size="sm" />
-                <UButton label="Imprimer" icon="i-lucide-printer" color="neutral" variant="subtle" size="sm" />
               </UDropdownMenu>
+              <UButton label="Exporter" icon="i-lucide-download" color="neutral" variant="subtle" size="sm"
+                @click="exportToCSV" />
+              <UButton label="Imprimer" icon="i-lucide-printer" color="neutral" variant="subtle" size="sm"
+                @click="window.print()" />
             </div>
           </div>
-
         </template>
       </UDashboardNavbar>
     </template>
@@ -88,9 +89,27 @@
           </div>
         </UCard>
       </div>
-      <div class="flex flex-row justify-end bg-(--ui-bg-elevated)/50 p-2 rounded-lg m-2">
+      <div class="flex flex-row justify-between bg-(--ui-bg-elevated)/50 p-2 rounded-lg m-2">
+        <!-- Filtres actifs -->
+        <div v-if="columnFilters.length > 0"
+          class="flex flex-wrap items-center gap-2  bg-(--ui-bg-elevated)/30 rounded-lg border border-(--ui-border) border-dashed">
+          <UIcon name="i-lucide-filter-x" class="w-4 h-4 text-(--ui-text-muted)" />
+          <p class="text-sm text-(--ui-text-muted) mr-1">Filtres actifs :</p>
+          <template v-for="filter in columnFilters" :key="filter.id">
+            <UBadge variant="subtle" color="primary" class="pr-1">
+              <span class="text-xs opacity-70 mr-1">{{ columnLabels[filter.id] || filter.id }} :</span>
+              <span class="font-medium mr-1">{{ filter.value }}</span>
+              <UButton icon="i-lucide-x" variant="ghost" color="neutral" size="xs" :padded="false"
+                class="hover:text-error" @click="clearFilter(filter.id)" />
+            </UBadge>
+          </template>
+          <UButton variant="link" color="error" size="xs" icon="i-lucide-trash-2" class="ml-auto"
+            @click="columnFilters = []" />
+        </div>
         <OrganisationsAddEmplacementModal :parent="organisation_id" />
       </div>
+
+
 
       <UTable ref="table" v-model:column-filters="columnFilters" v-model:column-visibility="columnVisibility"
         v-model:row-selection="rowSelection" v-model:pagination="pagination" empty="Aucune reception disponible"
@@ -112,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Row } from '@tanstack/table-core'
+import type { Row } from '@tanstack/table-core'
 import type { TableColumn, DropdownMenuItem, SelectMenuItem } from '@nuxt/ui'
 import type { Affectation, Organisation, STKHeader, Stock } from '~/types'
 
@@ -135,6 +154,8 @@ const UBadge = resolveComponent('UBadge')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UCheckbox = resolveComponent('UCheckbox')
 const UIcon = resolveComponent('UIcon')
+const UPopover = resolveComponent('UPopover')
+const UInput = resolveComponent('UInput')
 
 // 4. Refs d'état UI
 const openSlideOver = ref(false)
@@ -161,6 +182,20 @@ const {
   setPage,
   setStatusFilter
 } = useDataTable({ filterColumnId: 'article_id', pageSize: 100 })
+
+// Libellés pour les filtres actifs
+const columnLabels: Record<string, string> = {
+  'article.nom': 'Article',
+  'organisation.nom': 'Magasin',
+  'location.nom': 'Emplacement',
+  'numero_lot': 'N° Lot',
+  'quantite': 'Quantité',
+  'statut': 'Statut'
+}
+
+function clearFilter(id: string) {
+  columnFilters.value = columnFilters.value.filter(f => f.id !== id)
+}
 
 // Statistiques calculées
 const totalSKUs = computed(() => {
@@ -213,6 +248,41 @@ const itemsOrganisationsAffectes = computed<SelectMenuItem[]>(() =>
   })) || []
 )
 
+// 5.1 Helper pour les headers de recherche
+function renderSearchableHeader(label: string, column: any) {
+  const filterValue = column.getFilterValue() as string
+  const isSorted = column.getIsSorted()
+
+  return h(UPopover, {
+    content: { align: 'start', side: 'bottom', sideOffset: 8, class: 'p-2 w-48' }
+  }, {
+    default: () => h(UButton, {
+      color: filterValue ? 'primary' : 'neutral',
+      variant: 'ghost',
+      label: label,
+      icon: filterValue ? 'i-lucide-filter' : 'i-lucide-search',
+      trailingIcon: isSorted
+        ? isSorted === 'asc' ? 'i-lucide-arrow-up-narrow-wide' : 'i-lucide-arrow-down-wide-narrow'
+        : undefined,
+      class: '-mx-2.5 w-full justify-start'
+    }),
+    content: () => h(UInput, {
+      modelValue: filterValue,
+      'onUpdate:modelValue': (val: string) => column.setFilterValue(val),
+      placeholder: `Filtrer ${label.toLowerCase()}...`,
+      icon: 'i-lucide-search',
+      size: 'sm',
+      autofocus: true,
+      class: 'w-full',
+      onKeydown: (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          // L'appui sur Entrée ferme le popover naturellement si on perd le focus ou via un signal
+        }
+      }
+    })
+  })
+}
+
 // 6. Définition des colonnes
 const columns: TableColumn<Stock>[] = [
   // {
@@ -230,24 +300,24 @@ const columns: TableColumn<Stock>[] = [
   //   }),
   // },
   {
-    accessorKey: 'article_id',
-    header: 'Article',
+    accessorKey: 'article.nom',
+    header: ({ column }) => renderSearchableHeader('Article', column),
     meta: {
       class: { td: 'min-w-[300px] w-[300px]', th: 'w-[300px]' }
     },
     cell: ({ row }) => h('p', { class: 'whitespace-nowrap' }, row.original.article?.nom)
   },
   {
-    accessorKey: 'organisation',
-    header: 'Magasin',
+    accessorKey: 'organisation.nom',
+    header: ({ column }) => renderSearchableHeader('Magasin', column),
     meta: {
       class: { td: 'min-w-48' }
     },
     cell: ({ row }) => h('p', undefined, row.original.organisation?.nom)
   },
   {
-    accessorKey: 'location',
-    header: 'Emplacement',
+    accessorKey: 'location.nom',
+    header: ({ column }) => renderSearchableHeader('Emplacement', column),
     meta: {
       class: { td: 'min-w-48' }
     },
@@ -255,7 +325,7 @@ const columns: TableColumn<Stock>[] = [
   },
   {
     accessorKey: 'numero_lot',
-    header: 'N° Lot',
+    header: ({ column }) => renderSearchableHeader('N° Lot', column),
     meta: {
       class: { td: 'min-w-48' }
     },
@@ -264,7 +334,7 @@ const columns: TableColumn<Stock>[] = [
 
   {
     accessorKey: 'quantite',
-    header: 'Quantité',
+    header: ({ column }) => renderSearchableHeader('Quantité', column),
     meta: {
       class: { td: 'min-w-48' }
     },
@@ -342,6 +412,45 @@ const columns: TableColumn<Stock>[] = [
 ]
 
 // 7. Fonctions utilitaires
+function exportToCSV() {
+  if (!stock.value || stock.value.length === 0) {
+    toast.add({ title: 'Erreur', description: 'Aucune donnée à exporter', color: 'error' })
+    return
+  }
+
+  // En-têtes du CSV
+  const headers = ['Article', 'Magasin', 'Emplacement', 'Numéro de lot', 'Quantité', 'Statut']
+
+  // Transformation des données
+  const rows = stock.value.map(s => [
+    s.article?.nom || 'N/A',
+    s.organisation?.nom || 'N/A',
+    s.location?.nom || 'N/A',
+    s.numero_lot || '',
+    s.quantite || 0,
+    s.statut || 'actif'
+  ])
+
+  // Génération du contenu CSV (avec gestion des virgules dans les noms)
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(','))
+  ].join('\n')
+
+  // Création du lien de téléchargement
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', `etat_stock_${new Date().toISOString().split('T')[0]}.csv`)
+  link.style.visibility = 'hidden'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  toast.add({ title: 'Succès', description: 'Le fichier CSV a été généré avec succès', color: 'success' })
+}
+
 function getRowItems(row: Row<Stock>): DropdownMenuItem[][] {
   return [[
     {

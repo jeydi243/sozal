@@ -115,24 +115,28 @@ const columns: TableColumn<Organisation>[] = [
         <template #content>
             <div class="p-4 flex flex-col h-full gap-4">
                 <div>
-                    <p v-if="props.organisation" class="text-xl font-semibold text-(--ui-text-highlighted)">{{
-                        props.organisation.nom }}</p>
+                    <p v-if="props.organisation" class="text-xl font-semibold text-(--ui-text-highlighted)">
+                        {{
+                            props.organisation.nom }}
+                    </p>
                     <p class="text-sm text-(--ui-text-muted) flex items-center gap-2 mt-1">
                         <span class="font-mono bg-(--ui-bg-elevated) px-1.5 py-0.5 rounded">{{ props.organisation?.code
                             || 'N/A' }}</span>
                         <UBadge v-if="props.organisation?.status" :label="props.organisation.status" variant="subtle"
-                            class="capitalize" />
+                                class="capitalize" />
                     </p>
                 </div>
 
-                <div class="flex-1 overflow-hidden" v-if="props.organisation">
+                <div v-if="props.organisation" class="flex-1 overflow-hidden">
                     <UTabs :items="items" class="h-full flex flex-col" variant="link">
                         <template #infos>
                             <div class="space-y-4 pt-4">
                                 <div>
                                     <p class="text-sm font-medium text-(--ui-text-muted) mb-1">Description</p>
-                                    <p class="text-sm text-(--ui-text-highlighted)">{{ props.organisation.description ||
-                                        'Aucune description.' }}</p>
+                                    <p class="text-sm text-(--ui-text-highlighted)">
+                                        {{ props.organisation.description ||
+                                            'Aucune description.' }}
+                                    </p>
                                 </div>
                             </div>
                         </template>
@@ -143,13 +147,13 @@ const columns: TableColumn<Organisation>[] = [
                                     <OrganisationsAddServiceModal :parent="props.organisation" @service-added="refresh" />
                                 </div>
                                 <UTable :data="services || []" :columns="columns" :loading="pending"
-                                    class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
-                                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
-                                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                                        td: 'border-b border-(--ui-border) p-2'
-                                    }">
+                                        class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
+                                            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
+                                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                            td: 'border-b border-(--ui-border) p-2'
+                                        }">
                                     <template #empty-state>
                                         <div
                                             class="flex flex-col items-center justify-center py-6 text-(--ui-text-muted) text-sm">
@@ -165,13 +169,13 @@ const columns: TableColumn<Organisation>[] = [
                                     <OrganisationsAddEmplacementModal :parent="props.organisation" @emplacement-added="refresh" />
                                 </div>
                                 <UTable :data="emplacements || []" :columns="columns" :loading="pending"
-                                    class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
-                                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
-                                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                                        td: 'border-b border-(--ui-border) p-2'
-                                    }">
+                                        class="border border-(--ui-border) rounded-md overflow-hidden flex-1" :ui="{
+                                            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg',
+                                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                            td: 'border-b border-(--ui-border) p-2'
+                                        }">
                                     <template #empty-state>
                                         <div
                                             class="flex flex-col items-center justify-center py-6 text-(--ui-text-muted) text-sm">

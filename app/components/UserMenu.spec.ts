@@ -4,65 +4,65 @@ import UserMenu from './UserMenu.vue'
 
 // Mock composables using mockNuxtImport
 mockNuxtImport('useColorMode', () => {
-  return () => ({ value: 'light', preference: 'light' })
+    return () => ({ value: 'light', preference: 'light' })
 })
 
 mockNuxtImport('useAppConfig', () => {
-  return () => ({
-    ui: {
-      colors: {
-        primary: 'blue',
-        neutral: 'slate'
-      }
-    },
-    icon: {
-      collections: []
-    }
-  })
+    return () => ({
+        ui: {
+            colors: {
+                primary: 'blue',
+                neutral: 'slate'
+            }
+        },
+        icon: {
+            collections: []
+        }
+    })
 })
 
 mockNuxtImport('useSupabaseClient', () => {
-  return () => ({
-    auth: {
-      signOut: vi.fn().mockResolvedValue({ error: null })
-    }
-  })
+    return () => ({
+        auth: {
+            signOut: vi.fn().mockResolvedValue({ error: null })
+        }
+    })
 })
 
 mockNuxtImport('useToast', () => {
-  return () => ({
-    add: vi.fn()
-  })
+    return () => ({
+        add: vi.fn()
+    })
 })
 
 mockNuxtImport('useSupabaseUser', () => {
-  return () => ({
-    value: { email: 'test@example.com' }
-  })
+    return () => ({
+        value: { email: 'test@example.com' }
+    })
 })
 
 mockNuxtImport('navigateTo', () => {
-  return vi.fn()
+    return vi.fn()
 })
 
 describe('UserMenu', () => {
-  it('renders user name correctly', async () => {
-    const component = await mountSuspended(UserMenu, {
-      props: {
-        collapsed: false
-      }
+    it('renders user name correctly', async () => {
+        const component = await mountSuspended(UserMenu, {
+            props: {
+                collapsed: false
+            }
+        })
+
+        expect(component.text()).toContain('Benjamin Canac')
     })
 
-    expect(component.text()).toContain('Benjamin Canac')
-  })
+    it('renders correctly when collapsed', async () => {
+        const component = await mountSuspended(UserMenu, {
+            props: {
+                collapsed: true
+            }
+        })
 
-  it('renders correctly when collapsed', async () => {
-    const component = await mountSuspended(UserMenu, {
-      props: {
-        collapsed: true
-      }
+        expect(component.text()).not.toContain('Benjamin Canac')
     })
-
-    expect(component.text()).not.toContain('Benjamin Canac')
-  })
 })

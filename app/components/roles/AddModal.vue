@@ -55,10 +55,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #body>
             <UForm :schema="RoleSchema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Code" name="code">
-                    <UInput v-model="state.code" class="w-full"  />
+                    <UInput v-model="state.code" class="w-full" />
                 </UFormField>
                 <UFormField label="Nom" name="nom">
-                    <UInput v-model="state.nom" class="w-full"  />
+                    <UInput v-model="state.nom" class="w-full" />
                 </UFormField>
 
                 <UFormField label="Description" name="description">

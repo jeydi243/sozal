@@ -68,7 +68,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
                 <UFormField label="Article" name="article_id">
                     <USelectMenu v-model="state.article_id" value-key="id" :items="articleItems" class="w-full"
-                        placeholder="Rechercher un article..." searchable />
+                                 placeholder="Rechercher un article..." searchable />
                 </UFormField>
 
                 <div class="grid grid-cols-2 gap-4">

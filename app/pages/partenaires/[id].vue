@@ -22,8 +22,8 @@
                     <p>{{ partenaire?.nom }}</p>
                 </div>
                 <div class="bg-teal-500 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
-                   <h4>Nbre Patients</h4>
-                   <p>10</p>
+                    <h4>Nbre Patients</h4>
+                    <p>10</p>
                 </div>
                 <div class="bg-red-300 h-20 flex flex-col justify-left items-left rounded-lg w-56 p-4">
                     <h4>Nbre Mutuelles</h4>
@@ -43,8 +43,8 @@
             </div>
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
                 <template #content="{ item }">
-                    <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisationId="route.params.id as string" />
-                    <PartenairesMutuelles v-else-if="item.value == 'mutuelle' && partenaire" :organisationId="route.params.id as string" />
+                    <PartenairesPatients v-if="item.value == 'partenaire' && partenaire" :organisation-id="route.params.id as string" />
+                    <PartenairesMutuelles v-else-if="item.value == 'mutuelle' && partenaire" :organisation-id="route.params.id as string" />
                     <PartenairesFactures v-else :organisation="route.params.id" />
                 </template>
             </UTabs>

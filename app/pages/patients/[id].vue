@@ -12,7 +12,7 @@
                 </template>
                 <template #right>
                     <UButton label="Modifier" color="neutral" variant="subtle" icon="i-lucide-pencil"
-                        @click="openEditModal = true" />
+                             @click="openEditModal = true" />
                     <UButton label="Supprimer" color="error" variant="subtle" icon="i-lucide-trash" />
                 </template>
             </UDashboardNavbar>
@@ -28,7 +28,6 @@
             </div>
 
             <div v-else class="p-6 space-y-6">
-
                 <!-- === HERO CARD — Identité du patient === -->
                 <div
                     class="relative overflow-hidden rounded-2xl border border-(--ui-border) bg-(--ui-bg-elevated)/40 p-6">
@@ -40,8 +39,8 @@
                         <!-- Avatar -->
                         <div class="relative flex-shrink-0 group cursor-pointer" @click="openAvatarModal = true">
                             <UAvatar :src="patient.avatar ?? undefined" :alt="`${patient.prenom} ${patient.nom}`"
-                                size="3xl"
-                                :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg transition-opacity group-hover:opacity-75' }" />
+                                     size="3xl"
+                                     :ui="{ root: 'ring-4 ring-(--ui-border) shadow-lg transition-opacity group-hover:opacity-75' }" />
                             <div
                                 class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
                                 <UIcon name="i-lucide-camera" class="size-8 text-white drop-shadow-md" />
@@ -66,8 +65,10 @@
                                         patient.sexe }}
                                 </UBadge>
                             </div>
-                            <p class="text-(--ui-text-muted) text-sm mb-3">Dossier patient · Code <span
-                                    class="font-mono font-medium text-(--ui-text)">{{ patient.code }}</span></p>
+                            <p class="text-(--ui-text-muted) text-sm mb-3">
+                                Dossier patient · Code <span
+                                    class="font-mono font-medium text-(--ui-text)">{{ patient.code }}</span>
+                            </p>
 
                             <!-- Méta-données rapides -->
                             <div class="flex flex-wrap gap-4 text-sm">
@@ -89,9 +90,9 @@
                         <!-- Actions rapides -->
                         <div class="flex items-center gap-2 self-start">
                             <UButton icon="i-lucide-calendar-plus" color="primary" variant="solid" size="sm"
-                                label="RDV" />
+                                     label="RDV" />
                             <UButton icon="hugeicons:doctor-03" color="neutral" variant="outline" size="sm"
-                                label="Consulter" />
+                                     label="Consulter" />
                             <UButton icon="i-lucide-printer" color="neutral" variant="ghost" size="sm" />
                         </div>
                     </div>
@@ -100,9 +101,9 @@
                 <!-- === GRILLE 3 COLONNES — Stats rapides === -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div v-for="stat in quickStats" :key="stat.label"
-                        class="flex items-center gap-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/30 p-4 hover:bg-(--ui-bg-elevated)/60 transition-colors">
+                         class="flex items-center gap-4 rounded-xl border border-(--ui-border) bg-(--ui-bg-elevated)/30 p-4 hover:bg-(--ui-bg-elevated)/60 transition-colors">
                         <div class="flex size-10 flex-shrink-0 items-center justify-center rounded-lg"
-                            :class="stat.iconBg">
+                             :class="stat.iconBg">
                             <UIcon :name="stat.icon" class="size-5" :class="stat.iconColor" />
                         </div>
                         <div>
@@ -119,29 +120,30 @@
                         content: 'p-5'
                     }">
                         <template #content="{ item }">
-
                             <!-- Tab : Informations personnelles -->
                             <div v-if="item.value === 'info'" class="space-y-5">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
-                                    Identité civile</p>
+                                    Identité civile
+                                </p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <InfoField label="Nom" :value="patient.nom" icon="i-lucide-user" />
                                     <InfoField label="Prénom" :value="patient.prenom" icon="i-lucide-user" />
                                     <InfoField label="Post-nom" :value="patient.postnom" icon="i-lucide-user" />
                                     <InfoField label="Sexe" :value="patient.sexe === 'M' ? 'Masculin' : 'Féminin'"
-                                        icon="i-lucide-venus-and-mars" />
+                                               icon="i-lucide-venus-and-mars" />
                                     <InfoField label="Date de naissance" :value="formatDate(patient.date_naissance)"
-                                        icon="i-lucide-calendar" />
+                                               icon="i-lucide-calendar" />
                                     <InfoField label="Âge" :value="`${age} ans`" icon="i-lucide-clock" />
                                 </div>
                                 <USeparator />
                                 <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
-                                    Identifiants</p>
+                                    Identifiants
+                                </p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <InfoField label="MRN" :value="patient.mrn" icon="i-lucide-id-card" mono />
                                     <InfoField label="Code patient" :value="patient.code" icon="i-lucide-hash" mono />
                                     <InfoField label="Statut" :value="patient.status || 'Actif'"
-                                        icon="i-lucide-activity" />
+                                               icon="i-lucide-activity" />
                                 </div>
                             </div>
 
@@ -149,9 +151,10 @@
                             <div v-if="item.value === 'consultations'" class="space-y-4">
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
-                                        Historique des consultations</p>
+                                        Historique des consultations
+                                    </p>
                                     <UButton label="Nouvelle consultation" icon="i-lucide-plus" size="md"
-                                        color="primary" variant="subtle" />
+                                             color="primary" variant="subtle" />
                                 </div>
                                 <div
                                     class="flex flex-col items-center justify-center py-12 gap-3 text-(--ui-text-muted) rounded-lg border border-dashed border-(--ui-border)">
@@ -164,9 +167,10 @@
                             <div v-if="item.value === 'rdv'" class="space-y-4">
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
-                                        Rendez-vous</p>
+                                        Rendez-vous
+                                    </p>
                                     <UButton label="Nouveau RDV" icon="i-lucide-calendar-plus" size="md" color="primary"
-                                        variant="subtle" />
+                                             variant="subtle" />
                                 </div>
                                 <div
                                     class="flex flex-col items-center justify-center py-12 gap-3 text-(--ui-text-muted) rounded-lg border border-dashed border-(--ui-border)">
@@ -179,9 +183,10 @@
                             <div v-if="item.value === 'mutuelle'" class="space-y-4">
                                 <div class="flex items-center justify-between">
                                     <p class="text-xs font-semibold uppercase tracking-widest text-(--ui-text-muted)">
-                                        Couverture santé</p>
+                                        Couverture santé
+                                    </p>
                                     <UButton label="Ajouter une mutuelle" icon="i-lucide-plus" size="md" color="primary"
-                                        variant="subtle" />
+                                             variant="subtle" />
                                 </div>
                                 <div
                                     class="flex flex-col items-center justify-center py-12 gap-3 text-(--ui-text-muted) rounded-lg border border-dashed border-(--ui-border)">
@@ -189,15 +194,14 @@
                                     <p class="text-sm">Aucune mutuelle attachée</p>
                                 </div>
                             </div>
-
                         </template>
                     </UTabs>
                 </div>
 
                 <PatientsEditModal v-if="patient" v-model:open="openEditModal" :patient="patient"
-                    @patient-updated="refreshPatient" />
+                                   @patient-updated="refreshPatient" />
                 <PatientsAvatarUpdateModal v-if="patient" v-model:open="openAvatarModal" :patient="patient"
-                    @avatar-updated="refreshPatient" />
+                                           @avatar-updated="refreshPatient" />
             </div>
         </template>
     </UDashboardPanel>

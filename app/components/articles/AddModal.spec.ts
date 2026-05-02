@@ -4,38 +4,38 @@ import AddModal from './AddModal.vue'
 
 // Mock useToast
 mockNuxtImport('useToast', () => {
-  return () => ({
-    add: vi.fn()
-  })
+    return () => ({
+        add: vi.fn()
+    })
 })
 
 // Mock useSupabaseClient
 mockNuxtImport('useSupabaseClient', () => {
-  const mockSupabase = {
-    from: vi.fn().mockImplementation((table) => {
-      if (table === 'lookups') {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockResolvedValue({ 
-            data: [{ id: '1', nom: 'Category 1' }], 
-            error: null 
-          })
-        }
-      }
-      return {
-        select: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis()
-      }
-    })
-  }
-  return () => mockSupabase
+    const mockSupabase = {
+        from: vi.fn().mockImplementation((table) => {
+            if (table === 'lookups') {
+                return {
+                    select: vi.fn().mockReturnThis(),
+                    eq: vi.fn().mockResolvedValue({ 
+                        data: [{ id: '1', nom: 'Category 1' }], 
+                        error: null 
+                    })
+                }
+            }
+            return {
+                select: vi.fn().mockReturnThis(),
+                insert: vi.fn().mockReturnThis(),
+                eq: vi.fn().mockReturnThis()
+            }
+        })
+    }
+    return () => mockSupabase
 })
 
 describe('ArticlesAddModal', () => {
-  it('renders correctly', async () => {
-    const component = await mountSuspended(AddModal)
+    it('renders correctly', async () => {
+        const component = await mountSuspended(AddModal)
 
-    expect(component.text()).toContain('Add article')
-  })
+        expect(component.text()).toContain('Add article')
+    })
 })

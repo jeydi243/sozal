@@ -1,7 +1,7 @@
 <template>
-    <USlideover side="right" inset title="Details du patient"
-        :description="`${props.patient?.nom} ${props.patient?.postnom} ${props.patient?.prenom}`"
-        v-model:open="openDetailsPatient" :ui="{ content: 'max-w-3xl' }">
+    <USlideover v-model:open="openDetailsPatient" side="right" inset
+                title="Details du patient"
+                :description="`${props.patient?.nom} ${props.patient?.postnom} ${props.patient?.prenom}`" :ui="{ content: 'max-w-3xl' }">
         <template #body>
             <pre>{{ patient }}</pre>
             <UTabs color="primary" variant="link" :items="items" class="w-full" :ui="{ list: 'mb-2' }">
@@ -9,36 +9,36 @@
                     <div v-if="item.value == 'mutuelle'">
                         <div class="flex flex-row justify-end">
                             <UButton label="Attacher une mutuelle" icon="i-lucide-plus" color="primary"
-                                variant="solid" />
+                                     variant="solid" />
                         </div>
                         <UTable ref="table-mutuelle" v-model:column-filters="columnFilters"
-                            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                            v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-                            :data="MutuellesPatient" :columns="columns" empty="Aucune mutuelle attaché à ce patient"
-                            :ui="{
-                                base: 'table-fixed border-separate border-spacing-0',
-                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                                td: 'border-b border-(--ui-border) '
-                            }" />
+                                v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                                v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
+                                :data="MutuellesPatient" :columns="columns" empty="Aucune mutuelle attaché à ce patient"
+                                :ui="{
+                                    base: 'table-fixed border-separate border-spacing-0',
+                                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                    td: 'border-b border-(--ui-border) '
+                                }" />
                     </div>
                     <div v-if="item.value == 'ayant-droit'">
                         <div class="flex flex-row justify-end">
                             <UButton label="Ajouter un ayant-droit" icon="i-lucide-plus" color="primary"
-                                variant="solid" />
+                                     variant="solid" />
                         </div>
                         <UTable ref="table-ayant-droit" v-model:column-filters="columnFilters"
-                            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                            v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
-                            :data="MutuellesPatient" :columns="columnsAyantDroit"
-                            empty="Aucun ayant droit associé à ce patient" :ui="{
-                                base: 'table-fixed border-separate border-spacing-0',
-                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                                tbody: '[&>tr]:last:[&>td]:border-b-0',
-                                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                                td: 'border-b border-(--ui-border) '
-                            }" />
+                                v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                                v-model:pagination="pagination" :pagination-options="paginationOptions" class="shrink-0 m-2"
+                                :data="MutuellesPatient" :columns="columnsAyantDroit"
+                                empty="Aucun ayant droit associé à ce patient" :ui="{
+                                    base: 'table-fixed border-separate border-spacing-0',
+                                    thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                    tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                    th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                                    td: 'border-b border-(--ui-border) '
+                                }" />
                     </div>
                 </template>
             </UTabs>
@@ -310,7 +310,6 @@ const columnsAyantDroit: TableColumn<Patient>[] = [
             onClick: () => {
                 selectedAyantDroit.value = row.original;
                 openDetailsAyantDroit.value = !openDetailsAyantDroit.value;
-
             }
         }),
     },

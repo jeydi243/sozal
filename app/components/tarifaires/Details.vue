@@ -1,8 +1,6 @@
 <template>
-    <USlideover description="Details du tarifaire" inset :title="`${props.tarifaire?.code}`"
-        :ui="{ content: 'max-w-3xl' }" v-model:open="isOpenSlideOver">
-
-
+    <USlideover v-model:open="isOpenSlideOver" description="Details du tarifaire" inset
+                :title="`${props.tarifaire?.code}`" :ui="{ content: 'max-w-3xl' }">
         <template #body>
             <div class="flex flex-row justify-between">
                 <UButton icon="iconoir:refresh-double" color="primary" variant="ghost" @click="refreshTarifairesLines" />
@@ -10,29 +8,26 @@
             </div>
             <div>
                 <UTable ref="table_tarifaires_lines" v-model:column-filters="columnFilters"
-                    v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                    v-model:pagination="pagination" empty="Aucune ligne de tarifaire" :pagination-options="{
-                        getPaginationRowModel: getPaginationRowModel()
-                    }" class="shrink-0 m-2" :data="tarifairesLines || []" :columns="columnsTarifaireLine"
-                    :loading="tarifairesLinesStatus === 'pending'" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
+                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                        v-model:pagination="pagination" empty="Aucune ligne de tarifaire" :pagination-options="{
+                            getPaginationRowModel: getPaginationRowModel()
+                        }" class="shrink-0 m-2" :data="tarifairesLines || []" :columns="columnsTarifaireLine"
+                        :loading="tarifairesLinesStatus === 'pending'" :ui="{
+                            base: 'table-fixed border-separate border-spacing-0',
+                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+                            td: 'border-b border-(--ui-border) p-2'
+                        }" />
             </div>
             <UModal v-model:open="isStopModalOpen" title="Confirmer l'arrêt de l'tarifaire">
                 <template #body>
                     <div class="pl-4">
-
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Êtes-vous sûr de vouloir arrêter cette tarifaire ? La date de fin sera définie à
                             aujourd'hui.
                         </p>
                     </div>
-
-
                 </template>
                 <template #footer="{ close }">
                     <UButton color="neutral" variant="ghost" @click="close">
@@ -230,7 +225,6 @@ function getRowItemsTarifairesLines(row: Row<TarifaireLine>) {
     ]
 
     if (!row.original) {
-
         items.push({
             type: 'separator'
         });

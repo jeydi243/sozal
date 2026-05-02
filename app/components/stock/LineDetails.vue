@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { STKLine, STKLineDetail } from '~/types'
-import { type Row } from '@tanstack/table-core'
+import type { Row } from '@tanstack/table-core'
 import type { TableColumn } from '@nuxt/ui'
 
 const props = defineProps({
@@ -50,27 +50,29 @@ const columns: TableColumn<STKLineDetail>[] = [
         header: () => h('div', { class: 'w-[120px]' }, 'Statut'),
         cell: ({ row }) => h('p', { class: 'text-(--ui-text-muted)' }, row.original.statut)
     },
-    ...((props.readonly) ? [] : [{
-        id: 'actions',
-        header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
-        cell: ({ row }: { row: Row<STKLineDetail> }) => h('div', { class: 'text-left' },
-            h(UButton, {
-                icon: 'i-lucide-trash',
-                color: 'error',
-                variant: 'ghost',
-                async onClick() {
-                    const { error } = await supabase.from('stk_trx_details').delete().eq('id', row.original.id)
-                    if (error) {
-                        toast.add({ title: 'Erreur', description: error.message, color: 'error' })
-                    } else {
-                        toast.add({ title: 'Supprimé', description: 'Élément supprimé', color: 'success' })
-                        await refresh()
-                        emit('refresh')
+    ...((props.readonly)
+        ? []
+        : [{
+            id: 'actions',
+            header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
+            cell: ({ row }: { row: Row<STKLineDetail> }) => h('div', { class: 'text-left' },
+                h(UButton, {
+                    icon: 'i-lucide-trash',
+                    color: 'error',
+                    variant: 'ghost',
+                    async onClick() {
+                        const { error } = await supabase.from('stk_trx_details').delete().eq('id', row.original.id)
+                        if (error) {
+                            toast.add({ title: 'Erreur', description: error.message, color: 'error' })
+                        } else {
+                            toast.add({ title: 'Supprimé', description: 'Élément supprimé', color: 'success' })
+                            await refresh()
+                            emit('refresh')
+                        }
                     }
-                }
-            })
-        )
-    }])
+                })
+            )
+        }])
 ]
 
 // 8. Chargement des données
@@ -91,22 +93,22 @@ const { data: details, pending, refresh } = await useAsyncData(
 
 <template>
     <UModal v-model:open="isOpen" :title="`Détails - ${line?.article?.nom}`"
-        description="Liste des numeros de serie" :ui="{ content: 'max-w-3xl' }">
+            description="Liste des numeros de serie" :ui="{ content: 'max-w-3xl' }">
         <template #body>
             <div class="space-y-4">
                 <div v-if="!readonly" class="flex items-center justify-end">
                     <UButton label="Ajouter une serie" icon="i-lucide-plus" size="sm" color="primary"
-                        @click="openAddModal = true" />
+                             @click="openAddModal = true" />
                 </div>
 
                 <UTable ref="table" v-model:column-filters="columnFilters" v-model:pagination="pagination"
-                    :data="details || []" :columns="columns" :loading="pending" :ui="{
-                        base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
-                        thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                        tbody: '[&>tr]:last:[&>td]:border-b-0',
-                        th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r p-2',
-                        td: 'border-b border-(--ui-border) p-2'
-                    }" />
+                        :data="details || []" :columns="columns" :loading="pending" :ui="{
+                            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
+                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                            tbody: '[&>tr]:last:[&>td]:border-b-0',
+                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r p-2',
+                            td: 'border-b border-(--ui-border) p-2'
+                        }" />
 
                 <div v-if="details?.length" class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4">
                     <div class="text-xs text-(--ui-text-muted)">

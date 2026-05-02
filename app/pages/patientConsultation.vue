@@ -60,32 +60,33 @@ function saveConsultation() {
                     <form class="space-y-4" @submit.prevent="saveConsultation">
                         <UFormGroup label="Symptômes" name="symptoms">
                             <UTextarea v-model="state.symptoms" placeholder="Décrivez les symptômes du patient..."
-                                autoresize />
+                                       autoresize />
                         </UFormGroup>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <UFormGroup label="Diagnostic" name="diagnosis">
                                 <UInput v-model="state.diagnosis" icon="i-heroicons-magnifying-glass"
-                                    placeholder="Diagnostic principal" />
+                                        placeholder="Diagnostic principal" />
                             </UFormGroup>
                             <UFormGroup label="Type de consultation" name="type">
                                 <USelect :options="['Générale', 'Suivi', 'Urgence', 'Spécialisée']"
-                                    placeholder="Sélectionner..." />
+                                         placeholder="Sélectionner..." />
                             </UFormGroup>
                         </div>
 
                         <UFormGroup label="Prescription / Traitement" name="prescription">
                             <UTextarea v-model="state.prescription" placeholder="Liste des médicaments et posologie..."
-                                :rows="3" />
+                                       :rows="3" />
                         </UFormGroup>
 
                         <UFormGroup label="Notes Privées (Médecin)" name="notes">
                             <UTextarea v-model="state.notes" placeholder="Notes réservées au personnel médical..."
-                                :rows="2" color="gray" variant="outline" />
+                                       :rows="2" color="gray" variant="outline" />
                         </UFormGroup>
 
                         <div class="flex justify-end pt-2">
-                            <UButton type="submit" size="lg" icon="i-heroicons-check">Enregistrer la consultation
+                            <UButton type="submit" size="lg" icon="i-heroicons-check">
+                                Enregistrer la consultation
                             </UButton>
                         </div>
                     </form>

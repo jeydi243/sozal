@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Row } from '@tanstack/table-core'
+import type { Row } from '@tanstack/table-core'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
 import type { Article, STKHeader, STKLine } from '~/types'
 
@@ -101,15 +101,17 @@ const columns: TableColumn<STKLine>[] = [
             })
         )
     },
-    ...((props.stk_trx_header?.statut === 'Terminé') ? [] : [{
-        id: 'actions',
-        header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
-        cell: ({ row }: { row: Row<STKLine> }) => h('div', { class: 'text-center' },
-            h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
-                () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
+    ...((props.stk_trx_header?.statut === 'Terminé')
+        ? []
+        : [{
+            id: 'actions',
+            header: () => h('div', { class: 'text-center w-[80px]' }, 'Actions'),
+            cell: ({ row }: { row: Row<STKLine> }) => h('div', { class: 'text-center' },
+                h(UDropdownMenu, { content: { align: 'end' }, items: getRowItems(row) },
+                    () => h(UButton, { icon: 'i-lucide-ellipsis-vertical', color: 'neutral', variant: 'ghost' })
+                )
             )
-        )
-    }])
+        }])
 ]
 
 // 7. Fonctions utilitaires
@@ -185,7 +187,7 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
 
 <template>
     <USlideover v-model:open="isOpen" title="Détails de la Réception"
-        :ui="{ content: 'max-w-4xl', footer: 'flex flex-row justify-end' }" inset>
+                :ui="{ content: 'max-w-4xl', footer: 'flex flex-row justify-end' }" inset>
         <template #body>
             <div v-if="stk_trx_header" class="space-y-6">
                 <!-- Région Info Header -->
@@ -226,19 +228,19 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-bold">Articles reçus</h3>
                         <UButton v-if="stk_trx_header.statut !== 'Terminé'" label="Ajouter une ligne"
-                            icon="i-lucide-plus" color="primary" @click="openAddModal = true" />
+                                 icon="i-lucide-plus" color="primary" @click="openAddModal = true" />
                     </div>
 
                     <UTable ref="table" v-model:column-filters="columnFilters"
-                        v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
-                        v-model:pagination="pagination" :pagination-options="paginationOptions" :data="lines || []"
-                        :columns="columns" :loading="pending" :ui="{
-                            base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
-                            thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-                            tbody: '[&>tr]:last:[&>td]:border-b-0',
-                            th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r p-2',
-                            td: 'border-b border-(--ui-border) p-2'
-                        }" />
+                            v-model:column-visibility="columnVisibility" v-model:row-selection="rowSelection"
+                            v-model:pagination="pagination" :pagination-options="paginationOptions" :data="lines || []"
+                            :columns="columns" :loading="pending" :ui="{
+                                base: 'table-fixed border-separate border-spacing-0 border border-(--ui-border) rounded-t-lg w-full',
+                                thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+                                tbody: '[&>tr]:last:[&>td]:border-b-0',
+                                th: 'py-1 first:rounded-tl-[calc(var(--ui-radius)*2)] last:rounded-tr-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r p-2',
+                                td: 'border-b border-(--ui-border) p-2'
+                            }" />
 
                     <div class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4">
                         <div class="text-sm text-(--ui-text-muted)">
@@ -247,7 +249,7 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
 
                         <div class="flex items-center gap-1.5">
                             <UPagination :default-page="currentPage" :items-per-page="currentPageSize"
-                                :total="totalFilteredRows" @update:page="setPage" />
+                                         :total="totalFilteredRows" @update:page="setPage" />
                         </div>
                     </div>
                 </div>
@@ -256,18 +258,18 @@ const { data: lines, pending, refresh } = await useLazyAsyncData(
             <!-- Modal Ajout Ligne -->
             <StockAddLineModal v-model:open="openAddModal" :header="stk_trx_header" @line-added="refresh" />
             <StockLineDetails v-model:open="openLineDetails" :line="selectedLine"
-                :readonly="stk_trx_header?.statut === 'Terminé'" @refresh="refresh" />
+                              :readonly="stk_trx_header?.statut === 'Terminé'" @refresh="refresh" />
             <StockLotNumbersModal v-model:open="isOpenAddLotNumbers" :line-id="currentLineID"
-                :article="currentArticle" />
+                                  :article="currentArticle" />
         </template>
         <template #footer>
             <UButton v-if="stk_trx_header?.statut !== 'Terminé'" label="Terminer la réception" color="primary"
-                variant="subtle" @click="openConfirmFinish = true" />
+                     variant="subtle" @click="openConfirmFinish = true" />
         </template>
     </USlideover>
 
     <UModal v-model:open="openConfirmFinish" title="Terminer la réception"
-        description="Êtes-vous sûr de vouloir terminer cette réception ? Cette action changera le statut en 'Terminé'.">
+            description="Êtes-vous sûr de vouloir terminer cette réception ? Cette action changera le statut en 'Terminé'.">
         <template #footer>
             <UButton label="Annuler" color="neutral" variant="ghost" @click="openConfirmFinish = false" />
             <UButton label="Terminer" color="primary" :loading="finishing" @click="finishReception" />

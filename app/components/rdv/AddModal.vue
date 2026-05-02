@@ -160,7 +160,7 @@ function onError(error: FormErrorEvent) {
                 </UFormField> -->
                 <UFormField label="Service" name="service_id">
                     <USelectMenu v-model="state.service_id" value-key="id" :items="itemsServices" class="w-full"
-                        icon="material-symbols:medical-services-outline" />
+                                 icon="material-symbols:medical-services-outline" />
                 </UFormField>
                 <UFormField label="Medecin" name="medecin_id">
                     <USelectMenu v-model.trim="state.medecin_id" value-key="id" :items="itemsMedecins" class="w-full" />
@@ -171,7 +171,7 @@ function onError(error: FormErrorEvent) {
                             <template #trailing>
                                 <UPopover :reference="inputDateRef?.inputsRef[3]?.$el">
                                     <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
-                                        aria-label="Select a date" class="px-0" />
+                                             aria-label="Select a date" class="px-0" />
 
                                     <template #content>
                                         <UCalendar v-model="dateNaissanceModel" class="p-2" :max-date="maxDate" />
@@ -188,7 +188,7 @@ function onError(error: FormErrorEvent) {
                 
                 <UFormField label="Prestation" name="prestation_id">
                     <USelectMenu v-model="state.prestation_id" value-key="id" :items="itemsPrestations" class="w-full"
-                        icon="material-symbols:medical-services-outline" />
+                                 icon="material-symbols:medical-services-outline" />
                 </UFormField>
 
                 <div class="flex justify-end gap-2">

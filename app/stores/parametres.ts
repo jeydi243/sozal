@@ -8,6 +8,7 @@ export const useParametresStore = defineStore('parametres', () => {
   const classes = ref<Classe[]>([])
   const organisations = ref<Organisation[]>([])
   const affectations = ref<Affectation[]>([])
+  let channels: any = null
 
   const getClasseById = computed(() => (id: string) => {
     return classes.value.find(classe => classe.id === id)?.nom
@@ -26,7 +27,7 @@ export const useParametresStore = defineStore('parametres', () => {
 
   const getAffectations = computed(() => affectations.value)
   const getAffectationsMagasin = computed(() => affectations.value.filter(a => a.organisation?.lookup?.code === 'MAG'))
-  const getEmplacements = computed(() => (organisation_parent_id: string) => organisations.value.filter(o => o.lookup?.code === 'EMP' && o.organisation_parent?.id === organisation_parent_id))
+  const getEmplacements = computed(() => (organisation_parent_id: string) => organisations.value.filter(o => o.lookup?.code === 'EMP' && o.organisation_parent_id === organisation_parent_id))
   const getTypeOrganisation = computed(() => lookups.value.filter(lookup => lookup.classe.code === 'T-ORG'))
 
   async function init_user() {
@@ -64,6 +65,33 @@ export const useParametresStore = defineStore('parametres', () => {
     const { data: organisationsData, error: organisationsError } = await supabase.from('organisations').select('*, lookup:lookup_id(id, code, description, classe:classe_id(id, code,description))')
     if (organisationsData) organisations.value = organisationsData as unknown as Organisation[]
 
+
+    if (!channels) {
+      channels = supabase.channel('custom-all-channel')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'organisations' },
+          (payload) => {
+            console.log('Change received organisations', payload)
+            if (payload.eventType === 'INSERT') {
+              organisations.value.push(payload.new as unknown as Organisation)
+            }
+            if (payload.eventType === 'UPDATE') {
+              const index = organisations.value.findIndex(o => o.id === payload.new.id)
+              if (index !== -1) {
+                organisations.value[index] = payload.new as unknown as Organisation
+              }
+            }
+            if (payload.eventType === 'DELETE') {
+              const index = organisations.value.findIndex(o => o.id === payload.old.id)
+              if (index !== -1) {
+                organisations.value.splice(index, 1)
+              }
+            }
+          }
+        )
+        .subscribe()
+    }
     return {
       data: {
         lookups: lookupsData,
