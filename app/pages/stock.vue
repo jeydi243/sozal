@@ -10,11 +10,18 @@ const links = [[{
     icon: 'i-lucide-user',
     to: '/stock',
     exact: true
-}, {
+}, 
+{
+    label: 'Transfert de stock',
+    icon: 'i-lucide-users',
+    to: '/stock/transfert-stock'
+}, 
+{
     label: 'Reception externe',
     icon: 'i-lucide-users',
     to: '/stock/reception-externe'
-}, {
+}, 
+{
     label: 'Reception Interne',
     icon: 'octicon:organization-16',
     to: '/stock/reception-interne'

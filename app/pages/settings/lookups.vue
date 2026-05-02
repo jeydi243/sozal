@@ -100,7 +100,7 @@ watch(searchInput, (val) => {
 })
 
 // Data loading
-const { data: classes, refresh: refreshClassesData } = await useAsyncData<Classe[]>('lookups-classes', async () => {
+const { data: classes, refresh: refreshClassesData } = await useLazyAsyncData<Classe[]>('lookups-classes', async () => {
     const { data, error } = await supabase.from('classes').select()
     if (error) throw error
     return data as Classe[]

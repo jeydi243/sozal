@@ -67,6 +67,13 @@ const links = [
                 open.value = false
             }
         }, {
+            label: 'Transfert de stock',
+            to: '/stock/transfert-stock',
+            icon: 'solar:card-transfer-bold-duotone',
+            onSelect: () => {
+                open.value = false
+            }
+        }, {
             label: 'Reception externe',
             to: '/stock/reception-externe',
             icon: 'solar:card-transfer-bold-duotone',
